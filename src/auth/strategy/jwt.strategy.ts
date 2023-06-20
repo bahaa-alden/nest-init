@@ -10,7 +10,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(config: ConfigService, private prisma: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: true,
+      ignoreExpiration: false,
       secretOrKey: config.get('JWT_SECRET'),
     });
   }
@@ -24,7 +24,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       });
     }
     user.password = undefined;
-    //4) Check if the user changed the password
 
     return user;
   }

@@ -3,7 +3,8 @@ import { AppModule } from '../src/app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { PrismaService } from './../src/prisma/prisma.service';
 import * as pactum from 'pactum';
-import { AuthDto } from 'src/auth/dtos';
+import { AuthDto } from './../src/auth/dtos';
+import { UpdateUserDto } from './../src/users/dtos';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -27,7 +28,7 @@ describe('App e2e', () => {
     await app.close();
   });
   describe('Auth', () => {
-    const dto: AuthDto = { email: 'aa@ss.com', password: '123123' };
+    const dto: AuthDto = { email: 'aa@ss.com', password: '123Ax@@' };
     describe('SingUp', () => {
       it('should throw if email empty', () => {
         return pactum
@@ -103,7 +104,19 @@ describe('App e2e', () => {
       });
     });
 
-    describe('Edit user', () => {});
+    describe('Edit user', () => {
+      it('should edit user', () => {
+        const dto: UpdateUserDto = { firstName: 'ali' };
+        return pactum
+          .spec()
+          .patch('/users/me')
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.firstName)
+          .inspect();
+      });
+    });
   });
 
   describe('Bookmarks', () => {

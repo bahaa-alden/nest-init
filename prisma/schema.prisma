@@ -21,21 +21,5 @@ model User {
   firstName String?
   lastName  String?
 
-  bookmark Bookmark[]
-
   @@map("users")
-}
-
-model Bookmark {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  title       String
-  description String?
-  link        String
-  user        User    @relation(fields: [userId], references: [id])
-  userId      String
-
-  @@map("bookmarks")
 }

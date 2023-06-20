@@ -21,8 +21,9 @@ export class AuthService {
         data: input,
       });
       user.password = undefined;
+      const token = await this.signToken(user.id, user.email);
       const data = {
-        token: await this.signToken(user.id, user.email),
+        token,
         user,
       };
       return data;
@@ -35,6 +36,7 @@ export class AuthService {
       throw error;
     }
   }
+
   async login(dto: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -43,8 +45,10 @@ export class AuthService {
       throw new UnauthorizedException('Credentials incorrect');
     }
     user.password = undefined;
+    const token = await this.signToken(user.id, user.email);
+
     const data = {
-      token: await this.signToken(user.id, user.email),
+      token,
       user,
     };
     return data;
@@ -52,9 +56,10 @@ export class AuthService {
 
   signToken(userId: string, email: string): Promise<string> {
     const payload = { sub: userId, email };
-    return this.jwt.signAsync(payload, {
+    const token = this.jwt.signAsync(payload, {
       secret: this.config.get('JWT_SECRET'),
       expiresIn: this.config.get('JWT_EXPIRES_IN'),
     });
+    return token;
   }
 }
