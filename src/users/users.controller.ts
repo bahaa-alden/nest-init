@@ -20,7 +20,7 @@ import { LoggingInterceptor } from './interceptor';
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
-
+ 
   @Get('me')
   getMe(@GetUser() user: User) {
     return user;
