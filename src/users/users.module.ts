@@ -1,9 +1,14 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { LoggerMiddleware } from './middleware';
+import { LoggerMiddleware } from '../core/middleware';
+import { MongooseModule } from '@nestjs/mongoose';
+import { userSchema, User } from './schema/users.schema';
 
 @Module({
+  imports: [
+    MongooseModule.forFeature([{ name: User.name, schema: userSchema }]),
+  ],
   providers: [UsersService],
   controllers: [UsersController],
 })

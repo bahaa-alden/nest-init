@@ -7,10 +7,11 @@ export function createDocument(app: INestApplication): OpenAPIObject {
     .setTitle(SWAGGER_CONFIG.title)
     .setDescription(SWAGGER_CONFIG.description)
     .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      { type: 'http', scheme: 'bearer', bearerFormat: 'jwt' },
       'token',
     )
     .setVersion(SWAGGER_CONFIG.version);
+
   for (const tag of SWAGGER_CONFIG.tags) {
     builder.addTag(tag);
   }

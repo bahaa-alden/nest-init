@@ -1,47 +1,34 @@
-import { PrismaService } from './../prisma/prisma.service';
+import { UserModel } from '../users/interface/users.interface';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthDto, SignUpDto } from './dtos';
-import * as argon from 'argon2';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { User } from 'src/users/schema/users.schema';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
+    @InjectModel(User.name) private readonly userModel: UserModel,
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
   async signup(dto: SignUpDto) {
-    const input = { ...dto };
-    input.password = await argon.hash(dto.password);
-    try {
-      const user = await this.prisma.user.create({
-        data: input,
-      });
-      user.password = undefined;
-      const token = await this.signToken(user.id, user.email);
-      const data = {
-        token,
-        user,
-      };
-      return data;
-    } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new UnauthorizedException('Credentials taken');
-        }
-      }
-      throw error;
-    }
+    const user = await this.userModel.create(dto);
+    user.password = undefined;
+    const token = await this.signToken(user.id, user.email);
+    const data = {
+      token,
+      user,
+    };
+    return data;
   }
 
   async login(dto: AuthDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
-    if (!user || !(await argon.verify(user.password, dto.password))) {
+    const user = await this.userModel
+      .findOne({ email: dto.email })
+      .select('+password');
+    if (!user || !(await user.comparePassword(user.password, dto.password))) {
       throw new UnauthorizedException('Credentials incorrect');
     }
     user.password = undefined;

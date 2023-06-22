@@ -9,15 +9,9 @@ import {
 } from 'class-validator';
 
 export class SignUpDto {
-  @IsOptional()
   @IsString()
   @Length(3, 16)
-  readonly firstName: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(3, 16)
-  readonly lastName: string;
+  readonly name: string;
 
   @IsNotEmpty({ message: 'please provide email' })
   @IsEmail({}, { message: 'please provide valid email' })
