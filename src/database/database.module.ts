@@ -1,7 +1,18 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [MongooseModule.forRoot('mongodb://127.0.0.1:27017/nestjs', {})],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5434,
+      username: 'postgres',
+      password: '123',
+      database: 'nest',
+      entities: [],
+      synchronize: true,
+    }),
+  ],
 })
 export class DatabaseModule {}

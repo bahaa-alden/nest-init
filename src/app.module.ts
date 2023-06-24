@@ -8,8 +8,8 @@ import { DatabaseModule } from './database/database.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
-    AuthModule,
-    UsersModule,
+    // AuthModule,
+    // UsersModule,
   ],
   controllers: [],
   providers: [],
