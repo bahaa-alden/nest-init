@@ -12,7 +12,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-// import { JwtGuard } from './../auth/guard';
+import { JwtGuard } from './../auth/guard';
 import { GetUser } from './../auth/decorator';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos';
@@ -25,7 +25,7 @@ import {
 } from '@nestjs/swagger';
 
 @UseInterceptors(new LoggingInterceptor())
-// @UseGuards(JwtGuard)
+@UseGuards(JwtGuard)
 @ApiTags('users')
 @ApiBearerAuth('token')
 @Controller('users')

@@ -12,8 +12,10 @@ services:
     image: postgres:13
     ports:
       - 5435:5432
-    env_file:
-      - docker.env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nest
     networks:
       - freecodecamp
 networks:
