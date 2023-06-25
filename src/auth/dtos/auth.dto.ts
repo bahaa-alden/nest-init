@@ -1,3 +1,4 @@
+import { ApiCreatedResponse, ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -9,20 +10,17 @@ import {
 } from 'class-validator';
 
 export class SignUpDto {
-  @IsOptional()
+  @ApiProperty({ required: false })
   @IsString()
   @Length(3, 16)
-  readonly firstName: string;
+  readonly name: string;
 
-  @IsOptional()
-  @IsString()
-  @Length(3, 16)
-  readonly lastName: string;
-
+  @ApiProperty()
   @IsNotEmpty({ message: 'please provide email' })
   @IsEmail({}, { message: 'please provide valid email' })
   readonly email: string;
 
+  @ApiProperty()
   @IsString()
   @IsStrongPassword({
     minLength: 6,

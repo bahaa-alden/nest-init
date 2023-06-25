@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -10,13 +11,10 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   @Length(3, 16)
-  readonly firstName?: string;
+  @ApiProperty({ required: false })
+  readonly name?: string;
 
-  @IsString()
-  @IsOptional()
-  @Length(3, 16)
-  readonly lastName?: string;
-
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   @IsOptional()
   @IsEmail({}, { message: 'Please provide a valid email' })
