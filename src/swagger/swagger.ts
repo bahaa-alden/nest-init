@@ -12,9 +12,6 @@ export function createDocument(app: INestApplication): OpenAPIObject {
     )
     .setVersion(SWAGGER_CONFIG.version);
 
-  for (const tag of SWAGGER_CONFIG.tags) {
-    builder.addTag(tag);
-  }
   const options = builder.build();
   return SwaggerModule.createDocument(app, options);
 }
