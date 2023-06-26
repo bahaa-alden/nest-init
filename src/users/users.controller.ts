@@ -36,7 +36,7 @@ export class UsersController {
   @ApiQuery({ name: 'name', required: false })
   @Get()
   getAllUsers(@Query('name') name: string) {
-    return [{ name }];
+    return this.usersService.findAll();
   }
 
   @ApiOkResponse({ type: UpdateUserDto })
@@ -45,14 +45,13 @@ export class UsersController {
     return user;
   }
 
-  @HttpCode(HttpStatus.CREATED)
   @Patch('me')
-  async updateUser(@GetUser('id') id: string, @Body() dto: UpdateUserDto) {
-    // return this.usersService.updateUser(id, dto);
+  async updateUser(@GetUser('id') id: number, @Body() dto: UpdateUserDto) {
+    return this.usersService.update(id, dto);
   }
 
   @Get(':id')
-  getUser(@Param('id') id: string) {
-    return id;
+  getUser(@Param('id') id: number) {
+    return this.usersService.findOne(id);
   }
 }
