@@ -13,7 +13,7 @@ import { GetUser } from './../auth/decorator';
 import { User } from '@prisma/client';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos';
-import { LoggingInterceptor } from './interceptor';
+import { LoggingInterceptor } from '../core/interceptor';
 
 @UseInterceptors(new LoggingInterceptor())
 @UseGuards(JwtGuard)
