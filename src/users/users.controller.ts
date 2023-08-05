@@ -23,35 +23,28 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { Crud, CrudController } from '@nestjsx/crud';
+import { User } from './user.entity';
 
+@Crud({
+  model: {
+    type: User,
+  },
+})
 @UseInterceptors(new LoggingInterceptor())
 @UseGuards(JwtGuard)
 @ApiTags('users')
 @ApiBearerAuth('token')
 @Controller('users')
-export class UsersController {
-  constructor(private usersService: UsersService) {}
+export class UsersController implements CrudController<User> {
+  constructor(public service: UsersService) {}
 
   @ApiOkResponse({ type: UpdateUserDto, isArray: true })
   @ApiQuery({ name: 'name', required: false })
   @Get()
-  getAllUsers(@Query('name') name: string) {
-    return this.usersService.findAll();
-  }
-
   @ApiOkResponse({ type: UpdateUserDto })
   @Get('me')
   getMe(@GetUser() user: any) {
     return user;
-  }
-
-  @Patch('me')
-  async updateUser(@GetUser('id') id: number, @Body() dto: UpdateUserDto) {
-    return this.usersService.update(id, dto);
-  }
-
-  @Get(':id')
-  getUser(@Param('id') id: number) {
-    return this.usersService.findOne(id);
   }
 }
