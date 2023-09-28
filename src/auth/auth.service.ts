@@ -1,84 +1,117 @@
-import {
-  ConflictException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { AuthDto, SignUpDto } from './dtos';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { User } from '../users/user.entity';
-import * as argon from 'argon2';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { SignUpDto } from './dtos';
+import { User } from '../models/users/entities/users.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { LoginDto } from './dtos';
+import { verifyHash } from '../common/helpers';
 import { jwtPayload } from './interfaces';
+import { Role } from '../models/roles/entities/role.entity';
+import { Entities, ROLE } from '../common/enums';
+import { JwtTokenService } from '../shared/jwt/jwt-token.service';
+import { Admin } from '../models/admins/entities/admin.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private jwt: JwtService,
-    private config: ConfigService,
+    private jwtTokenService: JwtTokenService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Admin)
+    private adminsRepository: Repository<Admin>,
+    @InjectRepository(Role)
+    private rolesRepository: Repository<Role>,
   ) {}
   async signup(dto: SignUpDto) {
-    try {
-      const input: any = dto;
-      input.password = await argon.hash(dto.password);
-      const user = await this.usersRepository.save(input);
-      user.password = undefined;
-      const token = await this.signToken(user.id, user.email);
-      const data = {
-        token,
-        user,
-      };
-      return data;
-    } catch (error) {
-      if (error.code === '23505') {
-        // Assuming the error code '23505' corresponds to a duplicated key violation
-        throw new ConflictException('Email is already taken.');
-      }
-      throw error;
-    }
-  }
-
-  async login(dto: AuthDto) {
-    const user = await this.usersRepository.findOne({
-      where: { email: dto.email },
-      select: { password: true, email: true, name: true },
-    });
-    if (!user || !(await argon.verify(user.password, dto.password))) {
-      throw new UnauthorizedException('Credentials incorrect');
-    }
-    user.password = undefined;
-    const token = await this.signToken(user.id, user.email);
-
-    const data = {
+    const role = await this.rolesRepository.findOneBy({ name: ROLE.USER });
+    const user = this.usersRepository.create({ ...dto, role });
+    await this.usersRepository.insert(user);
+    const token = await this.jwtTokenService.signToken(
+      user.id,
+      user.email,
+      ROLE.USER,
+    );
+    return {
       token,
       user,
     };
-    return data;
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.usersRepository.findOne({
+      where: { email: dto.email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      relations: { role: true },
+    });
+
+    if (!user || !(await verifyHash(user.password, dto.password))) {
+      throw new UnauthorizedException('Credentials incorrect');
+    }
+    const token = await this.jwtTokenService.signToken(
+      user.id,
+      user.email,
+      ROLE.USER,
+    );
+    return { token, user };
   }
 
   async validate(payload: jwtPayload) {
-    const user = this.usersRepository.findOne({
-      where: { email: payload.email, id: +payload.sub },
-    });
-    if (!user) {
-      throw new UnauthorizedException({
-        message: 'The user belonging to this token does no longer exist',
+    let user;
+    if (payload.role === ROLE.ADMIN) {
+      user = await this.adminsRepository.findOne({
+        where: { email: payload.email, id: payload.sub },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: {
+            id: true,
+            name: true,
+            permissions: {
+              id: true,
+              action: true,
+              subject: true,
+            },
+          },
+          createdAt: true,
+          updatedAt: true,
+        },
+        relations: { role: { permissions: true } },
+      });
+    } else if (payload.role === ROLE.USER) {
+      user = await this.usersRepository.findOne({
+        where: { email: payload.email, id: payload.sub },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: {
+            id: true,
+            name: true,
+            permissions: {
+              id: true,
+              action: true,
+              subject: true,
+            },
+          },
+          createdAt: true,
+          updatedAt: true,
+        },
+        relations: { role: { permissions: true } },
       });
     }
-    return user;
-  }
 
-  signToken(userId: number, email: string): Promise<string> {
-    const payload = { sub: userId, email };
-    const token = this.jwt.signAsync(payload, {
-      secret: this.config.get('JWT_SECRET'),
-      expiresIn: this.config.get('JWT_EXPIRES_IN'),
-    });
-    return token;
+    if (!user) {
+      throw new UnauthorizedException('The user is not here');
+    }
+
+    return user;
   }
 }

@@ -24,9 +24,11 @@
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "db:dev:rm": "docker compose rm -s -f -v   dev-db",
     "db:dev:up": "docker compose up -d dev-db ",
-    "db:dev:restart": "yarn db:dev:rm && yarn db:dev:up"
+    "db:dev:restart": "yarn db:dev:rm && yarn db:dev:up",
+    "seed": "ts-node -r tsconfig-paths/register src/seed.ts"
   },
   "dependencies": {
+    "@casl/ability": "^6.5.0",
     "@hapi/joi": "^17.1.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.2",
