@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import {
   registerDecorator,
   ValidationArguments,
@@ -21,7 +21,8 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
         },
       })
       .then((entity) => {
-        if (entity) return false;
+        if (entity)
+          throw new ConflictException(args.constraints[0] + ' already exist');
         return true;
       });
   }

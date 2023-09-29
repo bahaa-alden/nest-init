@@ -5,7 +5,11 @@ services:
     ports:
       - 5434:5432
     env_file:
-      - docker.env
+      - .env
+    environment:
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASS}'
+      POSTGRES_DB: '${POSTGRES_NAME}'
     networks:
       - freecodecamp
   test-db:
@@ -13,9 +17,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: nest
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASS}'
+      POSTGRES_DB: '${POSTGRES_NAME}'
     networks:
       - freecodecamp
 networks:

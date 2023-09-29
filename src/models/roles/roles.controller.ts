@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiParam,
   ApiTags,
   OmitType,
@@ -48,16 +49,6 @@ export class RolesController {
     return this.rolesService.findAll();
   }
 
-  @SerializeOptions({
-    groups: [GROUPS.ROLE],
-  })
-  @ApiOkResponse({ type: Role })
-  @ApiParam({ name: 'id' })
-  @Get(':id')
-  async findById(@Param('id') id: UUID): Promise<Role | undefined> {
-    return this.rolesService.findById(id);
-  }
-
   @ApiCreatedResponse({ type: Role })
   @SerializeOptions({ groups: [GROUPS.ROLE] })
   @HttpCode(HttpStatus.CREATED)
@@ -66,45 +57,57 @@ export class RolesController {
     return this.rolesService.create(dto);
   }
 
+  @SerializeOptions({
+    groups: [GROUPS.ROLE],
+  })
+  @ApiOkResponse({ type: Role })
+  @ApiParam({ name: 'id' })
+  @Get(':id')
+  async findById(@Param('id') id: string): Promise<Role | undefined> {
+    return this.rolesService.findById(id);
+  }
+
   @ApiOkResponse({ type: Role })
   @SerializeOptions({ groups: [GROUPS.ROLE] })
   @Patch(':id')
   async update(
-    @Param('id', ParseUUIDPipe) id: UUID,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateRoleDto,
   ): Promise<Role | undefined> {
     return this.rolesService.update(id, dto);
-  }
-
-  @ApiOkResponse({ type: Role })
-  @SerializeOptions({ groups: [GROUPS.ROLE] })
-  @Post(':id/permissions')
-  async addPermissions(
-    @Param('id', ParseUUIDPipe) id: UUID,
-    @Body() dto: UpdateRoleDto,
-  ): Promise<Role | undefined> {
-    return this.rolesService.addPermissions(id, dto);
-  }
-
-  @ApiOkResponse({ type: Role })
-  @SerializeOptions({ groups: [GROUPS.ROLE] })
-  @Delete(':id/permissions')
-  async deletePermissions(
-    @Param('id', ParseUUIDPipe) id: UUID,
-    @Body() dto: UpdateRoleDto,
-  ): Promise<Role | undefined> {
-    return this.rolesService.deletePermissions(id, dto);
-  }
-
-  @HttpCode(HttpStatus.ACCEPTED)
-  @Patch(':id/recover')
-  async recover(@Param('id', ParseUUIDPipe) id: UUID): Promise<Role> {
-    return this.rolesService.recover(id);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async delete(@Param('id', ParseUUIDPipe) id: UUID): Promise<void> {
     return this.rolesService.delete(id);
+  }
+
+  @ApiOperation({ summary: 'recover deleted role' })
+  @Post(':id/recover')
+  async recover(@Param('id', ParseUUIDPipe) id: string): Promise<Role> {
+    return this.rolesService.recover(id);
+  }
+
+  @ApiOperation({ summary: 'add permissions to the role' })
+  @ApiOkResponse({ type: Role })
+  @SerializeOptions({ groups: [GROUPS.ROLE] })
+  @Post(':id/permissions')
+  async addPermissions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateRoleDto,
+  ): Promise<Role | undefined> {
+    return this.rolesService.addPermissions(id, dto);
+  }
+
+  @ApiOperation({ summary: 'remove permissions from the role' })
+  @ApiOkResponse({ type: Role })
+  @SerializeOptions({ groups: [GROUPS.ROLE] })
+  @Delete(':id/permissions')
+  async deletePermissions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateRoleDto,
+  ): Promise<Role | undefined> {
+    return this.rolesService.deletePermissions(id, dto);
   }
 }

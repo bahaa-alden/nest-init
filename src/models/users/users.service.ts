@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dtos';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,43 +11,46 @@ import { Role } from '../roles/entities/role.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
-    @InjectRepository(Role)
-    private rolesRepository: Repository<Role>,
-    private caslAbilityFactory: CaslAbilityFactory,
+    private userRepository: Repository<User>,
   ) {}
 
   findAll(user: User) {
     if (user.role.name === ROLE.SUPER_ADMIN || user.role.name === ROLE.ADMIN) {
-      return this.usersRepository.find({ withDeleted: true });
+      return this.userRepository.find({ withDeleted: true });
     }
-    return this.usersRepository.find();
+    return this.userRepository.find();
   }
 
   findById(id: string) {
-    return this.usersRepository.findOne({
+    return this.userRepository.findOne({
       where: { id },
       relations: { role: true },
     });
   }
 
   async delete(id: string) {
-    return this.usersRepository.softDelete(id);
+    return this.userRepository.softDelete(id);
   }
 
   async recover(id: string) {
-    await this.usersRepository.recover({ id });
-    return this.findById(id);
+    const user = await this.userRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!user) throw new NotFoundException('user not found');
+    await this.userRepository.recover(user);
+    return user;
   }
 
   async updateMe(dto: UpdateUserDto, user: User) {
     Object.assign(user, dto);
-    await this.usersRepository.update(user.id, user);
+    await this.userRepository.update(user.id, user);
     return this.findById(user.id);
   }
 
   async deleteMe(user: User) {
-    await this.usersRepository.softDelete(user.id);
+    await this.userRepository.softDelete(user.id);
     return;
   }
 }

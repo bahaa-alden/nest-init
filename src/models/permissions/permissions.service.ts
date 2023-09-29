@@ -7,9 +7,9 @@ import {
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { Permission } from './entities/permission.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UUID } from 'crypto';
+import { Not, Repository } from 'typeorm';
 import { Action, Entities } from '../../common/enums';
+import { UpdatePermissionDto } from './dto/update-permission.dto';
 
 @Injectable()
 export class PermissionsService {
@@ -19,11 +19,30 @@ export class PermissionsService {
   ) {}
 
   findAll() {
-    return this.permissionRepository.find();
+    return this.permissionRepository
+      .createQueryBuilder('permission')
+      .where(
+        '(permission.subject != :subject OR permission.action != :action)',
+        {
+          subject: Entities.All,
+          action: Action.Manage,
+        },
+      )
+      .getMany();
   }
 
-  async findById(id: UUID) {
-    const permission = await this.permissionRepository.findOneBy({ id });
+  async findById(id: string) {
+    const permission = await this.permissionRepository
+      .createQueryBuilder('permission')
+      .where(
+        '(permission.subject != :subject OR permission.action != :action)',
+        {
+          subject: Entities.All,
+          action: Action.Manage,
+        },
+      )
+      .andWhere('permission.id = :id', { id })
+      .getOne();
     if (!permission) throw new NotFoundException('permission not found');
     return permission;
   }
@@ -32,23 +51,54 @@ export class PermissionsService {
     const exist = await this.permissionRepository.findOne({
       where: { action: dto.action, subject: dto.subject },
     });
-    if (exist) throw new BadRequestException('permission already exist');
+    if (exist) throw new ConflictException('permission already exist');
     const permissions = this.permissionRepository.create(dto);
     await this.permissionRepository.insert(permissions);
     return permissions;
   }
 
-  async delete(id: UUID) {
+  async update(id: string, dto: UpdatePermissionDto) {
     const permission = await this.permissionRepository
       .createQueryBuilder('permission')
       .where(
-        '(permission.subject != :subject) AND (permission.action != :action)',
+        '(permission.subject != :subject OR permission.action != :action)',
         {
           subject: Entities.All,
           action: Action.Manage,
         },
       )
-      .whereInIds([id])
+      .andWhere('permission.id = :id', { id })
+      .getOne();
+
+    if (!permission) throw new NotFoundException('permission not found');
+
+    Object.assign(permission, dto);
+    await this.permissionRepository.update(id, permission);
+    return permission;
+  }
+
+  async recover(id: string) {
+    const permission = await this.permissionRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!permission) throw new NotFoundException('permission not found');
+    await this.permissionRepository.recover(permission);
+    return permission;
+  }
+
+  async delete(id: string) {
+    const permission = await this.permissionRepository
+      .createQueryBuilder('permission')
+      .where(
+        '(permission.subject != :subject OR permission.action != :action)',
+        {
+          subject: Entities.All,
+          action: Action.Manage,
+        },
+      )
+      .andWhere('permission.id = :id', { id })
       .getOne();
     if (!permission) throw new NotFoundException('permission not found');
 

@@ -22,6 +22,7 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { LoginDto, LoginResponseDto } from '../../auth/dtos';
@@ -96,5 +97,19 @@ export class AdminsController {
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.adminsService.remove(id);
+  }
+
+  @ApiOperation({ summary: 'recover deleted admin' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    allowEmptyValue: false,
+    required: true,
+  })
+  @CheckAbilities({ action: Action.Update, subject: Entities.Admin })
+  @SerializeOptions({ groups: [GROUPS.ADMIN] })
+  @Post(':id/recover')
+  recover(@Param('id', ParseUUIDPipe) id: string) {
+    return this.adminsService.recover(id);
   }
 }

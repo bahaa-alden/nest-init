@@ -19,6 +19,7 @@ import {
   ApiOkResponse,
   ApiCreatedResponse,
   ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { CheckAbilities, Roles } from '../../common/decorators/metadata';
 import { GetUser } from '../../common/decorators/requests';
@@ -89,23 +90,24 @@ export class UsersController {
     allowEmptyValue: false,
     required: true,
   })
-  @CheckAbilities({ action: Action.Update, subject: Entities.User })
-  @SerializeOptions({ groups: [GROUPS.USER] })
-  @Patch(':id')
-  recover(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.recover(id);
+  @CheckAbilities({ action: Action.Delete, subject: Entities.User })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  delete(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.delete(id);
   }
 
+  @ApiOperation({ summary: 'recover deleted user' })
   @ApiParam({
     name: 'id',
     type: 'string',
     allowEmptyValue: false,
     required: true,
   })
-  @CheckAbilities({ action: Action.Delete, subject: Entities.User })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  delete(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.delete(id);
+  @CheckAbilities({ action: Action.Update, subject: Entities.User })
+  @SerializeOptions({ groups: [GROUPS.USER] })
+  @Post(':id/recover')
+  recover(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.recover(id);
   }
 }

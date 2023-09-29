@@ -33,7 +33,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception instanceof ForbiddenError
         ? new ForbiddenException(exception.message)
         : exception.code === '23505'
-        ? exist(exception.table)
+        ? new BadRequestException(exception.detail)
         : exception.code === '23503'
         ? new NotFoundException(exception.detail + ' not found')
         : exception instanceof HttpException

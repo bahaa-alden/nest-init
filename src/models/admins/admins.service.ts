@@ -18,13 +18,13 @@ export class AdminsService {
   constructor(
     private jwtTokenService: JwtTokenService,
     @InjectRepository(Admin)
-    private adminsRepository: Repository<Admin>,
+    private adminRepository: Repository<Admin>,
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
   ) {}
 
   async login(dto: LoginDto) {
-    const admin = await this.adminsRepository.findOne({
+    const admin = await this.adminRepository.findOne({
       where: { email: dto.email },
       select: {
         id: true,
@@ -48,14 +48,14 @@ export class AdminsService {
   }
 
   findAll() {
-    return this.adminsRepository.find({
+    return this.adminRepository.find({
       where: { role: { name: Equal(ROLE.ADMIN) } },
       withDeleted: true,
     });
   }
 
   async findOne(id: string) {
-    const admin = await this.adminsRepository.findOne({
+    const admin = await this.adminRepository.findOne({
       where: { id, role: { name: Equal(ROLE.SUPER_ADMIN) } },
       relations: { role: true },
     });
@@ -67,21 +67,32 @@ export class AdminsService {
 
   async create(dto: CreateAdminDto) {
     const role = await this.rolesRepository.findOneBy({ name: ROLE.ADMIN });
-    const admin = this.adminsRepository.create({ ...dto, role });
-    await this.adminsRepository.insert(admin);
+    const admin = this.adminRepository.create({ ...dto, role });
+    await this.adminRepository.insert(admin);
     return admin;
   }
 
   async update(id: string, updateAdminDto: UpdateAdminDto): Promise<Admin> {
     const admin = await this.findOne(id);
     Object.assign(admin, updateAdminDto);
-    await this.adminsRepository.update(id, admin);
+    await this.adminRepository.update(id, admin);
+    return admin;
+  }
+
+  async recover(id: string) {
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!admin) throw new NotFoundException('admin not found');
+    await this.adminRepository.recover(admin);
     return admin;
   }
 
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     // Soft delete admin using the softDelete method
-    await this.adminsRepository.softDelete(id);
+    await this.adminRepository.softDelete(id);
   }
 }
