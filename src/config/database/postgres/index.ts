@@ -6,5 +6,6 @@ const postgresConfig = registerAs('postgres', () => ({
   password: process.env.POSTGRES_PASS,
   port: Number(process.env.POSTGRES_PORT),
   host: process.env.POSTGRES_HOST,
+  url: process.env.NEON_URL,
 }));
 export default postgresConfig;

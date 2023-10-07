@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { SuperadminService } from './superadmin.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Permission } from '../../../models/permissions/entities/permission.entity';
-import { Role } from '../../../models/roles/entities/role.entity';
-import { Admin } from '../../../models/admins/entities/admin.entity';
+import { Permission } from '../../../models/permissions';
+import { Role } from '../../../models/roles';
+import { Admin } from '../../../models/admins';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Admin, Permission, Role])],

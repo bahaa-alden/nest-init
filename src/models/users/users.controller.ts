@@ -2,40 +2,37 @@ import {
   UseGuards,
   UseInterceptors,
   Controller,
-  Get,
-  Post,
-  Body,
-  Delete,
-  Param,
   SerializeOptions,
+  Get,
   Patch,
-  ParseUUIDPipe,
+  Body,
   HttpCode,
   HttpStatus,
+  Delete,
+  Param,
+  ParseUUIDPipe,
+  Post,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOkResponse,
-  ApiCreatedResponse,
   ApiParam,
   ApiOperation,
 } from '@nestjs/swagger';
-import { CheckAbilities, Roles } from '../../common/decorators/metadata';
-import { GetUser } from '../../common/decorators/requests';
-import { JwtGuard, CaslAbilitiesGuard, RolesGuard } from '../../common/guards';
+import { Roles, CheckAbilities } from '../../common/decorators';
+import { GetUser } from '../../common/decorators';
+import { GROUPS, ROLE, Entities, Action } from '../../common/enums';
+import { CaslAbilitiesGuard, RolesGuard } from '../../common/guards';
 import { LoggingInterceptor } from '../../common/interceptors';
-import { CaslAbilityFactory } from '../../shared/casl/casl-ability.factory';
-import { CreateUserDto, UpdateUserDto } from './dtos';
-import { User } from './entities/users.entity';
+import { UpdateUserDto } from './dtos';
+import { User } from './entities';
 import { UsersService } from './users.service';
-import { Action, Entities, ROLE } from '../../common/enums';
-
-import { GROUPS } from '../../common/enums/groups.enum';
+import { Role } from '../roles';
 
 @ApiTags('users')
 @ApiBearerAuth('token')
-@UseGuards(JwtGuard, CaslAbilitiesGuard, RolesGuard)
+@UseGuards(CaslAbilitiesGuard, RolesGuard)
 @UseInterceptors(new LoggingInterceptor())
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
@@ -82,6 +79,14 @@ export class UsersController {
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findById(id);
+  }
+
+  @SerializeOptions({ groups: [GROUPS.USER] })
+  @ApiOkResponse({ type: User })
+  @CheckAbilities({ action: Action.Update, subject: Entities.User })
+  @Patch(':id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.update(id, dto);
   }
 
   @ApiParam({

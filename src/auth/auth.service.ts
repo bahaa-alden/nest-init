@@ -1,15 +1,24 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { SignUpDto } from './dtos';
-import { User } from '../models/users/entities/users.entity';
-import { Repository } from 'typeorm';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LoginDto } from './dtos';
-import { verifyHash } from '../common/helpers';
+import {
+  FindOptionsRelations,
+  FindOptionsSelect,
+  FindOptionsWhere,
+  FindOptionsWhereProperty,
+  Repository,
+} from 'typeorm';
+import { ROLE } from '../common/enums';
+import { Role } from '../models/roles';
+import { User, UserImage } from '../models/users';
+import { JwtTokenService } from '../shared/jwt';
+import { SignUpDto, LoginDto, PasswordChangeDto } from './dtos';
 import { jwtPayload } from './interfaces';
-import { Role } from '../models/roles/entities/role.entity';
-import { Entities, ROLE } from '../common/enums';
-import { JwtTokenService } from '../shared/jwt/jwt-token.service';
-import { Admin } from '../models/admins/entities/admin.entity';
+import { Admin } from '../models/admins';
+import { defaultImage } from '../common/constants';
 
 @Injectable()
 export class AuthService {
@@ -21,16 +30,16 @@ export class AuthService {
     private adminsRepository: Repository<Admin>,
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
+    @InjectRepository(UserImage)
+    private userImageRepository: Repository<UserImage>,
   ) {}
   async signup(dto: SignUpDto) {
     const role = await this.rolesRepository.findOneBy({ name: ROLE.USER });
-    const user = this.usersRepository.create({ ...dto, role });
-    await this.usersRepository.insert(user);
-    const token = await this.jwtTokenService.signToken(
-      user.id,
-      user.email,
-      ROLE.USER,
-    );
+    const user = this.usersRepository.create({ ...dto, role, images: [] });
+    user.images.push(this.userImageRepository.create(defaultImage));
+    await this.usersRepository.save(user);
+    console.log(user);
+    const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
     return {
       token,
       user,
@@ -48,70 +57,87 @@ export class AuthService {
         createdAt: true,
         updatedAt: true,
       },
-      relations: { role: true },
+      relations: { role: true, images: true },
     });
 
-    if (!user || !(await verifyHash(user.password, dto.password))) {
+    if (!user || !(await user.verifyHash(user.password, dto.password))) {
       throw new UnauthorizedException('Credentials incorrect');
     }
-    const token = await this.jwtTokenService.signToken(
-      user.id,
-      user.email,
-      ROLE.USER,
-    );
+    const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
+    return { token, user };
+  }
+
+  async updateMyPassword(dto: PasswordChangeDto, id: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      relations: { role: true, images: true },
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    // 2)check if the passwordConfirm is correct
+    if (!(await user.verifyHash(user.password, dto.passwordCurrent))) {
+      throw new UnauthorizedException('كلمة المرور الحالية غير صحيحة');
+    }
+    user.password = dto.password;
+    await user.save();
+    const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
+
     return { token, user };
   }
 
   async validate(payload: jwtPayload) {
-    let user;
+    let user: User | Admin;
+    const where: FindOptionsWhere<User> = { id: payload.sub };
+    const select: FindOptionsSelect<User> = {
+      id: true,
+      name: true,
+      email: true,
+      passwordChangedAt: true,
+      role: {
+        id: true,
+        name: true,
+        permissions: {
+          id: true,
+          action: true,
+          subject: true,
+        },
+      },
+      createdAt: true,
+      updatedAt: true,
+      images: false,
+    };
+    const relations: FindOptionsRelations<User> = {
+      role: { permissions: true },
+      images: true,
+    };
     if (payload.role === ROLE.ADMIN) {
       user = await this.adminsRepository.findOne({
-        where: { email: payload.email, id: payload.sub },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: {
-            id: true,
-            name: true,
-            permissions: {
-              id: true,
-              action: true,
-              subject: true,
-            },
-          },
-          createdAt: true,
-          updatedAt: true,
-        },
-        relations: { role: { permissions: true } },
+        where,
+        select,
+        relations,
       });
     } else if (payload.role === ROLE.USER) {
-      user = await this.usersRepository.findOne({
-        where: { email: payload.email, id: payload.sub },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: {
-            id: true,
-            name: true,
-            permissions: {
-              id: true,
-              action: true,
-              subject: true,
-            },
-          },
-          createdAt: true,
-          updatedAt: true,
-        },
-        relations: { role: { permissions: true } },
-      });
+      user = await this.usersRepository.findOne({ where, select, relations });
     }
 
     if (!user) {
       throw new UnauthorizedException('The user is not here');
     }
 
+    if (user.isPasswordChanged(payload.iat)) {
+      throw new UnauthorizedException(
+        'User recently changed the password!, please login again.',
+      );
+    }
     return user;
   }
 }

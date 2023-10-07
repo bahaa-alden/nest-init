@@ -9,16 +9,13 @@ import {
   createMongoAbility,
 } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
-import { User } from '../../models/users/entities/users.entity';
-import { Action, Entities } from '../../common/enums';
+import { User } from '../../models/users';
 import { AppAbility, Subjects } from './casl.interface';
 
 @Injectable()
 export class CaslAbilityFactory {
   defineAbility(user: User) {
-    const { can, cannot, build, rules } = new AbilityBuilder<AppAbility>(
-      createMongoAbility,
-    );
+    const { can, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
 
     user.role.permissions.forEach((p) => {
       can(p.action, p.subject);

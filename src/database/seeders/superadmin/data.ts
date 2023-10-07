@@ -1,5 +1,4 @@
-import { IUser } from './../../../models/users/interfaces/users.interface';
-import { ROLE } from '../../../common/enums';
+import { IUser } from '../../../models/users';
 
 export const superadmin: IUser = {
   name: 'super',

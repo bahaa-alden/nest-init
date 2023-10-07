@@ -1,19 +1,19 @@
+import { MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { LoggerMiddleware } from '../common/middlewares';
+import { Role } from '../models/roles';
+import { User, UserImage } from '../models/users';
+import { JwtTokenModule } from '../shared/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { LoggerMiddleware } from '../common/middlewares';
-import { User } from '../models/users/entities/users.entity';
-import { Role } from '../models/roles/entities/role.entity';
-import { JwtTokenModule } from '../shared/jwt/jwt-token.module';
 import { JwtStrategy } from './strategy';
-import { Admin } from '../models/admins/entities/admin.entity';
+import { Admin } from '../models/admins';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Admin, Role]),
+    TypeOrmModule.forFeature([User, Admin, Role, UserImage]),
     JwtTokenModule,
     PassportModule.register({}),
   ],

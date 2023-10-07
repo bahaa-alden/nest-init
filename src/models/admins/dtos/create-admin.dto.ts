@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Length, IsNotEmpty, IsEmail } from 'class-validator';
-import { IsUnique } from '../../../common/decorators/validations';
+import {
+  IsString,
+  Length,
+  IsNotEmpty,
+  IsEmail,
+  IsOptional,
+} from 'class-validator';
+import { IsUnique } from '../../../common/decorators';
 import { Entities } from '../../../common/enums';
 // import { IsEmailUnique } from '../../../common/decorators/validations';
 
@@ -18,6 +24,7 @@ export class CreateAdminDto {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   @Length(6, 15)
   readonly password: string;
 }

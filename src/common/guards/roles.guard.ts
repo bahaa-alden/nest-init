@@ -5,10 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-
 import { Observable } from 'rxjs';
-import { User } from '../../models/users/entities/users.entity';
-import { ROLE } from '../enums';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -22,7 +19,7 @@ export class RolesGuard implements CanActivate {
     ]);
 
     if (!requiredRoles) return true;
-    const { user }: { user: User } = context.switchToHttp().getRequest();
+    const { user }: { user: any } = context.switchToHttp().getRequest();
     if (!requiredRoles.includes(user.role.name))
       throw new ForbiddenException('You can not perform this action');
     else return true;

@@ -2,7 +2,7 @@ import { IsArray, IsOptional, IsUUID, NotEquals } from 'class-validator';
 import { Entities, ROLE } from '../../../common/enums';
 import { UUID } from 'crypto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUnique } from '../../../common/decorators/validations';
+import { IsUnique } from '../../../common/decorators';
 
 export class CreateRoleDto {
   @ApiProperty({ description: 'the rule name' })

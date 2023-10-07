@@ -13,20 +13,19 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { Crud, CrudController } from '@nestjsx/crud';
-import { Permission } from './entities/permission.entity';
+import { Permission } from './entities';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CaslAbilitiesGuard, JwtGuard } from '../../common/guards';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { CheckAbilities } from '../../common/decorators/metadata';
+import { CreatePermissionDto } from './dtos';
+import { CheckAbilities } from '../../common/decorators';
 import { Action, Entities } from '../../common/enums';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
-import { GROUPS } from '../../common/enums/groups.enum';
+import { UpdatePermissionDto } from './dtos';
+import { GROUPS } from '../../common/enums';
 
 @ApiTags('Permissions')
 @ApiBearerAuth('token')
-@CheckAbilities({ action: Action.Manage, subject: Entities.Role })
-@UseGuards(JwtGuard, CaslAbilitiesGuard)
+@CheckAbilities({ action: Action.Manage, subject: Entities.Permission })
+@UseGuards(CaslAbilitiesGuard)
 @Controller('permissions')
 export class PermissionsController {
   constructor(public permissionsService: PermissionsService) {}
@@ -36,7 +35,6 @@ export class PermissionsController {
     return this.permissionsService.findAll();
   }
 
-  @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ groups: [GROUPS.PERMISSION] })
   @Post()
   async create(@Body() dto: CreatePermissionDto): Promise<Permission> {

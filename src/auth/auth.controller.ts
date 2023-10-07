@@ -1,30 +1,37 @@
 import {
-  Body,
-  ClassSerializerInterceptor,
   Controller,
+  SerializeOptions,
+  Post,
+  Body,
   HttpCode,
   HttpStatus,
-  Post,
-  SerializeOptions,
-  UseInterceptors,
+  Patch,
+  UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { SignUpDto } from './dtos';
 import {
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
   ApiTags,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiOkResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
-import { LoginDto, LoginResponseDto } from './dtos/login.dto';
-import { User } from '../models/users/entities/users.entity';
-import { GROUPS } from '../common/enums/groups.enum';
+import { Public, GetUser, CheckAbilities, Roles } from '../common/decorators';
+import { Action, Entities, GROUPS, ROLE } from '../common/enums';
+import { AuthService } from './auth.service';
+import {
+  SignUpDto,
+  LoginResponseDto,
+  LoginDto,
+  PasswordChangeDto,
+} from './dtos';
+import { CaslAbilitiesGuard, RolesGuard } from '../common/guards';
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @SerializeOptions({ groups: [GROUPS.USER] })
   @ApiCreatedResponse({ type: SignUpDto })
   @Post('signup')
@@ -32,6 +39,7 @@ export class AuthController {
     return this.authService.signup(dto);
   }
 
+  @Public()
   @SerializeOptions({ groups: [GROUPS.USER] })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login' })
@@ -42,5 +50,14 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @ApiBearerAuth('token')
+  @SerializeOptions({ groups: [GROUPS.USER] })
+  @UseGuards(RolesGuard)
+  @Roles(ROLE.USER)
+  @Patch('updateMyPassword')
+  updateMyPassword(@Body() dto: PasswordChangeDto, @GetUser('id') id: string) {
+    return this.authService.updateMyPassword(dto, id);
   }
 }

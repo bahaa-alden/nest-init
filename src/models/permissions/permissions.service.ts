@@ -4,12 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { Permission } from './entities/permission.entity';
+import { CreatePermissionDto } from './dtos';
+import { Permission } from './entities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Action, Entities } from '../../common/enums';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { UpdatePermissionDto } from './dtos';
 
 @Injectable()
 export class PermissionsService {
@@ -73,7 +73,7 @@ export class PermissionsService {
     if (!permission) throw new NotFoundException('permission not found');
 
     Object.assign(permission, dto);
-    await this.permissionRepository.update(id, permission);
+    await permission.save();
     return permission;
   }
 
@@ -84,7 +84,7 @@ export class PermissionsService {
     });
 
     if (!permission) throw new NotFoundException('permission not found');
-    await this.permissionRepository.recover(permission);
+    await permission.recover();
     return permission;
   }
 
@@ -102,6 +102,6 @@ export class PermissionsService {
       .getOne();
     if (!permission) throw new NotFoundException('permission not found');
 
-    return this.permissionRepository.softRemove(permission);
+    return await permission.softRemove();
   }
 }

@@ -1,15 +1,20 @@
-import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
-import { UsersModule } from './models/users/users.module';
 import * as Joi from '@hapi/joi';
+import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
-import { CaslModule } from './shared/casl/casl.module';
-import { DatabaseModule } from './providers/database/database.module';
+import { AuthModule } from './auth';
+import { CloudinaryModule } from './shared/cloudinary';
+import { IsUniqueConstraint } from './common/decorators';
+import { JwtGuard } from './common/guards';
+import { ImagesModule } from './images';
+import { ImageCleanupModule } from './jobs/image-cleanup';
 import { AdminsModule } from './models/admins/admins.module';
 import { PermissionsModule } from './models/permissions/permissions.module';
 import { RolesModule } from './models/roles/roles.module';
-import { IsUniqueConstraint } from './common/decorators/validations';
+import { UsersModule } from './models/users/users.module';
+import { DatabaseModule } from './providers/database';
+import { CaslModule } from './shared/casl';
+import { Module } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -35,8 +40,17 @@ import { IsUniqueConstraint } from './common/decorators/validations';
     DatabaseModule,
     RolesModule,
     PermissionsModule,
+    ImagesModule,
+    CloudinaryModule,
+    ImageCleanupModule,
   ],
   controllers: [],
-  providers: [IsUniqueConstraint],
+  providers: [
+    IsUniqueConstraint,
+    {
+      provide: APP_GUARD,
+      useClass: JwtGuard,
+    },
+  ],
 })
 export class AppModule {}

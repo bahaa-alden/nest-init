@@ -1,5 +1,4 @@
-import { Action, ROLE } from '../../../common/enums';
-import { IPermission } from '../../../models/permissions/interfaces/permissions.interface';
+import { ROLE } from '../../../common/enums';
 
 export const roles: any[] = [
   { name: ROLE.USER },

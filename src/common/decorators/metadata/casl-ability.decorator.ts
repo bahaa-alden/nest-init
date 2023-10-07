@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { RequiredRole } from '../../../shared/casl/casl.interface';
+import { RequiredRole } from '../../../shared/casl';
 
 export const CHECK_ABILITY = 'check_ability';
 

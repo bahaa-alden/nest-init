@@ -1,42 +1,37 @@
 import {
-  Controller,
   UseGuards,
-  Patch,
-  Param,
-  Body,
-  Delete,
+  Controller,
+  SerializeOptions,
   Get,
   Post,
-  Put,
+  Body,
+  Param,
+  Patch,
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
-  SerializeOptions,
+  Delete,
 } from '@nestjs/common';
-import { RolesService } from './roles.service';
-import { CaslAbilitiesGuard, JwtGuard } from '../../common/guards';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
   ApiTags,
+  ApiOkResponse,
   OmitType,
+  ApiCreatedResponse,
+  ApiParam,
+  ApiOperation,
 } from '@nestjs/swagger';
-import { CheckAbilities } from '../../common/decorators/metadata';
-import { Action } from '../../common/enums/action.enum';
-import { Entities } from '../../common/enums';
-import { UUID } from 'crypto';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
-import { CaslAbilityFactory } from '../../shared/casl/casl-ability.factory';
-import { Role } from './entities/role.entity';
-import { GROUPS } from '../../common/enums/groups.enum';
+import { Action } from '../../common/enums';
+import { CheckAbilities } from '../../common/decorators';
+import { Entities, GROUPS } from '../../common/enums';
+import { CaslAbilitiesGuard } from '../../common/guards';
+import { CreateRoleDto, UpdateRoleDto } from './dtos';
+import { Role } from './entities';
+import { RolesService } from './roles.service';
 
 @ApiBearerAuth('token')
 @ApiTags('Roles')
-@UseGuards(JwtGuard, CaslAbilitiesGuard)
+@UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Manage, subject: Entities.Role })
 @Controller('roles')
 export class RolesController {
@@ -51,7 +46,6 @@ export class RolesController {
 
   @ApiCreatedResponse({ type: Role })
   @SerializeOptions({ groups: [GROUPS.ROLE] })
-  @HttpCode(HttpStatus.CREATED)
   @Post()
   async create(@Body() dto: CreateRoleDto): Promise<Role> {
     return this.rolesService.create(dto);
@@ -79,7 +73,7 @@ export class RolesController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  async delete(@Param('id', ParseUUIDPipe) id: UUID): Promise<void> {
+  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.rolesService.delete(id);
   }
 

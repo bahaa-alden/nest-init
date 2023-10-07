@@ -8,9 +8,9 @@ import {
 } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/exceptions';
 import { SwaggerModule } from '@nestjs/swagger';
-import { createDocument } from './common/helpers/swagger.helper';
-import { errorsFormat } from './common/helpers';
+import { createDocument, errorsFormat } from './common/helpers';
 import { useContainer } from 'class-validator';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -18,6 +18,10 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
+  app.useStaticAssets(join(__dirname, '..', 'public'), {
+    extensions: ['jpg'],
+    index: false,
+  });
   app.useGlobalFilters(new HttpExceptionFilter(httpAdapter));
   app.useGlobalPipes(
     new ValidationPipe({

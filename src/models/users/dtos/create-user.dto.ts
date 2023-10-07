@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 // import { IsEmailUnique } from '../../../common/decorators/validations/is-email-unique.validation';
 
 export class CreateUserDto {

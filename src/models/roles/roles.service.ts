@@ -1,23 +1,21 @@
 import {
-  BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
-import { Role } from './entities/role.entity';
-import { Permission } from '../permissions/entities/permission.entity';
-import { UpdateRoleDto } from './dto/update-role.dto';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { Action, Entities, ROLE } from '../../common/enums';
+import { Repository, Not } from 'typeorm';
+import { ROLE, Entities, Action } from '../../common/enums';
+import { Permission } from '../permissions';
+import { CreateRoleDto, UpdateRoleDto } from './dtos';
+import { Role } from './entities';
 
 @Injectable()
 export class RolesService {
   constructor(
-    @InjectRepository(Role) private roleRepository: Repository<Role>,
     @InjectRepository(Permission)
-    private readonly permissionRepository: Repository<Permission>,
+    private permissionRepository: Repository<Permission>,
+    @InjectRepository(Role) private roleRepository: Repository<Role>,
   ) {}
 
   async findAll(): Promise<Role[]> {
@@ -80,7 +78,6 @@ export class RolesService {
       .getMany();
 
     role.permissions = permissions;
-
     await this.roleRepository.save(role);
     return role;
   }
@@ -113,13 +110,9 @@ export class RolesService {
           `Permission with ID ${p.id} already exist in the role.`,
         );
     });
-    await this.roleRepository
-      .createQueryBuilder()
-      .relation(Role, 'permissions')
-      .of(role) // you can use just post id as well
-      .add(permissions);
-
-    return this.findById(id);
+    role.permissions.push(...permissions);
+    await role.save();
+    return role;
   }
 
   async deletePermissions(
@@ -165,7 +158,7 @@ export class RolesService {
     });
 
     if (!role) throw new NotFoundException('role not found');
-    await this.roleRepository.recover(role);
+    await role.recover();
     return role;
   }
 
@@ -177,6 +170,6 @@ export class RolesService {
     });
 
     if (!role) throw new NotFoundException('role not found');
-    await this.roleRepository.softRemove(role);
+    await role.softRemove();
   }
 }

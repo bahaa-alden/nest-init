@@ -6,7 +6,7 @@ import {
   IsNotEmpty,
   IsEmail,
 } from 'class-validator';
-import { IsUnique } from '../../../common/decorators/validations';
+import { IsUnique } from '../../../common/decorators';
 import { Entities } from '../../../common/enums';
 
 export class UpdateAdminDto {
@@ -22,4 +22,15 @@ export class UpdateAdminDto {
   @IsEmail({}, { message: 'Please provide a valid email' })
   @IsUnique(Entities.Admin, { message: 'email already used' })
   readonly email?: string;
+
+  @ApiProperty({ required: false })
+  @IsNotEmpty()
+  @IsOptional()
+  @IsString()
+  readonly photo?: string;
+
+  @ApiProperty()
+  @IsString()
+  @Length(6, 15)
+  readonly password: string;
 }

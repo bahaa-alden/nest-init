@@ -2,12 +2,16 @@ import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/users.entity';
-import { CaslModule } from '../../shared/casl/casl.module';
-import { Role } from '../roles/entities/role.entity';
+import { User, UserImage } from './entities';
+import { CaslModule } from '../../shared/casl';
+import { CloudinaryModule } from '../../shared/cloudinary';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Role]), CaslModule],
+  imports: [
+    TypeOrmModule.forFeature([User, UserImage]),
+    CaslModule,
+    CloudinaryModule,
+  ],
   controllers: [UsersController],
   providers: [UsersService],
 })

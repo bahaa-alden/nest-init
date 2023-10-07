@@ -2,10 +2,9 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import { ForbiddenError } from '@casl/ability';
-import { CaslAbilityFactory } from '../../shared/casl/casl-ability.factory';
-import { CHECK_ABILITY } from '../decorators/metadata';
-import { User } from '../../models/users/entities/users.entity';
-import { RequiredRole } from '../../shared/casl/casl.interface';
+import { CaslAbilityFactory, RequiredRole } from '../../shared/casl';
+import { CHECK_ABILITY } from '../decorators';
+import { User } from '../../models/users';
 
 @Injectable()
 export class CaslAbilitiesGuard implements CanActivate {

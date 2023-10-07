@@ -26,7 +26,7 @@ function consOrChild(
   });
 }
 
-export const errorsFormat = (errors: ValidationError[]) => {
+export const errorsFormat = (errors: any) => {
   const formattedErrors = [];
   errors.forEach((error) => {
     consOrChild(error, formattedErrors);

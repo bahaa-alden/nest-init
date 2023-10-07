@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { superadmin } from './data';
 import { ROLE } from '../../../common/enums';
-import { Role } from '../../../models/roles/entities/role.entity';
-import { Admin } from '../../../models/admins/entities/admin.entity';
+import { Role } from '../../../models/roles';
+import { Admin } from '../../../models/admins';
 
 @Injectable()
 

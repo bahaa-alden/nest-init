@@ -2,16 +2,19 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dtos';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/users.entity';
-import { CaslAbilityFactory } from '../../shared/casl/casl-ability.factory';
+import { User, UserImage } from './entities';
 import { ROLE } from '../../common/enums';
-import { Role } from '../roles/entities/role.entity';
+import { CloudinaryService } from '../../shared/cloudinary';
+import { checkIfExist } from '../../common/helpers';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(UserImage)
+    private userImageRepository: Repository<UserImage>,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   findAll(user: User) {
@@ -24,7 +27,7 @@ export class UsersService {
   findById(id: string) {
     return this.userRepository.findOne({
       where: { id },
-      relations: { role: true },
+      relations: { role: true, images: true },
     });
   }
 
@@ -44,13 +47,33 @@ export class UsersService {
   }
 
   async updateMe(dto: UpdateUserDto, user: User) {
-    Object.assign(user, dto);
-    await this.userRepository.update(user.id, user);
+    if (dto.photo) user.images.push(await this.updatePhoto(dto.photo));
+    Object.assign(user, { email: dto.email, name: dto.name });
+    await this.userRepository.save(user);
     return this.findById(user.id);
   }
 
   async deleteMe(user: User) {
-    await this.userRepository.softDelete(user.id);
-    return;
+    return await this.userRepository.softDelete(user.id);
+  }
+
+  async update(id: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findById(id);
+    if (dto.photo) user.images.push(await this.updatePhoto(dto.photo));
+    Object.assign(user, {
+      email: dto.email,
+      name: dto.name,
+    });
+    await this.userRepository.save(user);
+    return user;
+  }
+
+  async updatePhoto(url: string) {
+    const res = await checkIfExist(url);
+    const uploaded = await this.cloudinaryService.uploadSingleImage(res);
+    const photo = this.userImageRepository.create({
+      ...uploaded,
+    });
+    return photo;
   }
 }

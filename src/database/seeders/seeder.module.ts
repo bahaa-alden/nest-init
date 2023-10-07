@@ -1,11 +1,11 @@
 import { Logger, Module } from '@nestjs/common';
-import { PermissionsSeederModule } from './permissions/permissions.module';
-import { DatabaseModule } from '../../providers/database/database.module';
+import { PermissionsSeederModule } from './permissions';
+import { DatabaseModule } from '../../providers/database';
 import { Seeder } from './seeder';
 import { ConfigModule } from '@nestjs/config';
-import { SuperadminModule } from './superadmin/superadmin.module';
+import { SuperadminModule } from './superadmin';
 import Joi = require('@hapi/joi');
-import { RolesSeederModule } from './roles/roles.module';
+import { RolesSeederModule } from './roles';
 
 @Module({
   imports: [

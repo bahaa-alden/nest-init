@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PermissionSeederService } from './permissions/permissions.service';
-import { SuperadminService } from './superadmin/superadmin.service';
-import { RoleSeederService } from './roles/roles.service';
+import { PermissionSeederService } from './permissions';
+import { SuperadminService } from './superadmin';
+import { RoleSeederService } from './roles';
 
 @Injectable()
 export class Seeder {
@@ -75,7 +75,7 @@ export class Seeder {
           'No. of Roles created : ' +
             // Remove all null values and return only created Roles.
             createdRoles.filter(
-              (nullValueOrCreatedPermission) => nullValueOrCreatedPermission,
+              (nullValueOrCreatedRole) => nullValueOrCreatedRole,
             ).length,
         );
         return Promise.resolve(true);

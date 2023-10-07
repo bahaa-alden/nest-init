@@ -1,7 +1,5 @@
 import { Action, Entities, ROLE } from '../../../common/enums';
-import { IPermission } from '../../../models/permissions/interfaces/permissions.interface';
-import { Role } from '../../../models/roles/entities/role.entity';
-import { roles } from '../roles/data';
+import { IPermission } from '../../../models/permissions';
 
 type pp = { roles: any[] } & IPermission;
 export const permissions: pp[] = [

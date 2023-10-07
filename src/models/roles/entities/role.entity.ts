@@ -1,24 +1,24 @@
-import {
-  Column,
-  DeleteDateColumn,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Permission } from '../../permissions/entities/permission.entity';
-import { User } from '../../users/entities/users.entity';
-import { ROLE } from '../../../common/enums';
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
-import { GROUPS } from '../../../common/enums/groups.enum';
-import { Admin } from '../../admins/entities/admin.entity';
+import { Expose, Exclude } from 'class-transformer';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  BaseEntity,
+} from 'typeorm';
+import { GROUPS, ROLE } from '../../../common/enums';
+import { Permission } from '../../permissions';
+import { User } from '../../users';
+import { Admin } from '../../admins';
 
-@Entity()
-export class Role {
+@Entity({ name: 'roles' })
+export class Role extends BaseEntity {
   @Expose({ groups: [GROUPS.ROLE, GROUPS.ALL_ROLES] })
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
@@ -49,16 +49,13 @@ export class Role {
 
   @Expose({ groups: [GROUPS.ROLE, GROUPS.ALL_ROLES] })
   @ApiProperty()
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  createdAt: string;
+  @CreateDateColumn()
+  createdAt: Date;
 
   @Expose({ groups: [GROUPS.ROLE, GROUPS.ALL_ROLES] })
   @ApiProperty()
   @UpdateDateColumn()
-  updatedAt: string;
+  updatedAt: Date;
 
   @Exclude()
   @DeleteDateColumn()

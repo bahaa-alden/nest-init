@@ -1,8 +1,5 @@
-import { UUID } from 'crypto';
-// base-person.entity.ts
-
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Exclude, Transform } from 'class-transformer';
+import { Expose, Exclude } from 'class-transformer';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -10,21 +7,16 @@ import {
   BaseEntity,
   BeforeInsert,
   DeleteDateColumn,
-  JoinColumn,
-  ManyToOne,
   UpdateDateColumn,
+  CreateDateColumn,
+  BeforeUpdate,
 } from 'typeorm';
-import { Role } from '../../models/roles/entities/role.entity';
-import { GROUPS } from '../enums/groups.enum';
-import { generateHash } from '../helpers';
+import { GROUPS } from '../enums';
+import * as argon from 'argon2';
+import { EntityBase } from './entity-base.entity';
 
 @Entity()
 export class BasePerson extends BaseEntity {
-  @BeforeInsert()
-  async hash() {
-    this.password = await generateHash(this.password);
-  }
-
   @Expose({
     groups: [GROUPS.ALL_USERS, GROUPS.USER, GROUPS.ALL_ADMINS, GROUPS.ADMIN],
   })
@@ -50,22 +42,65 @@ export class BasePerson extends BaseEntity {
   @Column({ select: false })
   password: string;
 
-  @Expose({ groups: [GROUPS.USER, GROUPS.ADMIN] })
-  @ApiProperty()
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  createdAt: string;
+  @Exclude()
+  @Column({ nullable: true })
+  passwordChangedAt: Date;
 
-  @Expose({ groups: [GROUPS.USER, GROUPS.ADMIN] })
+  @Exclude()
+  @Column({ nullable: true })
+  passwordResetToken: string;
+
+  @Exclude()
+  @Column({ nullable: true })
+  passwordResetExpires: Date;
+
+  @Expose({
+    groups: [GROUPS.USER, GROUPS.ADMIN],
+  })
+  @ApiProperty()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Expose({
+    groups: [GROUPS.USER, GROUPS.ADMIN],
+  })
   @ApiProperty()
   @UpdateDateColumn()
-  updatedAt: string;
+  updatedAt: Date;
 
   @Exclude()
   @DeleteDateColumn()
   deletedAt: Date;
 
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hash() {
+    if (this.password) {
+      this.password = await this.generateHash(this.password);
+    }
+  }
+
+  @BeforeUpdate()
+  async passChanged() {
+    if (this.password) {
+      this.passwordChangedAt = new Date(Date.now() - 1000);
+    }
+  }
+
+  isPasswordChanged(JWTTimestamp: number) {
+    if (this.passwordChangedAt) {
+      const changeTimestamp: number = this.passwordChangedAt.getTime() / 1000;
+      return changeTimestamp > JWTTimestamp;
+    }
+    return false;
+  }
+
+  async generateHash(password: string) {
+    return await argon.hash(password);
+  }
+
+  async verifyHash(hash: string, password: string) {
+    return await argon.verify(hash, password);
+  }
   // Add any other common fields for both User and Admin here
 }

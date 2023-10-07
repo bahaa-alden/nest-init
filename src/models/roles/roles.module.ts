@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
-import { RolesService } from './roles.service';
-import { RolesController } from './roles.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Role } from './entities/role.entity';
-import { CaslModule } from '../../shared/casl/casl.module';
-import { Permission } from '../permissions/entities/permission.entity';
+import { CaslModule } from '../../shared/casl';
+import { Permission } from '../permissions';
+import { Module, forwardRef } from '@nestjs/common';
+import { RolesController } from './roles.controller';
+import { RolesService } from './roles.service';
+import { Role } from './entities';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Role, Permission]), CaslModule],

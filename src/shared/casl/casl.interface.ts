@@ -1,5 +1,5 @@
 import { InferSubjects, MongoAbility, MongoQuery } from '@casl/ability';
-import { User } from '../../models/users/entities/users.entity';
+import { User } from '../../models/users';
 import { Action, Entities } from '../../common/enums';
 
 export interface RequiredRole {

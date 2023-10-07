@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsString, IsNotEmpty, IsEmail, Length } from 'class-validator';
-import { User } from '../../models/users/entities/users.entity';
+import { IsNotEmpty, IsEmail, IsString, Length } from 'class-validator';
+import { User } from '../../models/users';
 
 export class LoginDto {
   @ApiProperty({ default: 'ibo@dev.io' })

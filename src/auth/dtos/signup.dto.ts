@@ -1,9 +1,7 @@
-import { ApiCreatedResponse, ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
-import { IsUnique } from '../../common/decorators/validations';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, Length, IsNotEmpty, IsEmail } from 'class-validator';
+import { IsUnique } from '../../common/decorators';
 import { Entities } from '../../common/enums';
-// import { IsEmailUnique } from '../../common/decorators/validations';
 
 export class SignUpDto {
   @ApiProperty()

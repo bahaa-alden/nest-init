@@ -1,6 +1,5 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateRoleDto } from './create-role.dto';
-import { UUID } from 'crypto';
+import { ApiProperty } from '@nestjs/swagger';
+
 import { IsArray, IsOptional, IsUUID } from 'class-validator';
 
 export class UpdateRoleDto {
