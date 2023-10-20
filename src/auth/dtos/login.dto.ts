@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsEmail, IsString, Length } from 'class-validator';
-import { User } from '../../models/users';
+import { User, UserImage } from '../../models/users';
 
 export class LoginDto {
   @ApiProperty({ default: 'ibo@dev.io' })
@@ -19,4 +19,7 @@ export class LoginResponseDto {
 
   @ApiProperty({ type: User })
   user: User;
+
+  @ApiProperty({ type: UserImage })
+  photo: UserImage;
 }
