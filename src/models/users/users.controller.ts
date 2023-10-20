@@ -69,12 +69,6 @@ export class UsersController {
     return this.usersService.deleteMe(user);
   }
 
-  @ApiParam({
-    name: 'id',
-    type: 'string',
-    allowEmptyValue: false,
-    required: true,
-  })
   @SerializeOptions({ groups: [GROUPS.USER] })
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
@@ -89,12 +83,6 @@ export class UsersController {
     return this.usersService.update(id, dto);
   }
 
-  @ApiParam({
-    name: 'id',
-    type: 'string',
-    allowEmptyValue: false,
-    required: true,
-  })
   @CheckAbilities({ action: Action.Delete, subject: Entities.User })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
@@ -103,14 +91,9 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'recover deleted user' })
-  @ApiParam({
-    name: 'id',
-    type: 'string',
-    allowEmptyValue: false,
-    required: true,
-  })
   @CheckAbilities({ action: Action.Update, subject: Entities.User })
   @SerializeOptions({ groups: [GROUPS.USER] })
+  @HttpCode(HttpStatus.OK)
   @Post(':id/recover')
   recover(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.recover(id);

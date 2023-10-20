@@ -50,7 +50,7 @@ export class UsersService {
     if (dto.photo) user.images.push(await this.updatePhoto(dto.photo));
     Object.assign(user, { email: dto.email, name: dto.name });
     await this.userRepository.save(user);
-    return this.findById(user.id);
+    return user;
   }
 
   async deleteMe(user: User) {
