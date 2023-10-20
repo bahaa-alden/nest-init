@@ -20,6 +20,8 @@ import { ProductsModule } from './models/products/products.module';
 import { EmployeesModule } from './models/employees/employees.module';
 import { StoresModule } from './models/stores/stores.module';
 import { CategoriesModule } from './models/categories/categories.module';
+import { ProdcutsModule } from './models/prodcuts/prodcuts.module';
+import { ProdcutsModule } from './models/prodcuts/prodcuts.module';
 
 @Module({
   imports: [
@@ -53,6 +55,7 @@ import { CategoriesModule } from './models/categories/categories.module';
     CaslModule,
     CloudinaryModule,
     ImageCleanupModule,
+    ProdcutsModule,
   ],
   controllers: [],
   providers: [
