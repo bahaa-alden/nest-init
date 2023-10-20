@@ -4,7 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth';
 import { CloudinaryModule } from './shared/cloudinary';
-import { IsUniqueConstraint } from './common/decorators';
+import { IsExistConstraint, IsUniqueConstraint } from './common/decorators';
 import { JwtGuard } from './common/guards';
 import { ImagesModule } from './images';
 import { ImageCleanupModule } from './jobs/image-cleanup';
@@ -15,6 +15,11 @@ import { UsersModule } from './models/users/users.module';
 import { DatabaseModule } from './providers/database';
 import { CaslModule } from './shared/casl';
 import { Module } from '@nestjs/common';
+import { CitiesModule } from './models/cities/cities.module';
+import { ProductsModule } from './models/products/products.module';
+import { EmployeesModule } from './models/employees/employees.module';
+import { StoresModule } from './models/stores/stores.module';
+import { CategoriesModule } from './models/categories/categories.module';
 
 @Module({
   imports: [
@@ -36,17 +41,23 @@ import { Module } from '@nestjs/common';
     AuthModule,
     UsersModule,
     AdminsModule,
-    CaslModule,
-    DatabaseModule,
+    EmployeesModule,
+    ProductsModule,
+    CategoriesModule,
+    CitiesModule,
+    StoresModule,
     RolesModule,
     PermissionsModule,
     ImagesModule,
+    DatabaseModule,
+    CaslModule,
     CloudinaryModule,
     ImageCleanupModule,
   ],
   controllers: [],
   providers: [
     IsUniqueConstraint,
+    IsExistConstraint,
     {
       provide: APP_GUARD,
       useClass: JwtGuard,

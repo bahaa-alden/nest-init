@@ -15,7 +15,6 @@ export class BaseImage {
   @PrimaryGeneratedColumn('uuid')
   id?: string;
 
-  @ApiProperty()
   @Exclude()
   @Column()
   publicId: string;
@@ -36,15 +35,14 @@ export class BaseImage {
   @Column()
   webUrl: string;
 
-  @ApiProperty()
+  @Exclude()
   @CreateDateColumn()
   createdAt?: Date;
 
-  @ApiProperty()
+  @Exclude()
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ApiProperty()
   @Exclude()
   @DeleteDateColumn()
   deletedAt: Date;

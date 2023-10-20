@@ -1,7 +1,7 @@
 import { Action, Entities, ROLE } from '../../../common/enums';
 import { IPermission } from '../../../models/permissions';
 
-type pp = { roles: any[] } & IPermission;
+type pp = { roles?: any[] } & IPermission;
 export const permissions: pp[] = [
   {
     action: Action.Manage,
@@ -90,6 +90,6 @@ export const permissions: pp[] = [
     subject: Entities.Wallet,
     roles: [ROLE.ADMIN, ROLE.EMPLOYEE],
   },
-
+  { action: Action.Manage, subject: Entities.Admin },
   { action: Action.Manage, subject: Entities.All, roles: [ROLE.SUPER_ADMIN] },
 ];

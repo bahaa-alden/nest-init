@@ -11,13 +11,13 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { HttpAdapterHost } from '@nestjs/core';
+import { AbstractHttpAdapter, HttpAdapterHost } from '@nestjs/core';
 import { Response } from 'express';
 
 const handelPassportError = () =>
   new UnauthorizedException({ message: 'الرجاء تسجيل الدخول' });
 const exist = (table: string) => {
-  if (table === 'role_permissions_permission')
+  if (table === 'roles_permissions')
     return new BadRequestException('permission already exist in role');
 };
 
@@ -51,17 +51,33 @@ export class HttpExceptionFilter implements ExceptionFilter {
           return HttpStatus.INTERNAL_SERVER_ERROR;
       }
     })();
-    console.log(exception);
-    if (status === 500) console.log(exception);
 
-    httpAdapter.reply(
-      response,
-      {
+    const Env = process.env.ENV;
+
+    if (Env === 'production') {
+      if (status === 500) console.log(exception);
+      const rep = {
         type: error.errors ? 'form' : 'default',
         message: error.message,
         errors: error.errors,
-      },
-      status,
-    );
+      };
+      this.reply(httpAdapter, response, status, rep);
+    } else {
+      const rep = {
+        error: exception,
+        stack: exception.stack,
+        message: exception.message,
+      };
+      this.reply(httpAdapter, response, status, rep);
+    }
+  }
+
+  reply(
+    httpAdapter: AbstractHttpAdapter,
+    response: Response,
+    status: number,
+    rep: any,
+  ) {
+    httpAdapter.reply(response, rep, status);
   }
 }

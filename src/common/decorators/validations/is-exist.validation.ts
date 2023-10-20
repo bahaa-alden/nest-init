@@ -1,7 +1,7 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   registerDecorator,
@@ -12,28 +12,30 @@ import {
 } from 'class-validator';
 import { DataSource } from 'typeorm';
 
-@ValidatorConstraint({ name: 'isUnique', async: true })
+@ValidatorConstraint({ name: 'isExist', async: true })
 @Injectable()
-export class IsUniqueConstraint implements ValidatorConstraintInterface {
+export class IsExistConstraint implements ValidatorConstraintInterface {
   constructor(private dataSource: DataSource) {}
   async validate(value: any, args: ValidationArguments) {
     return this.dataSource
       .getRepository(args.constraints[0])
       .findOne({
         where: {
-          [args.property]: value,
+          id: value,
         },
         withDeleted: true,
       })
       .then((entity) => {
-        if (entity)
-          throw new BadRequestException(args.constraints[0] + ' already exist');
+        if (!entity)
+          throw new BadRequestException(
+            args.constraints[0] + ' with id:' + value + ' not found',
+          );
         return true;
       });
   }
 }
 
-export function IsUnique(
+export function IsExist(
   entity: string,
   validationOptions?: ValidationOptions,
 ): PropertyDecorator {
@@ -43,7 +45,7 @@ export function IsUnique(
       propertyName: propertyName,
       options: validationOptions,
       constraints: [entity],
-      validator: IsUniqueConstraint,
+      validator: IsExistConstraint,
     });
   };
 }
