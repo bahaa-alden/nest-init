@@ -8,7 +8,7 @@ import { Repository, Not } from 'typeorm';
 import { ROLE, Entities, Action } from '../../common/enums';
 import { Permission } from '../permissions';
 import { CreateRoleDto, UpdateRoleDto } from './dtos';
-import { Role } from './entities';
+import { Role } from './entities/role.entity';
 
 @Injectable()
 export class RolesService {
@@ -53,6 +53,9 @@ export class RolesService {
       .andWhereInIds(dto.permissions)
       .getMany();
 
+    if (dto.permissions.length !== permissions.length)
+      throw new NotFoundException('some of permissions not found');
+
     const role = this.roleRepository.create({
       name: dto.name,
       permissions,
@@ -76,6 +79,9 @@ export class RolesService {
       )
       .andWhereInIds(dto.permissions)
       .getMany();
+
+    if (dto.permissions.length !== permissions.length)
+      throw new NotFoundException('some of permissions not found');
 
     role.permissions = permissions;
     await this.roleRepository.save(role);

@@ -2,11 +2,11 @@ import { IsArray, IsOptional, IsUUID, NotEquals } from 'class-validator';
 import { Entities, ROLE } from '../../../common/enums';
 import { UUID } from 'crypto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUnique } from '../../../common/decorators';
+import { IsExist, IsUnique } from '../../../common/decorators';
 
 export class CreateRoleDto {
   @ApiProperty({ description: 'the rule name' })
-  @IsUnique(Entities.Role, { message: 'role already exist' })
+  @IsUnique(Entities.Role)
   @NotEquals(ROLE.SUPER_ADMIN)
   name: string;
 

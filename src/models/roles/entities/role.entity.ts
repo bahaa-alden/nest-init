@@ -16,6 +16,7 @@ import { GROUPS, ROLE } from '../../../common/enums';
 import { Permission } from '../../permissions';
 import { User } from '../../users';
 import { Admin } from '../../admins';
+import { Employee } from '../../employees/entities/employee.entity';
 
 @Entity({ name: 'roles' })
 export class Role extends BaseEntity {
@@ -31,14 +32,18 @@ export class Role extends BaseEntity {
 
   @Expose({ groups: [GROUPS.ROLE] })
   @ApiProperty({
-    type: OmitType,
+    type: Permission,
     isArray: true,
   })
   @ManyToMany(() => Permission, (permission) => permission.roles, {
     onDelete: 'CASCADE',
     cascade: true,
   })
-  @JoinTable({})
+  @JoinTable({
+    name: 'roles_permissions',
+    joinColumn: { name: 'roleId' },
+    inverseJoinColumn: { name: 'permissionId' },
+  })
   permissions: Permission[];
 
   @OneToMany(() => User, (user) => user.role, { cascade: true })
@@ -46,6 +51,9 @@ export class Role extends BaseEntity {
 
   @OneToMany(() => Admin, (admin) => admin.role, { cascade: true })
   admins: Admin[];
+
+  @OneToMany(() => Employee, (employee) => employee.role, { cascade: true })
+  employees: Employee[];
 
   @Expose({ groups: [GROUPS.ROLE, GROUPS.ALL_ROLES] })
   @ApiProperty()

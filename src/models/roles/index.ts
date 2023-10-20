@@ -1,2 +1,2 @@
 export * from './dtos';
-export * from './entities';
+export * from './entities/role.entity';

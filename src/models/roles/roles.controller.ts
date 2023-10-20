@@ -26,7 +26,7 @@ import { CheckAbilities } from '../../common/decorators';
 import { Entities, GROUPS } from '../../common/enums';
 import { CaslAbilitiesGuard } from '../../common/guards';
 import { CreateRoleDto, UpdateRoleDto } from './dtos';
-import { Role } from './entities';
+import { Role } from './entities/role.entity';
 import { RolesService } from './roles.service';
 
 @ApiBearerAuth('token')
@@ -78,6 +78,7 @@ export class RolesController {
   }
 
   @ApiOperation({ summary: 'recover deleted role' })
+  @HttpCode(HttpStatus.OK)
   @Post(':id/recover')
   async recover(@Param('id', ParseUUIDPipe) id: string): Promise<Role> {
     return this.rolesService.recover(id);

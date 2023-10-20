@@ -18,21 +18,42 @@ import { EntityBase } from './entity-base.entity';
 @Entity()
 export class BasePerson extends BaseEntity {
   @Expose({
-    groups: [GROUPS.ALL_USERS, GROUPS.USER, GROUPS.ALL_ADMINS, GROUPS.ADMIN],
+    groups: [
+      GROUPS.ALL_USERS,
+      GROUPS.USER,
+      GROUPS.ALL_ADMINS,
+      GROUPS.ADMIN,
+      GROUPS.ALL_EMPLOYEES,
+      GROUPS.EMPLOYEE,
+    ],
   })
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Expose({
-    groups: [GROUPS.ALL_USERS, GROUPS.USER, GROUPS.ALL_ADMINS, GROUPS.ADMIN],
+    groups: [
+      GROUPS.ALL_USERS,
+      GROUPS.USER,
+      GROUPS.ALL_ADMINS,
+      GROUPS.ADMIN,
+      GROUPS.ALL_EMPLOYEES,
+      GROUPS.EMPLOYEE,
+    ],
   })
   @ApiProperty()
   @Column({})
   name: string;
 
   @Expose({
-    groups: [GROUPS.ALL_USERS, GROUPS.USER, GROUPS.ALL_ADMINS, GROUPS.ADMIN],
+    groups: [
+      GROUPS.ALL_USERS,
+      GROUPS.USER,
+      GROUPS.ALL_ADMINS,
+      GROUPS.ADMIN,
+      GROUPS.ALL_EMPLOYEES,
+      GROUPS.EMPLOYEE,
+    ],
   })
   @ApiProperty()
   @Column({ unique: true })
@@ -55,14 +76,14 @@ export class BasePerson extends BaseEntity {
   passwordResetExpires: Date;
 
   @Expose({
-    groups: [GROUPS.USER, GROUPS.ADMIN],
+    groups: [GROUPS.USER, GROUPS.ADMIN, GROUPS.EMPLOYEE],
   })
   @ApiProperty()
   @CreateDateColumn()
   createdAt: Date;
 
   @Expose({
-    groups: [GROUPS.USER, GROUPS.ADMIN],
+    groups: [GROUPS.USER, GROUPS.ADMIN, GROUPS.EMPLOYEE],
   })
   @ApiProperty()
   @UpdateDateColumn()

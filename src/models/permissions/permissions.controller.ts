@@ -13,7 +13,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { Permission } from './entities';
+import { Permission } from './entities/permission.entity';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CaslAbilitiesGuard, JwtGuard } from '../../common/guards';
 import { CreatePermissionDto } from './dtos';
@@ -64,6 +64,7 @@ export class PermissionsController {
 
   @ApiOperation({ summary: 'recover deleted permission' })
   @SerializeOptions({ groups: [GROUPS.PERMISSION] })
+  @HttpCode(HttpStatus.OK)
   @Post(':id/recover')
   recover(@Param('id', ParseUUIDPipe) id: string) {
     return this.permissionsService.recover(id);

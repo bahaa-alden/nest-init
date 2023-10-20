@@ -4,6 +4,7 @@ import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { permissions } from './data';
 import { Role } from '../../../models/roles';
+import { roles } from '../roles/data';
 
 /**
  * Service dealing with Permission based operations.
@@ -45,9 +46,11 @@ export class PermissionSeederService {
           if (dbPermission) {
             return Promise.resolve(null);
           }
-          const roles = await this.roleRepository.findBy({
-            name: In(permission.roles),
-          });
+          const roles = permission.roles
+            ? await this.roleRepository.findBy({
+                name: In(permission.roles),
+              })
+            : [];
           const per = this.permissionRepository.create({
             action: permission.action,
             subject: permission.subject,
