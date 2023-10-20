@@ -16,10 +16,11 @@ import { ROLE } from '../../common/enums';
 import { JwtTokenService } from '../../shared/jwt';
 import { Role } from '../roles';
 import { CreateAdminDto, UpdateAdminDto } from './dtos';
-import { Admin, AdminImage } from './entities';
+import { Admin } from './entities/admin.entity';
 import { checkIfExist } from '../../common/helpers';
 import { CloudinaryService } from '../../shared/cloudinary/cloudinary.service';
 import { defaultImage } from '../../common/constants';
+import { AdminImage } from './entities/admin-image.entity';
 
 @Injectable()
 export class AdminsService {
@@ -93,7 +94,7 @@ export class AdminsService {
       password: dto.password,
     });
     await this.adminRepository.save(admin);
-    return this.findOne(id, role);
+    return admin;
   }
 
   async recover(id: string) {

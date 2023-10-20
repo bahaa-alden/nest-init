@@ -20,7 +20,7 @@ export class UpdateAdminDto {
   @IsNotEmpty()
   @IsOptional()
   @IsEmail({}, { message: 'Please provide a valid email' })
-  @IsUnique(Entities.Admin, { message: 'email already used' })
+  @IsUnique(Entities.Admin)
   readonly email?: string;
 
   @ApiProperty({ required: false })

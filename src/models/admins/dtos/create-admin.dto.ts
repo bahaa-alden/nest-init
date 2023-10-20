@@ -19,12 +19,17 @@ export class CreateAdminDto {
   @ApiProperty()
   @IsNotEmpty({ message: 'please provide email' })
   @IsEmail({}, { message: 'please provide valid email' })
-  @IsUnique(Entities.Admin, { message: 'admin already exist' })
+  @IsUnique(Entities.Admin)
   readonly email: string;
 
   @ApiProperty()
   @IsString()
-  @IsOptional()
   @Length(6, 15)
   readonly password: string;
+
+  @ApiProperty({ required: false })
+  @IsNotEmpty()
+  @IsOptional()
+  @IsString()
+  readonly photo?: string;
 }

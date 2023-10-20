@@ -3,10 +3,11 @@ import { AdminsController } from './admins.controller';
 import { CaslModule } from '../../shared/casl';
 import { AdminsService } from './admins.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Admin, AdminImage } from './entities';
+import { Admin } from './entities/admin.entity';
 import { Role } from '../roles';
 import { JwtTokenModule } from '../../shared/jwt';
 import { CloudinaryModule } from '../../shared/cloudinary';
+import { AdminImage } from './entities/admin-image.entity';
 
 @Module({
   imports: [

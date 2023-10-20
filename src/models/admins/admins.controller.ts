@@ -26,7 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { LoginDto, LoginResponseDto } from '../../auth';
 import { GROUPS } from '../../common/enums';
-import { Admin } from './entities';
+import { Admin } from './entities/admin.entity';
 import { Role } from '../roles';
 
 @ApiTags('Admins')
@@ -101,14 +101,9 @@ export class AdminsController {
   }
 
   @ApiOperation({ summary: 'recover deleted admin' })
-  @ApiParam({
-    name: 'id',
-    type: 'string',
-    allowEmptyValue: false,
-    required: true,
-  })
   @CheckAbilities({ action: Action.Update, subject: Entities.Admin })
   @SerializeOptions({ groups: [GROUPS.ADMIN] })
+  @HttpCode(HttpStatus.OK)
   @Post(':id/recover')
   recover(@Param('id', ParseUUIDPipe) id: string) {
     return this.adminsService.recover(id);
