@@ -2,7 +2,7 @@ import { MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
-import { LoggerMiddleware } from '../common/middlewares';
+import { LoggerMiddleware } from '../common';
 import { Role } from '../models/roles';
 import { User, UserImage } from '../models/users';
 import { JwtTokenModule } from '../shared/jwt';

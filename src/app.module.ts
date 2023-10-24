@@ -4,8 +4,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth';
 import { CloudinaryModule } from './shared/cloudinary';
-import { IsExistConstraint, IsUniqueConstraint } from './common/decorators';
-import { JwtGuard } from './common/guards';
+import { IsExistConstraint, IsUniqueConstraint } from './common';
+import { JwtGuard } from './common';
 import { ImagesModule } from './images';
 import { ImageCleanupModule } from './jobs/image-cleanup';
 import { AdminsModule } from './models/admins/admins.module';
@@ -16,12 +16,11 @@ import { DatabaseModule } from './providers/database';
 import { CaslModule } from './shared/casl';
 import { Module } from '@nestjs/common';
 import { CitiesModule } from './models/cities/cities.module';
-import { ProductsModule } from './models/products/products.module';
 import { EmployeesModule } from './models/employees/employees.module';
 import { StoresModule } from './models/stores/stores.module';
 import { CategoriesModule } from './models/categories/categories.module';
-import { ProdcutsModule } from './models/prodcuts/prodcuts.module';
-import { ProdcutsModule } from './models/prodcuts/prodcuts.module';
+import { ProductsModule } from './models/products/products.module';
+// import { PaymentsModule } from './models/payments/payments.module';
 
 @Module({
   imports: [
@@ -55,7 +54,7 @@ import { ProdcutsModule } from './models/prodcuts/prodcuts.module';
     CaslModule,
     CloudinaryModule,
     ImageCleanupModule,
-    ProdcutsModule,
+    // PaymentsModule,
   ],
   controllers: [],
   providers: [

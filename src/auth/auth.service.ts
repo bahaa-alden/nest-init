@@ -11,14 +11,14 @@ import {
   FindOptionsWhereProperty,
   Repository,
 } from 'typeorm';
-import { ROLE } from '../common/enums';
+import { ROLE } from '../common';
 import { Role } from '../models/roles';
 import { User, UserImage } from '../models/users';
 import { JwtTokenService } from '../shared/jwt';
 import { SignUpDto, LoginDto, PasswordChangeDto } from './dtos';
 import { jwtPayload } from './interfaces';
 import { Admin } from '../models/admins';
-import { defaultImage } from '../common/constants';
+import { defaultImage } from '../common';
 
 @Injectable()
 export class AuthService {
@@ -38,7 +38,6 @@ export class AuthService {
     const user = this.usersRepository.create({ ...dto, role, images: [] });
     user.images.push(this.userImageRepository.create(defaultImage));
     await this.usersRepository.save(user);
-    console.log(user);
     const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
     return {
       token,
@@ -88,7 +87,7 @@ export class AuthService {
       throw new UnauthorizedException('كلمة المرور الحالية غير صحيحة');
     }
     user.password = dto.password;
-    await user.save();
+    await this.usersRepository.save(user);
     const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
 
     return { token, user };

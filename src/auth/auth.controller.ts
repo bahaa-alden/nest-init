@@ -15,8 +15,8 @@ import {
   ApiOkResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Public, GetUser, CheckAbilities, Roles } from '../common/decorators';
-import { Action, Entities, GROUPS, ROLE } from '../common/enums';
+import { Public, GetUser, CheckAbilities, Roles } from '../common';
+import { Action, Entities, GROUPS, ROLE } from '../common';
 import { AuthService } from './auth.service';
 import {
   SignUpDto,
@@ -24,7 +24,7 @@ import {
   LoginDto,
   PasswordChangeDto,
 } from './dtos';
-import { CaslAbilitiesGuard, RolesGuard } from '../common/guards';
+import { CaslAbilitiesGuard, RolesGuard } from '../common';
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })

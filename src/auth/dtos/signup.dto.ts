@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Length, IsNotEmpty, IsEmail } from 'class-validator';
-import { IsUnique } from '../../common/decorators';
-import { Entities } from '../../common/enums';
+import { IsUnique } from '../../common';
+import { Entities } from '../../common';
 
 export class SignUpDto {
   @ApiProperty()

@@ -6,15 +6,20 @@ import {
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
-import { HttpExceptionFilter } from './common/exceptions';
+import { HttpExceptionFilter } from './common';
 import { SwaggerModule } from '@nestjs/swagger';
-import { createDocument, errorsFormat } from './common/helpers';
+import { createDocument, errorsFormat } from './common';
 import { useContainer } from 'class-validator';
 import { join } from 'path';
+import { ConfigService, ConfigType } from '@nestjs/config';
+import { AppConfig } from './config/app';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const httpAdapter = app.get(HttpAdapterHost);
+  const appConfig: ConfigType<typeof AppConfig> = app
+    .get(ConfigService)
+    .get('application');
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -22,7 +27,7 @@ async function bootstrap() {
     extensions: ['jpg'],
     index: false,
   });
-  app.useGlobalFilters(new HttpExceptionFilter(httpAdapter));
+  app.useGlobalFilters(new HttpExceptionFilter(httpAdapter, appConfig));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
