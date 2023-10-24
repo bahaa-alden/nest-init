@@ -13,24 +13,10 @@ import {
 } from 'typeorm';
 import { GROUPS } from '../enums';
 import * as argon from 'argon2';
-import { EntityBase } from './entity-base.entity';
+import { GlobalEntity } from './global-entity.entity';
 
 @Entity()
-export class BasePerson extends BaseEntity {
-  @Expose({
-    groups: [
-      GROUPS.ALL_USERS,
-      GROUPS.USER,
-      GROUPS.ALL_ADMINS,
-      GROUPS.ADMIN,
-      GROUPS.ALL_EMPLOYEES,
-      GROUPS.EMPLOYEE,
-    ],
-  })
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class BasePerson extends GlobalEntity {
   @Expose({
     groups: [
       GROUPS.ALL_USERS,
@@ -74,24 +60,6 @@ export class BasePerson extends BaseEntity {
   @Exclude()
   @Column({ nullable: true })
   passwordResetExpires: Date;
-
-  @Expose({
-    groups: [GROUPS.USER, GROUPS.ADMIN, GROUPS.EMPLOYEE],
-  })
-  @ApiProperty()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Expose({
-    groups: [GROUPS.USER, GROUPS.ADMIN, GROUPS.EMPLOYEE],
-  })
-  @ApiProperty()
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Exclude()
-  @DeleteDateColumn()
-  deletedAt: Date;
 
   @BeforeInsert()
   @BeforeUpdate()

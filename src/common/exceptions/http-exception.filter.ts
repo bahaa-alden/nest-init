@@ -13,6 +13,8 @@ import {
 } from '@nestjs/common';
 import { AbstractHttpAdapter, HttpAdapterHost } from '@nestjs/core';
 import { Response } from 'express';
+import { AppConfig } from '../../config/app';
+import { ConfigType } from '@nestjs/config';
 
 const handelPassportError = () =>
   new UnauthorizedException({ message: 'الرجاء تسجيل الدخول' });
@@ -23,7 +25,10 @@ const exist = (table: string) => {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+  constructor(
+    private readonly httpAdapterHost: HttpAdapterHost,
+    private readonly appConfig: ConfigType<typeof AppConfig>,
+  ) {}
 
   catch(exception: any, host: ArgumentsHost) {
     const { httpAdapter } = this.httpAdapterHost;
@@ -52,9 +57,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     })();
 
-    const Env = process.env.ENV;
-
-    if (Env === 'production') {
+    if (this.appConfig.env === 'production') {
       if (status === 500) console.log(exception);
       const rep = {
         type: error.errors ? 'form' : 'default',

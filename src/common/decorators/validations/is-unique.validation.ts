@@ -27,7 +27,13 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
       })
       .then((entity) => {
         if (entity)
-          throw new BadRequestException(args.constraints[0] + ' already exist');
+          throw new BadRequestException(
+            `${args.constraints[0]} already exist ${
+              entity.deletedAt
+                ? `but deleted at ${entity.deletedAt} make a recover request`
+                : ''
+            }`,
+          );
         return true;
       });
   }

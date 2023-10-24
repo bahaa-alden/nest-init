@@ -8,13 +8,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { GlobalEntity } from './global-entity.entity';
 
 @Entity()
-export class BaseImage {
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id?: string;
-
+export class BaseImage extends GlobalEntity {
   @Exclude()
   @Column()
   publicId: string;
@@ -34,16 +31,4 @@ export class BaseImage {
   @ApiProperty()
   @Column()
   webUrl: string;
-
-  @Exclude()
-  @CreateDateColumn()
-  createdAt?: Date;
-
-  @Exclude()
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Exclude()
-  @DeleteDateColumn()
-  deletedAt: Date;
 }
