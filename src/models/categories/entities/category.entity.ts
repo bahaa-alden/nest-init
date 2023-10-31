@@ -1,12 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { GlobalEntity } from '../../../common';
+import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'categories' })
-export class Category extends BaseEntity {
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Category extends GlobalEntity {
   @ApiProperty()
   @Column({ unique: true })
   name: string;

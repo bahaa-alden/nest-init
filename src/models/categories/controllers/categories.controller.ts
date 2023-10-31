@@ -9,12 +9,12 @@ import {
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
-import { CategoriesService } from './categories.service';
-import { CreateCategoryDto, UpdateCategoryDto } from './dtos';
+import { CategoriesService } from '../services/categories.service';
+import { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import { ApiTags } from '@nestjs/swagger';
-import { CaslAbilitiesGuard } from '../../common/guards';
-import { CheckAbilities } from '../../common/decorators';
-import { Action, Entities } from '../../common/enums';
+import { CaslAbilitiesGuard } from '../../../common';
+import { CheckAbilities } from '../../../common';
+import { Action, Entities } from '../../../common';
 
 @ApiTags('Categories')
 @UseGuards(CaslAbilitiesGuard)
