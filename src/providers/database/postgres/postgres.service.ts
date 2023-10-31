@@ -1,21 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { TypeOrmOptionsFactory, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { ConfigType, ConfigService } from '@nestjs/config';
-import postgresConfig from '../../../config/database/postgres';
+import { ConfigType } from '@nestjs/config';
+import PostgresConfig from '../../../config/database/postgres';
+import { AppConfig } from '../../../config/app';
 
 @Injectable()
 export class PostgresService implements TypeOrmOptionsFactory {
   constructor(
-    @Inject(postgresConfig.KEY)
-    private readonly pgConfig: ConfigType<typeof postgresConfig>,
-    private readonly configService: ConfigService,
+    @Inject(PostgresConfig.KEY)
+    private readonly postgresConfig: ConfigType<typeof PostgresConfig>,
+    @Inject(AppConfig.KEY)
+    private readonly appConfig: ConfigType<typeof AppConfig>,
   ) {}
   createTypeOrmOptions(): TypeOrmModuleOptions {
-    if (this.configService.get('ENV') === 'production') {
+    if (this.appConfig.env === 'production') {
       return {
         type: 'postgres',
-        url: this.pgConfig.url,
-        ssl: true,
+        url: this.postgresConfig.url,
         entities: [__dirname + '/../../../models/**/entities/*.entity.{js,ts}'],
         synchronize: true,
       };
@@ -23,11 +24,11 @@ export class PostgresService implements TypeOrmOptionsFactory {
 
     return {
       type: 'postgres',
-      host: this.pgConfig.host,
-      port: this.pgConfig.port,
-      password: this.pgConfig.password,
-      database: this.pgConfig.database,
-      username: this.pgConfig.username,
+      host: this.postgresConfig.host,
+      port: this.postgresConfig.port,
+      password: this.postgresConfig.password,
+      database: this.postgresConfig.database,
+      username: this.postgresConfig.username,
       entities: [__dirname + '/../../../models/**/entities/*.entity.{js,ts}'],
       synchronize: true,
     };

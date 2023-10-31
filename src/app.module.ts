@@ -20,6 +20,7 @@ import { EmployeesModule } from './models/employees/employees.module';
 import { StoresModule } from './models/stores/stores.module';
 import { CategoriesModule } from './models/categories/categories.module';
 import { ProductsModule } from './models/products/products.module';
+import { JwtTokenModule } from './shared/jwt';
 // import { PaymentsModule } from './models/payments/payments.module';
 
 @Module({
@@ -39,6 +40,11 @@ import { ProductsModule } from './models/products/products.module';
       }),
       // load: [postgresConfig],
     }),
+    DatabaseModule,
+    CaslModule,
+    CloudinaryModule,
+    ImageCleanupModule,
+    JwtTokenModule,
     AuthModule,
     UsersModule,
     AdminsModule,
@@ -50,10 +56,6 @@ import { ProductsModule } from './models/products/products.module';
     RolesModule,
     PermissionsModule,
     ImagesModule,
-    DatabaseModule,
-    CaslModule,
-    CloudinaryModule,
-    ImageCleanupModule,
     // PaymentsModule,
   ],
   controllers: [],

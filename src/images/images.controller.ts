@@ -1,4 +1,4 @@
-import { CloudinaryService } from './../shared/cloudinary/cloudinary.service';
+import { CloudinaryService } from './../shared/cloudinary';
 import {
   Body,
   Controller,
@@ -22,9 +22,9 @@ import {
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ImagesService } from './images.service';
-import { SharpPipe } from '../common/pipes';
-import { checkIfExist } from '../common/helpers';
-import { Public } from '../common/decorators';
+import { SharpPipe } from '../common';
+import { checkIfExist } from '../common';
+import { Public } from '../common';
 
 @ApiTags('images')
 @ApiBearerAuth('token')
