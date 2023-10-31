@@ -14,13 +14,10 @@ import {
 import { City } from '../../cities';
 import { Exclude, Transform } from 'class-transformer';
 import { Employee } from '../../employees/entities/employee.entity';
+import { GlobalEntity } from '../../../common';
 
 @Entity({ name: 'stores' })
-export class Store extends BaseEntity {
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Store extends GlobalEntity {
   @ApiProperty()
   @Column()
   name: string;
@@ -34,7 +31,7 @@ export class Store extends BaseEntity {
     return { name: value.name };
   })
   @ManyToOne(() => City, (city) => city.stores, { eager: true })
-  @JoinColumn({ name: 'cityId' })
+  @JoinColumn({ name: 'cityId', referencedColumnName: 'id' })
   city: City;
 
   @Exclude()
@@ -43,16 +40,4 @@ export class Store extends BaseEntity {
 
   @OneToMany(() => Employee, (employee) => employee.store)
   employees: Employee[];
-
-  @ApiProperty()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @ApiProperty()
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Exclude()
-  @DeleteDateColumn()
-  deletedAt: Date;
 }

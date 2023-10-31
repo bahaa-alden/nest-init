@@ -11,9 +11,9 @@ import {
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
-import { StoresService } from './stores.service';
-import { CreateStoreDto } from './dtos';
-import { UpdateStoreDto } from './dtos';
+import { StoresService } from '../services/stores.service';
+import { CreateStoreDto } from '../dtos';
+import { UpdateStoreDto } from '../dtos';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -21,10 +21,10 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CaslAbilitiesGuard } from '../../common/guards';
-import { CheckAbilities } from '../../common/decorators';
-import { Action, Entities } from '../../common/enums';
-import { Store } from './entities/store.entity';
+import { CaslAbilitiesGuard } from '../../../common';
+import { CheckAbilities } from '../../../common';
+import { Action, Entities } from '../../../common';
+import { Store } from '../entities/store.entity';
 
 @ApiTags('Stores')
 @ApiBearerAuth('token')
