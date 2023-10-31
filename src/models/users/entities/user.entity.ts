@@ -6,9 +6,9 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { BasePerson } from '../../../common/entities';
+import { BasePerson } from '../../../common';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { GROUPS } from '../../../common/enums';
+import { GROUPS } from '../../../common';
 import { Role } from '../../roles';
 import { UserImage } from './user-image.entity';
 import * as crypto from 'crypto';
@@ -21,6 +21,7 @@ export class User extends BasePerson {
   @JoinColumn({ name: 'roleId' })
   role: Role;
 
+  @Exclude()
   @Column()
   roleId: string;
 

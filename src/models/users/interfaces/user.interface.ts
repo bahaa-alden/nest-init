@@ -1,4 +1,4 @@
-import { ROLE } from '../../../common/enums';
+import { ROLE } from '../../../common';
 
 export type IUser = {
   name: string;

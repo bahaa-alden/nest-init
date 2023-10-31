@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
-// import { IsEmailUnique } from '../../../common/decorators/validations/is-email-unique.validation';
+import { IsUnique } from '../../../common';
+import { Entities } from '../../../common';
+import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -11,7 +13,8 @@ export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty({ message: 'please provide email' })
   @IsEmail({}, { message: 'please provide valid email' })
-  // @IsEmailUnique({ message: 'Email already taken' })
+  @Transform(({ value }) => value.toLowerCase())
+  @IsUnique(Entities.User)
   readonly email: string;
 
   @ApiProperty()

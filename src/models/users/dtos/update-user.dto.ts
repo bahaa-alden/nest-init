@@ -6,8 +6,9 @@ import {
   IsNotEmpty,
   IsEmail,
 } from 'class-validator';
-import { IsUnique } from '../../../common/decorators';
-import { Entities } from '../../../common/enums';
+import { IsUnique } from '../../../common';
+import { Entities } from '../../../common';
+import { Transform } from 'class-transformer';
 
 export class UpdateUserDto {
   @IsString()
@@ -17,10 +18,11 @@ export class UpdateUserDto {
   readonly name?: string;
 
   @ApiProperty({ required: false })
-  @IsUnique(Entities.User, { message: 'Email already taken' })
   @IsNotEmpty()
   @IsOptional()
   @IsEmail({}, { message: 'Please provide a valid email' })
+  @Transform(({ value }) => value.toLowerCase())
+  @IsUnique(Entities.User, { message: 'Email already taken' })
   readonly email?: string;
 
   @ApiProperty({ required: false })

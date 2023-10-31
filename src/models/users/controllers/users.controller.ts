@@ -17,18 +17,16 @@ import {
   ApiTags,
   ApiBearerAuth,
   ApiOkResponse,
-  ApiParam,
   ApiOperation,
 } from '@nestjs/swagger';
-import { Roles, CheckAbilities } from '../../common/decorators';
-import { GetUser } from '../../common/decorators';
-import { GROUPS, ROLE, Entities, Action } from '../../common/enums';
-import { CaslAbilitiesGuard, RolesGuard } from '../../common/guards';
-import { LoggingInterceptor } from '../../common/interceptors';
-import { UpdateUserDto } from './dtos';
-import { User } from './entities';
-import { UsersService } from './users.service';
-import { Role } from '../roles';
+import { Roles, CheckAbilities } from '../../../common';
+import { GetUser } from '../../../common';
+import { GROUPS, ROLE, Entities, Action } from '../../../common';
+import { CaslAbilitiesGuard, RolesGuard } from '../../../common';
+import { LoggingInterceptor } from '../../../common';
+import { UpdateUserDto } from '../dtos';
+import { User } from '../entities/user.entity';
+import { UsersService } from '../services/users.service';
 
 @ApiTags('users')
 @ApiBearerAuth('token')
@@ -72,7 +70,7 @@ export class UsersController {
   @SerializeOptions({ groups: [GROUPS.USER] })
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.findById(id);
+    return this.usersService.findOne(id);
   }
 
   @SerializeOptions({ groups: [GROUPS.USER] })
