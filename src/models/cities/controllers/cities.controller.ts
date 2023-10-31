@@ -11,9 +11,9 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { CitiesService } from './cities.service';
-import { CreateCityDto } from './dtos';
-import { UpdateCityDto } from './dtos';
+import { CitiesService } from '../services/cities.service';
+import { CreateCityDto } from '../dtos';
+import { UpdateCityDto } from '../dtos';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -21,10 +21,10 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CaslAbilitiesGuard } from '../../common/guards';
-import { CheckAbilities } from '../../common/decorators';
-import { Action, Entities } from '../../common/enums';
-import { City } from './entities/city.entity';
+import { CaslAbilitiesGuard } from '../../../common';
+import { CheckAbilities } from '../../../common';
+import { Action, Entities } from '../../../common';
+import { City } from '../entities/city.entity';
 
 @ApiTags('cities')
 @ApiBearerAuth('token')
