@@ -1,22 +1,13 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { AdminsController } from './admins.controller';
-import { CaslModule } from '../../shared/casl';
-import { AdminsService } from './admins.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Admin } from './entities/admin.entity';
-import { Role } from '../roles';
-import { JwtTokenModule } from '../../shared/jwt';
-import { CloudinaryModule } from '../../shared/cloudinary';
-import { AdminImage } from './entities/admin-image.entity';
+import { Module } from '@nestjs/common';
+import { AdminsController } from './controllers';
+import { AdminsService } from './services';
+import { AdminRepository } from './repositories/admin.repository';
+import { AdminImagesRepository } from './repositories/admin-images.repository';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Role, Admin, AdminImage]),
-    CloudinaryModule,
-    CaslModule,
-    JwtTokenModule,
-  ],
+  imports: [],
   controllers: [AdminsController],
-  providers: [AdminsService],
+  providers: [AdminsService, AdminRepository, AdminImagesRepository],
+  exports: [AdminImagesRepository, AdminRepository],
 })
 export class AdminsModule {}

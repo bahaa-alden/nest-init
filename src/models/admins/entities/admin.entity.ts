@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { BasePerson } from '../../../common/entities';
+import { BasePerson } from '../../../common';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { GROUPS } from '../../../common/enums';
+import { GROUPS } from '../../../common';
 import { Role } from '../../roles';
 import { AdminImage } from './admin-image.entity';
 

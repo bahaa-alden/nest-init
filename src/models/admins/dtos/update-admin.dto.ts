@@ -6,8 +6,9 @@ import {
   IsNotEmpty,
   IsEmail,
 } from 'class-validator';
-import { IsUnique } from '../../../common/decorators';
-import { Entities } from '../../../common/enums';
+import { IsUnique } from '../../../common';
+import { Entities } from '../../../common';
+import { Transform } from 'class-transformer';
 
 export class UpdateAdminDto {
   @IsString()
@@ -20,6 +21,7 @@ export class UpdateAdminDto {
   @IsNotEmpty()
   @IsOptional()
   @IsEmail({}, { message: 'Please provide a valid email' })
+  @Transform(({ value }) => value.toLowerCase())
   @IsUnique(Entities.Admin)
   readonly email?: string;
 

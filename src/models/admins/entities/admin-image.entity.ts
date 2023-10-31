@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Admin } from './admin.entity';
-import { BaseImage } from '../../../common/entities';
+import { BaseImage } from '../../../common';
 import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'admin_images' })
