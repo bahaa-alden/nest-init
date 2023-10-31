@@ -1,5 +1,12 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { JwtTokenService } from './jwt-token.service';
+import { ConfigModule } from '@nestjs/config';
+import { JwtConfig } from '../../config/app';
 
-@Module({ providers: [JwtTokenService], exports: [JwtTokenService] })
+@Global()
+@Module({
+  imports: [ConfigModule.forFeature(JwtConfig)],
+  providers: [JwtTokenService],
+  exports: [JwtTokenService],
+})
 export class JwtTokenModule {}

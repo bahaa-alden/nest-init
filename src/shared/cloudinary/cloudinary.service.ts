@@ -1,15 +1,19 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import * as cloudinary from 'cloudinary';
-import { ConfigService } from '@nestjs/config';
-import { CheckUrl, IImage } from '../../common/types';
+import { ConfigType } from '@nestjs/config';
+import { CheckUrl, IImage } from '../../common';
+import { CloudinaryConfig } from '../../config/app';
 
 @Injectable()
 export class CloudinaryService {
-  constructor(private configService: ConfigService) {
+  constructor(
+    @Inject(CloudinaryConfig.KEY)
+    private readonly cloudinaryConfig: ConfigType<typeof CloudinaryConfig>,
+  ) {
     cloudinary.v2.config({
-      cloud_name: this.configService.get('CLOUDINARY_NAME'),
-      api_key: this.configService.get('CLOUDINARY_API_KEY'),
-      api_secret: this.configService.get('CLOUDINARY_API_SECRET'),
+      cloud_name: this.cloudinaryConfig.cloud_name,
+      api_key: this.cloudinaryConfig.api_key,
+      api_secret: this.cloudinaryConfig.api_secret,
     });
   }
   async uploadImage(path: string): Promise<cloudinary.UploadApiResponse> {
