@@ -7,9 +7,9 @@ import {
   IsOptional,
   IsUUID,
 } from 'class-validator';
-import { IsUnique } from '../../../common/decorators';
-import { Entities } from '../../../common/enums';
-// import { IsEmailUnique } from '../../../common/decorators/validations';
+import { IsUnique } from '../../../common';
+import { Entities } from '../../../common';
+import { Transform } from 'class-transformer';
 
 export class CreateEmployeeDto {
   @ApiProperty()
@@ -20,6 +20,7 @@ export class CreateEmployeeDto {
   @ApiProperty()
   @IsNotEmpty({ message: 'please provide email' })
   @IsEmail({}, { message: 'please provide valid email' })
+  @Transform(({ value }) => value.toLowerCase())
   @IsUnique(Entities.Employee)
   readonly email: string;
 

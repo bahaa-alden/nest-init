@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { BasePerson } from '../../../common/entities';
+import { BasePerson } from '../../../common';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { GROUPS } from '../../../common/enums';
+import { GROUPS } from '../../../common';
 import { Role } from '../../roles';
 import { EmployeeImage } from './employee-image.entity';
 import { Store } from '../../stores';
@@ -13,6 +13,9 @@ export class Employee extends BasePerson {
   address: string;
 
   @Expose({ groups: [GROUPS.EMPLOYEE] })
+  @Transform(({ value }) => {
+    return { id: value.id, name: value.name };
+  })
   @ManyToOne(() => Store, (store) => store.employees)
   @JoinColumn({ name: 'storeId' })
   store: Store;

@@ -4,7 +4,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Employee } from './entities/employee.entity';
+import { Employee } from '../entities/employee.entity';
 import {
   Body,
   Controller,
@@ -19,12 +19,12 @@ import {
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
-import { EmployeesService } from './employees.service';
-import { LoginResponseDto, LoginDto } from '../../auth';
-import { Public, CheckAbilities } from '../../common/decorators';
-import { GROUPS, Entities, Action } from '../../common/enums';
-import { CaslAbilitiesGuard, JwtGuard } from '../../common/guards';
-import { CreateEmployeeDto, UpdateEmployeeDto } from './dtos';
+import { EmployeesService } from '../services/employees.service';
+import { LoginResponseDto, LoginDto } from '../../../auth';
+import { Public, CheckAbilities } from '../../../common';
+import { GROUPS, Entities, Action } from '../../../common';
+import { CaslAbilitiesGuard, JwtGuard } from '../../../common';
+import { CreateEmployeeDto, UpdateEmployeeDto } from '../dtos';
 
 @ApiTags('Employees')
 @Controller({ path: 'employees', version: '1' })

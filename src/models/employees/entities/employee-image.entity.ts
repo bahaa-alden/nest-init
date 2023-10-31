@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { BaseImage } from '../../../common/entities';
+import { BaseImage } from '../../../common';
 import { Employee } from './employee.entity';
 import { Exclude } from 'class-transformer';
 
