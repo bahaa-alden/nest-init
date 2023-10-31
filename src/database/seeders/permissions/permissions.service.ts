@@ -4,7 +4,6 @@ import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { permissions } from './data';
 import { Role } from '../../../models/roles';
-import { roles } from '../roles/data';
 
 /**
  * Service dealing with Permission based operations.

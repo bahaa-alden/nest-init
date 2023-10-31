@@ -1,10 +1,11 @@
+import { AdminImagesRepository } from './../../../models/admins/repositories/admin-images.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { superadmin } from './data';
-import { ROLE } from '../../../common/enums';
+import { ROLE, defaultImage } from '../../../common';
 import { Role } from '../../../models/roles';
-import { Admin } from '../../../models/admins';
+import { Admin, AdminImage } from '../../../models/admins';
 
 @Injectable()
 
@@ -24,6 +25,8 @@ export class SuperadminService {
   constructor(
     @InjectRepository(Admin)
     private readonly adminRepository: Repository<Admin>,
+    @InjectRepository(AdminImage)
+    private adminImagesRepository: Repository<AdminImage>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
   ) {}
@@ -51,11 +54,13 @@ export class SuperadminService {
           name: superadmin.name,
           email: superadmin.email,
           password: superadmin.password,
+          images: [],
           role,
         });
+        admin.images.push(this.adminImagesRepository.create(defaultImage));
         return Promise.resolve(
           // or create(superadmin).then(() => { ... });
-          await this.adminRepository.insert(admin),
+          await this.adminRepository.save(admin),
         );
       })
       .catch((error) => Promise.reject(error));
