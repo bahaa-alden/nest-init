@@ -21,13 +21,13 @@ import {
   ApiParam,
   ApiOperation,
 } from '@nestjs/swagger';
-import { Action } from '../../common/enums';
-import { CheckAbilities } from '../../common/decorators';
-import { Entities, GROUPS } from '../../common/enums';
-import { CaslAbilitiesGuard } from '../../common/guards';
-import { CreateRoleDto, UpdateRoleDto } from './dtos';
-import { Role } from './entities/role.entity';
-import { RolesService } from './roles.service';
+import { Action } from '../../../common';
+import { CheckAbilities } from '../../../common';
+import { Entities, GROUPS } from '../../../common';
+import { CaslAbilitiesGuard } from '../../../common';
+import { CreateRoleDto, UpdateRoleDto } from '../dtos';
+import { Role } from '../entities/role.entity';
+import { RolesService } from '../services/roles.service';
 
 @ApiBearerAuth('token')
 @ApiTags('Roles')
@@ -58,7 +58,7 @@ export class RolesController {
   @ApiParam({ name: 'id' })
   @Get(':id')
   async findById(@Param('id') id: string): Promise<Role | undefined> {
-    return this.rolesService.findById(id);
+    return this.rolesService.findOne(id);
   }
 
   @ApiOkResponse({ type: Role })
@@ -69,19 +69,6 @@ export class RolesController {
     @Body() dto: UpdateRoleDto,
   ): Promise<Role | undefined> {
     return this.rolesService.update(id, dto);
-  }
-
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    return this.rolesService.delete(id);
-  }
-
-  @ApiOperation({ summary: 'recover deleted role' })
-  @HttpCode(HttpStatus.OK)
-  @Post(':id/recover')
-  async recover(@Param('id', ParseUUIDPipe) id: string): Promise<Role> {
-    return this.rolesService.recover(id);
   }
 
   @ApiOperation({ summary: 'add permissions to the role' })
@@ -104,5 +91,21 @@ export class RolesController {
     @Body() dto: UpdateRoleDto,
   ): Promise<Role | undefined> {
     return this.rolesService.deletePermissions(id, dto);
+  }
+
+  @ApiOperation({ summary: 'recover deleted role' })
+  @SerializeOptions({
+    groups: [GROUPS.ROLE],
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/recover')
+  async recover(@Param('id', ParseUUIDPipe) id: string): Promise<Role> {
+    return this.rolesService.recover(id);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.rolesService.delete(id);
   }
 }

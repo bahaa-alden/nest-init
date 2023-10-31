@@ -12,19 +12,15 @@ import {
   DeleteDateColumn,
   BaseEntity,
 } from 'typeorm';
-import { GROUPS, ROLE } from '../../../common/enums';
+import { GROUPS, ROLE } from '../../../common';
 import { Permission } from '../../permissions';
 import { User } from '../../users';
 import { Admin } from '../../admins';
-import { Employee } from '../../employees/entities/employee.entity';
+import { Employee } from '../../employees';
+import { GlobalEntity } from '../../../common';
 
 @Entity({ name: 'roles' })
-export class Role extends BaseEntity {
-  @Expose({ groups: [GROUPS.ROLE, GROUPS.ALL_ROLES] })
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Role extends GlobalEntity {
   @Expose({ groups: [GROUPS.ROLE, GROUPS.ALL_ROLES] })
   @ApiProperty()
   @Column({ unique: true })
@@ -46,26 +42,15 @@ export class Role extends BaseEntity {
   })
   permissions: Permission[];
 
+  @Exclude()
   @OneToMany(() => User, (user) => user.role, { cascade: true })
   users: User[];
 
+  @Exclude()
   @OneToMany(() => Admin, (admin) => admin.role, { cascade: true })
   admins: Admin[];
 
+  @Exclude()
   @OneToMany(() => Employee, (employee) => employee.role, { cascade: true })
   employees: Employee[];
-
-  @Expose({ groups: [GROUPS.ROLE, GROUPS.ALL_ROLES] })
-  @ApiProperty()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Expose({ groups: [GROUPS.ROLE, GROUPS.ALL_ROLES] })
-  @ApiProperty()
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Exclude()
-  @DeleteDateColumn()
-  deletedAt: Date;
 }

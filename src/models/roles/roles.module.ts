@@ -1,14 +1,14 @@
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CaslModule } from '../../shared/casl';
-import { Permission } from '../permissions';
-import { Module, forwardRef } from '@nestjs/common';
-import { RolesController } from './roles.controller';
-import { RolesService } from './roles.service';
-import { Role } from './entities/role.entity';
+import { Global, Module } from '@nestjs/common';
+import { RolesController } from './controllers';
+import { RolesService } from './services';
+import { RoleRepository } from './repositories/roles.repository';
+import { PermissionsModule } from '../permissions/permissions.module';
 
+@Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([Role, Permission]), CaslModule],
+  imports: [PermissionsModule],
   controllers: [RolesController],
-  providers: [RolesService],
+  providers: [RolesService, RoleRepository],
+  exports: [RoleRepository],
 })
 export class RolesModule {}
