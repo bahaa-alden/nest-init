@@ -11,20 +11,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IPermission } from '../interfaces';
-import { Action, Entities } from '../../../common/enums';
+import { Action, Entities } from '../../../common';
 import { Role } from '../../roles';
 import { ApiProperty } from '@nestjs/swagger';
-import { GROUPS } from '../../../common/enums';
+import { GROUPS } from '../../../common';
 import { Exclude, Expose } from 'class-transformer';
+import { GlobalEntity } from '../../../common';
 
 @Entity({ name: 'permissions' })
 @Unique('un_permission', ['action', 'subject'])
-export class Permission extends BaseEntity implements IPermission {
-  @Expose({ groups: [GROUPS.PERMISSION, GROUPS.ALL_PERMISSIONS, GROUPS.ROLE] })
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Permission extends GlobalEntity implements IPermission {
   @Expose({ groups: [GROUPS.PERMISSION, GROUPS.ALL_PERMISSIONS, GROUPS.ROLE] })
   @ApiProperty()
   @Column({ enum: Action })
@@ -40,18 +36,4 @@ export class Permission extends BaseEntity implements IPermission {
     onDelete: 'CASCADE',
   })
   roles: Role[];
-
-  @Expose({ groups: [GROUPS.PERMISSION] })
-  @ApiProperty()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Expose({ groups: [GROUPS.PERMISSION] })
-  @ApiProperty()
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Exclude()
-  @DeleteDateColumn()
-  deletedAt: Date;
 }

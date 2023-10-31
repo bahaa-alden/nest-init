@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { PermissionsService } from './permissions.service';
-import { PermissionsController } from './permissions.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Permission } from './entities/permission.entity';
+import { PermissionsService } from './services';
+import { PermissionsController } from './controllers';
 import { CaslAbilityFactory } from '../../shared/casl';
+import { PermissionRepository } from './repositories/permission.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Permission])],
+  imports: [],
   controllers: [PermissionsController],
-  providers: [PermissionsService, CaslAbilityFactory],
+  providers: [PermissionsService, CaslAbilityFactory, PermissionRepository],
+  exports: [PermissionsService],
 })
 export class PermissionsModule {}

@@ -1,5 +1,5 @@
 import { IsArray, IsEnum, NotEquals } from 'class-validator';
-import { Action, Entities } from '../../../common/enums';
+import { Action, Entities } from '../../../common';
 import { IPermission } from '../interfaces';
 import { ApiProperty } from '@nestjs/swagger';
 
