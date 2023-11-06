@@ -1,4 +1,3 @@
-import { AdminImagesRepository } from './../../../models/admins/repositories/admin-images.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

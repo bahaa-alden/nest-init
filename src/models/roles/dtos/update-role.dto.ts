@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IsArray, IsOptional, IsUUID } from 'class-validator';
-import { Permission } from 'src/models/permissions';
+import { Permission } from './../../permissions';
 
 export class UpdateRoleDto {
   @IsArray()

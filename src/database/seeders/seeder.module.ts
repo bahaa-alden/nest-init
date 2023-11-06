@@ -6,8 +6,6 @@ import { ConfigModule } from '@nestjs/config';
 import { SuperadminModule } from './superadmin';
 import Joi = require('@hapi/joi');
 import { RolesSeederModule } from './roles';
-import { JwtTokenModule } from 'src/shared/jwt';
-import { CloudinaryModule } from 'src/shared/cloudinary';
 
 @Module({
   imports: [

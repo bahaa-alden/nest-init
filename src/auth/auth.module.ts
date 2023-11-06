@@ -5,14 +5,14 @@ import { Module } from '@nestjs/common';
 import { LoggerMiddleware } from '../common';
 import { Role } from '../models/roles';
 import { User, UserImage } from '../models/users';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthController } from './controllers/auth.controller';
+import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategy';
 import { Admin } from '../models/admins';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Admin, Role, UserImage]),
+    TypeOrmModule.forFeature([User, Admin, UserImage]),
 
     PassportModule.register({}),
   ],

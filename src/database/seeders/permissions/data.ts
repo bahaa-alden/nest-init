@@ -8,6 +8,26 @@ export const permissions: pp[] = [
     subject: Entities.User,
     roles: [ROLE.ADMIN],
   },
+  {
+    action: Action.Read,
+    subject: Entities.Category,
+    roles: [ROLE.USER, ROLE.EMPLOYEE],
+  },
+  {
+    action: Action.Read,
+    subject: Entities.City,
+    roles: [ROLE.USER, ROLE.EMPLOYEE],
+  },
+  {
+    action: Action.Read,
+    subject: Entities.Store,
+    roles: [ROLE.USER, ROLE.EMPLOYEE],
+  },
+  {
+    action: Action.Read,
+    subject: Entities.User,
+    roles: [ROLE.USER, ROLE.EMPLOYEE],
+  },
   { action: Action.Manage, subject: Entities.Category, roles: [ROLE.ADMIN] },
   { action: Action.Manage, subject: Entities.Chat, roles: [ROLE.USER] },
   { action: Action.Manage, subject: Entities.City, roles: [ROLE.ADMIN] },

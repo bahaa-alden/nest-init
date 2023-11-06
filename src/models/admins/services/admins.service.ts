@@ -3,21 +3,14 @@ import {
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Repository,
-  Equal,
-  FindOneOptions,
-  FindOptionsWhere,
-  Not,
-} from 'typeorm';
 import { LoginDto } from '../../../auth';
 import { ROLE } from '../../../common';
 import { JwtTokenService } from '../../../shared/jwt';
-import { Role, RoleRepository } from '../../roles';
+import { Role } from '../../roles';
 import { CreateAdminDto, UpdateAdminDto } from '../dtos';
 import { Admin } from '../entities/admin.entity';
-import { AdminRepository } from '../repositories/admin.repository';
+import { RoleRepository } from '../../../shared/repositories';
+import { AdminRepository } from '../../../shared/repositories';
 
 @Injectable()
 export class AdminsService {

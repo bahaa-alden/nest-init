@@ -22,6 +22,7 @@ export class CaslAbilitiesGuard implements CanActivate {
       ]) || [];
     const { user }: { user: User } = context.switchToHttp().getRequest();
     const ability = this.caslAbilityFactory.defineAbility(user);
+
     rules.forEach((rule) =>
       ForbiddenError.from(ability)
         .setMessage('You can not perform this action')

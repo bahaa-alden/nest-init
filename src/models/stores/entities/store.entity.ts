@@ -1,3 +1,4 @@
+import { Product } from './../../products';
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import {
   BaseEntity,
@@ -38,6 +39,9 @@ export class Store extends GlobalEntity {
   @Column()
   cityId: string;
 
-  @OneToMany(() => Employee, (employee) => employee.store)
+  @OneToMany(() => Product, (product) => product.store, { cascade: true })
+  products: Product[];
+
+  @OneToMany(() => Employee, (employee) => employee.store, { cascade: true })
   employees: Employee[];
 }

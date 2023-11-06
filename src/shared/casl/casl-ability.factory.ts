@@ -1,11 +1,6 @@
 import {
   AbilityBuilder,
-  AbilityTuple,
-  AnyAbility,
-  AnyMongoAbility,
   ExtractSubjectType,
-  MongoAbility,
-  PureAbility,
   createMongoAbility,
 } from '@casl/ability';
 import { Injectable } from '@nestjs/common';

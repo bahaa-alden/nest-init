@@ -1,14 +1,8 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { DataSource, Not, Repository, And, Equal } from 'typeorm';
-import { Role } from '../entities/role.entity';
-import { UpdateRoleDto, CreateRoleDto } from '../dtos';
-import { PermissionRepository } from '../../permissions/repositories/permission.repository';
+import { Injectable } from '@nestjs/common';
 import { ROLE } from '../../../common';
-import { Permission } from 'src/models/permissions';
+import { Permission } from '../../../models/permissions';
+import { Role, CreateRoleDto } from '../../../models/roles';
+import { Repository, DataSource, Not, And, Equal } from 'typeorm';
 
 @Injectable()
 export class RoleRepository extends Repository<Role> {
@@ -65,6 +59,15 @@ export class RoleRepository extends Repository<Role> {
       },
     });
     return role;
+  }
+
+  async findPermissionsByRoleName(roleName: string) {
+    const { permissions } = await this.createQueryBuilder('role')
+      .select(['permission.action', 'permission.subject', 'role.name'])
+      .leftJoin('role.permissions', 'permission')
+      .where('role.name = :roleName', { roleName })
+      .getOne();
+    return permissions;
   }
   async updateOne(role: Role, permissions: Permission[]) {
     role.permissions = permissions;

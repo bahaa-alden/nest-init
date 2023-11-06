@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { UserImage } from '../entities/user-image.entity';
 import { checkIfExist } from './../../../common';
-import { CloudinaryService } from '../../../shared/cloudinary/cloudinary.service';
+import { EmployeeImage } from './../../../models/employees';
+import { Repository, DataSource } from 'typeorm';
+import { CloudinaryService } from '../../cloudinary/cloudinary.service';
 
 @Injectable()
-export class UserImagesRepository extends Repository<UserImage> {
+export class EmployeeImagesRepository extends Repository<EmployeeImage> {
   constructor(
     private readonly dataSource: DataSource,
     private cloudinaryService: CloudinaryService,
   ) {
-    super(UserImage, dataSource.createEntityManager());
+    super(EmployeeImage, dataSource.createEntityManager());
   }
 
   async updatePhoto(url: string) {

@@ -1,18 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { defaultImage, ROLE } from './../../../common';
 import {
-  DataSource,
-  Equal,
-  FindOneOptions,
-  FindOptions,
-  FindOptionsWhere,
-  Not,
-  Repository,
-} from 'typeorm';
-import { Admin } from '../entities/admin.entity';
-import { CreateAdminDto, UpdateAdminDto } from '../dtos';
+  Admin,
+  CreateAdminDto,
+  UpdateAdminDto,
+} from './../../../models/admins';
+import { Role } from './../../../models/roles';
+import { Repository, DataSource, Equal, FindOneOptions } from 'typeorm';
 import { AdminImagesRepository } from './admin-images.repository';
-import { ROLE, defaultImage } from './../../../common';
-import { Role } from 'src/models/roles';
 
 @Injectable()
 export class AdminRepository extends Repository<Admin> {

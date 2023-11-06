@@ -14,14 +14,18 @@ import { RolesModule } from './models/roles/roles.module';
 import { UsersModule } from './models/users/users.module';
 import { DatabaseModule } from './providers/database';
 import { CaslModule } from './shared/casl';
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { CitiesModule } from './models/cities/cities.module';
 import { EmployeesModule } from './models/employees/employees.module';
 import { StoresModule } from './models/stores/stores.module';
 import { CategoriesModule } from './models/categories/categories.module';
 import { ProductsModule } from './models/products/products.module';
 import { JwtTokenModule } from './shared/jwt';
+import { RepositoriesModule } from './shared/repositories';
 // import { PaymentsModule } from './models/payments/payments.module';
+import { CouponsModule } from './models/coupons/coupons.module';
+import { CommentsModule } from './models/comments/comments.module';
+import { CouponsModule } from './models/coupons/coupons.module';
 
 @Module({
   imports: [
@@ -56,6 +60,9 @@ import { JwtTokenModule } from './shared/jwt';
     RolesModule,
     PermissionsModule,
     ImagesModule,
+    RepositoriesModule,
+    CouponsModule,
+    CommentsModule,
     // PaymentsModule,
   ],
   controllers: [],
@@ -66,6 +73,7 @@ import { JwtTokenModule } from './shared/jwt';
       provide: APP_GUARD,
       useClass: JwtGuard,
     },
+    Logger,
   ],
 })
 export class AppModule {}

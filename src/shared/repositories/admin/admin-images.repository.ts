@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { AdminImage } from '../entities/admin-image.entity';
-import { CloudinaryService } from '../../../shared/cloudinary/cloudinary.service';
-import { checkIfExist } from '../../../common';
+import { checkIfExist } from './../../../common';
+import { AdminImage } from './../../../models/admins';
+import { Repository, DataSource } from 'typeorm';
+import { CloudinaryService } from '../../cloudinary/cloudinary.service';
 
 @Injectable()
 export class AdminImagesRepository extends Repository<AdminImage> {

@@ -1,8 +1,9 @@
+import { Role } from './../../../models/roles';
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
-import { UpdateUserDto } from '../dtos';
 import { UserImagesRepository } from './user-images.repository';
+import { defaultImage } from './../../../common';
+import { CreateUserDto, UpdateUserDto, User } from '../../../models/users';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -13,6 +14,13 @@ export class UserRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
+  async createOne(dto: CreateUserDto, role: Role) {
+    const user = this.create({ ...dto, role, images: [] });
+    user.images.push(this.userImagesRepository.create(defaultImage));
+    await user.save();
+    return user;
+  }
+
   async findAll(withDeleted: boolean) {
     return this.find({ withDeleted, relations: { images: true, role: true } });
   }
@@ -20,7 +28,29 @@ export class UserRepository extends Repository<User> {
   async findById(id: string, withDeleted = false) {
     return await this.findOne({
       where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       withDeleted,
+      relations: { images: true, role: true },
+    });
+  }
+
+  async findByEmail(email: string) {
+    return await this.findOne({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       relations: { images: true, role: true },
     });
   }

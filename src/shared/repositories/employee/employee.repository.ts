@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Equal, FindOneOptions, Repository } from 'typeorm';
-import { Employee } from '../entities/employee.entity';
-import { CreateEmployeeDto, UpdateEmployeeDto } from '../dtos';
+import { defaultImage, ROLE } from './../../../common';
+import {
+  Employee,
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+} from './../../../models/employees';
+import { Role } from './../../../models/roles';
+import { Repository, DataSource, Equal, FindOneOptions } from 'typeorm';
 import { EmployeeImagesRepository } from './employee-images.repository';
-import { ROLE, defaultImage } from '../../../common';
-import { Role } from 'src/models/roles';
 
 @Injectable()
 export class EmployeeRepository extends Repository<Employee> {

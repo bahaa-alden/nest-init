@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { Category } from '../entities/category.entity';
-import { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
+import { Repository, DataSource } from 'typeorm';
+import {
+  Category,
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from './../../../models/categories';
 
 @Injectable()
 export class CategoryRepository extends Repository<Category> {

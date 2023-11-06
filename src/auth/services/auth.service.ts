@@ -1,43 +1,33 @@
+import { AdminRepository, UserRepository } from './../../shared/repositories';
 import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
   FindOptionsRelations,
   FindOptionsSelect,
   FindOptionsWhere,
-  FindOptionsWhereProperty,
-  Repository,
 } from 'typeorm';
-import { ROLE } from '../common';
-import { Role } from '../models/roles';
-import { User, UserImage } from '../models/users';
-import { JwtTokenService } from '../shared/jwt';
-import { SignUpDto, LoginDto, PasswordChangeDto } from './dtos';
-import { jwtPayload } from './interfaces';
-import { Admin } from '../models/admins';
-import { defaultImage } from '../common';
+import { ROLE } from '../../common';
+import { User } from '../../models/users';
+import { JwtTokenService } from '../../shared/jwt';
+import { SignUpDto, LoginDto, PasswordChangeDto } from '../dtos';
+import { jwtPayload } from '../interfaces';
+import { Admin } from './../../models/admins';
+import { RolesService } from './../../models/roles/services';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtTokenService: JwtTokenService,
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-    @InjectRepository(Admin)
-    private adminsRepository: Repository<Admin>,
-    @InjectRepository(Role)
-    private rolesRepository: Repository<Role>,
-    @InjectRepository(UserImage)
-    private userImageRepository: Repository<UserImage>,
+    private usersRepository: UserRepository,
+    private adminsRepository: AdminRepository,
+    private rolesService: RolesService,
   ) {}
   async signup(dto: SignUpDto) {
-    const role = await this.rolesRepository.findOneBy({ name: ROLE.USER });
-    const user = this.usersRepository.create({ ...dto, role, images: [] });
-    user.images.push(this.userImageRepository.create(defaultImage));
-    await this.usersRepository.save(user);
+    const role = await this.rolesService.findByName(ROLE.USER);
+    const user = await this.usersRepository.createOne(dto, role);
     const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
     return {
       token,
@@ -46,19 +36,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.usersRepository.findOne({
-      where: { email: dto.email },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      relations: { role: true, images: true },
-    });
-
+    const user = await this.usersRepository.findByEmail(dto.email);
     if (!user || !(await user.verifyHash(user.password, dto.password))) {
       throw new UnauthorizedException('Credentials incorrect');
     }
@@ -66,19 +44,8 @@ export class AuthService {
     return { token, user };
   }
 
-  async updateMyPassword(dto: PasswordChangeDto, id: string) {
-    const user = await this.usersRepository.findOne({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      relations: { role: true, images: true },
-    });
+  async updateMyPassword(dto: PasswordChangeDto, email: string) {
+    const user = await this.usersRepository.findByEmail(email);
 
     if (!user) throw new NotFoundException('User not found');
 
@@ -86,6 +53,7 @@ export class AuthService {
     if (!(await user.verifyHash(user.password, dto.passwordCurrent))) {
       throw new UnauthorizedException('كلمة المرور الحالية غير صحيحة');
     }
+
     user.password = dto.password;
     await this.usersRepository.save(user);
     const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);

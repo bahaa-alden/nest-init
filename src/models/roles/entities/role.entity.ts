@@ -1,17 +1,6 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Exclude } from 'class-transformer';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToMany,
-  JoinTable,
-  OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  BaseEntity,
-} from 'typeorm';
+import { Entity, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { GROUPS, ROLE } from '../../../common';
 import { Permission } from '../../permissions';
 import { User } from '../../users';
@@ -37,8 +26,8 @@ export class Role extends GlobalEntity {
   })
   @JoinTable({
     name: 'roles_permissions',
-    joinColumn: { name: 'roleId' },
-    inverseJoinColumn: { name: 'permissionId' },
+    joinColumn: { name: 'roleId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'permissionId', referencedColumnName: 'id' },
   })
   permissions: Permission[];
 

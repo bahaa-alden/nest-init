@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Not, Repository } from 'typeorm';
-import { Permission } from '../entities/permission.entity';
-import { CreatePermissionDto, UpdatePermissionDto } from '../dtos';
 import { Action, Entities } from './../../../common';
+import {
+  Permission,
+  CreatePermissionDto,
+  UpdatePermissionDto,
+} from './../../../models/permissions';
+import { Repository, DataSource } from 'typeorm';
 
 @Injectable()
 export class PermissionRepository extends Repository<Permission> {
   constructor(private readonly dataSource: DataSource) {
     super(Permission, dataSource.createEntityManager());
   }
-
   async findAll(permissionsIds?: string[]) {
     let permissions = this.createQueryBuilder('permission').where(
       '(permission.subject != :subject OR permission.action != :action)',
@@ -21,6 +23,7 @@ export class PermissionRepository extends Repository<Permission> {
     permissions = permissionsIds
       ? permissions.andWhereInIds(permissionsIds)
       : permissions;
+
     return permissions.getMany();
   }
   async findById(id: string, withDeleted = false) {

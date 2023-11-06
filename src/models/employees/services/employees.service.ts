@@ -4,21 +4,20 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Equal } from 'typeorm';
+
 import { LoginDto } from '../../../auth';
-import { defaultImage } from '../../../common';
 import { ROLE } from '../../../common';
-import { checkIfExist } from '../../../common';
 import { CloudinaryService } from '../../../shared/cloudinary';
 import { JwtTokenService } from '../../../shared/jwt';
-import { Role, RoleRepository } from '../../roles';
 import { CreateEmployeeDto } from '../dtos/create-employee.dto';
 import { UpdateEmployeeDto } from '../dtos/update-employee.dto';
 import { EmployeeImage } from '../entities/employee-image.entity';
 import { Employee } from '../entities/employee.entity';
 import { StoresService } from '../../stores/services/stores.service';
-import { EmployeeRepository } from '../repositories/employee.repository';
+import {
+  EmployeeRepository,
+  RoleRepository,
+} from '../../../shared/repositories';
 
 @Injectable()
 export class EmployeesService {
@@ -27,7 +26,6 @@ export class EmployeesService {
     private employeeRepository: EmployeeRepository,
     private roleRepository: RoleRepository,
     private storesService: StoresService,
-    private cloudinaryService: CloudinaryService,
   ) {}
 
   async login(dto: LoginDto) {

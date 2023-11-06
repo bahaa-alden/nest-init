@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { Store } from '../entities/store.entity';
-import { UpdateStoreDto, CreateStoreDto } from '../dtos';
-import { City } from 'src/models/cities';
+import { City } from './../../../models/cities';
+import {
+  Store,
+  CreateStoreDto,
+  UpdateStoreDto,
+} from './../../../models/stores';
+import { Repository, DataSource } from 'typeorm';
 
 @Injectable()
 export class StoreRepository extends Repository<Store> {

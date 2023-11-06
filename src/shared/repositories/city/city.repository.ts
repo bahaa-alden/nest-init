@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { City } from '../entities/city.entity';
-import { UpdateCityDto } from '../dtos';
+import { City, UpdateCityDto } from './../../../models/cities';
+import { Repository, DataSource } from 'typeorm';
 
 @Injectable()
 export class CityRepository extends Repository<City> {

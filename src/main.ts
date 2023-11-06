@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import {
   ClassSerializerInterceptor,
+  Logger,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import { AppConfig } from './config/app';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const httpAdapter = app.get(HttpAdapterHost);
+  const logger = app.get(Logger);
   const appConfig: ConfigType<typeof AppConfig> = app
     .get(ConfigService)
     .get('application');
@@ -43,6 +45,11 @@ async function bootstrap() {
   app.enableVersioning({ type: VersioningType.URI });
   app.setGlobalPrefix('api');
   SwaggerModule.setup('api', app, createDocument(app));
-  await app.listen(3000);
+  await app.listen(appConfig.port, () => {
+    logger.debug(`server started at port: ${appConfig.port}`);
+    logger.debug(
+      `swagger docs started at http://localhost:${appConfig.port}/api`,
+    );
+  });
 }
 bootstrap();

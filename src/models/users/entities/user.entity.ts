@@ -3,6 +3,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToOne,
   OneToMany,
 } from 'typeorm';
@@ -12,6 +13,8 @@ import { GROUPS } from '../../../common';
 import { Role } from '../../roles';
 import { UserImage } from './user-image.entity';
 import * as crypto from 'crypto';
+import { Coupon } from '../../coupons/entities/coupon.entity';
+import { Product } from 'src/models/products';
 
 @Entity({ name: 'users' })
 export class User extends BasePerson {
@@ -30,6 +33,16 @@ export class User extends BasePerson {
     cascade: true,
   })
   images: UserImage[];
+
+  @Exclude()
+  @OneToMany(() => Coupon, (coupon) => coupon.user)
+  coupons: Coupon[];
+
+  @OneToMany(() => Product, (product) => product.user)
+  products: Product[];
+
+  @ManyToOne(() => Product, (product) => product.likedBy)
+  likedProducts: Product[];
 
   @Expose({ groups: [GROUPS.USER, GROUPS.ALL_USERS] })
   photo() {
