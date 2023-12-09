@@ -13,21 +13,24 @@ import {
   SerializeOptions,
 } from '@nestjs/common';
 import { AdminsService } from '../services/admins.service';
-import { UpdateAdminDto, CreateAdminDto } from '../dtos';
-import { CaslAbilitiesGuard, JwtGuard } from '../../../common';
-import { CheckAbilities, GetUser, Public } from '../../../common';
-import { Action, Entities } from '../../../common';
+import {
+  UpdateAdminDto,
+  CreateAdminDto,
+  LoginResponseDto,
+  LoginAdminDto,
+} from '../dtos';
+
 import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { LoginDto, LoginResponseDto } from '../../../auth';
-import { GROUPS } from '../../../common';
 import { Admin } from '../entities/admin.entity';
 import { Role } from '../../roles';
+import { Public, CheckAbilities, GetUser } from '../../../common/decorators';
+import { GROUPS, Entities, Action } from '../../../common/enums';
+import { CaslAbilitiesGuard, JwtGuard } from '../../../common/guards';
 
 @ApiTags('Admins')
 @Controller({ path: 'admins', version: '1' })
@@ -43,7 +46,7 @@ export class AdminsController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  login(@Body() dto: LoginDto) {
+  login(@Body() dto: LoginAdminDto) {
     return this.adminsService.login(dto);
   }
 
@@ -83,11 +86,7 @@ export class AdminsController {
   @ApiOkResponse({ type: Admin })
   @CheckAbilities({ action: Action.Update, subject: Entities.Admin })
   @Patch(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateAdminDto,
-    @GetUser('role') role: Role,
-  ) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateAdminDto) {
     return this.adminsService.update(id, dto);
   }
 

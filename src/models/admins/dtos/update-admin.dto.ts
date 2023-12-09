@@ -6,9 +6,10 @@ import {
   IsNotEmpty,
   IsEmail,
 } from 'class-validator';
-import { IsUnique } from '../../../common';
-import { Entities } from '../../../common';
+import { IsPhotoExist, IsUnique } from '../../../common/decorators';
+import { Entities } from '../../../common/enums';
 import { Transform } from 'class-transformer';
+import { getPhotoPath } from '../../../common/helpers';
 
 export class UpdateAdminDto {
   @IsString()
@@ -26,9 +27,10 @@ export class UpdateAdminDto {
   readonly email?: string;
 
   @ApiProperty({ required: false })
-  @IsNotEmpty()
   @IsOptional()
   @IsString()
+  @Transform(({ value }: { value: string }) => getPhotoPath(value))
+  @IsPhotoExist()
   readonly photo?: string;
 
   @ApiProperty()

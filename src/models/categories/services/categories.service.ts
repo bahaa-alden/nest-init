@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from '../dtos/create-category.dto';
 import { UpdateCategoryDto } from '../dtos/update-category.dto';
-import { CategoryRepository } from '../../../shared/repositories';
+import { CategoryRepository } from '../../../shared/repositories/category';
 
 @Injectable()
 export class CategoriesService {
@@ -31,13 +31,16 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    const category = await this.findOne(id);
-
+    const category = await this.categoryRepository.findCategoryProducts(id);
+    if (!category) throw new NotFoundException('Category not found');
     return category.softRemove();
   }
 
   async recover(id: string) {
-    const category = await this.findOne(id, true);
+    const category = await this.categoryRepository.findCategoryProducts(
+      id,
+      true,
+    );
     return category.recover();
   }
 }

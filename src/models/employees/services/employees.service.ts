@@ -5,19 +5,18 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 
-import { LoginDto } from '../../../auth';
-import { ROLE } from '../../../common';
+import { ROLE } from '../../../common/enums';
 import { CloudinaryService } from '../../../shared/cloudinary';
 import { JwtTokenService } from '../../../shared/jwt';
 import { CreateEmployeeDto } from '../dtos/create-employee.dto';
 import { UpdateEmployeeDto } from '../dtos/update-employee.dto';
-import { EmployeeImage } from '../entities/employee-image.entity';
+import { EmployeePhoto } from '../entities/employee-image.entity';
 import { Employee } from '../entities/employee.entity';
 import { StoresService } from '../../stores/services/stores.service';
-import {
-  EmployeeRepository,
-  RoleRepository,
-} from '../../../shared/repositories';
+import { EmployeeRepository } from '../../../shared/repositories/employee';
+import { LoginUserDto } from '../../../auth';
+import { RoleRepository } from '../../../shared/repositories/role';
+import { StoreRepository } from '../../../shared/repositories/store/store.repository';
 
 @Injectable()
 export class EmployeesService {
@@ -25,10 +24,10 @@ export class EmployeesService {
     private jwtTokenService: JwtTokenService,
     private employeeRepository: EmployeeRepository,
     private roleRepository: RoleRepository,
-    private storesService: StoresService,
+    private storeRepository: StoreRepository,
   ) {}
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginUserDto) {
     const employee = await this.employeeRepository.findByEmail(dto.email);
     if (
       !employee ||
@@ -46,6 +45,7 @@ export class EmployeesService {
   findAll() {
     return this.employeeRepository.find({
       withDeleted: true,
+      relations: ['store'],
     });
   }
 
@@ -58,15 +58,17 @@ export class EmployeesService {
   }
 
   async create(dto: CreateEmployeeDto) {
-    await this.storesService.findOne(dto.storeId);
+    const store = await this.storeRepository.findById(dto.storeId);
     const role = await this.roleRepository.findByName(ROLE.EMPLOYEE);
-    return this.employeeRepository.createOne(dto, role);
+    console.log(role);
+    return this.employeeRepository.createOne(dto, role, store);
   }
 
   async update(id: string, dto: UpdateEmployeeDto): Promise<Employee> {
     const employee = await this.findOne(id);
-    await this.storesService.findOne(dto.storeId);
-    return this.employeeRepository.updateOne(employee, dto);
+    const store = await this.storeRepository.findById(dto.storeId);
+    if (!store) throw new NotFoundException('store not found');
+    return this.employeeRepository.updateOne(employee, dto, store);
   }
 
   async recover(id: string) {

@@ -4,13 +4,14 @@ import { SuperadminService } from './superadmin';
 import { RoleSeederService } from './roles';
 
 @Injectable()
-export class Seeder {
+export class InitialDatabaseSeeder {
   constructor(
     private readonly logger: Logger,
     private readonly permissionSeederService: PermissionSeederService,
     private readonly superadminService: SuperadminService,
     private readonly roleSeederService: RoleSeederService,
   ) {}
+
   async seed() {
     await this.Roles()
       .then((completed) => {
@@ -42,6 +43,7 @@ export class Seeder {
         Promise.reject(error);
       });
   }
+
   async Permissions() {
     return await Promise.all(this.permissionSeederService.create())
       .then((createdPermissions) => {

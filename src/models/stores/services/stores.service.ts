@@ -1,16 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStoreDto, UpdateStoreDto } from '../dtos';
-import { CitiesService } from '../../cities/services/cities.service';
-import { StoreRepository } from '../../../shared/repositories';
+import { StoreRepository } from '../../../shared/repositories/store';
+import { CityRepository } from '../../../shared/repositories/city';
 
 @Injectable()
 export class StoresService {
   constructor(
     private storeRepository: StoreRepository,
-    private citiesService: CitiesService,
+    private cityRepository: CityRepository,
   ) {}
   async create(dto: CreateStoreDto) {
-    const city = await this.citiesService.findOne(dto.cityId);
+    const city = await this.cityRepository.findById(dto.cityId);
+    if (!city) throw new NotFoundException('city not found');
     return this.storeRepository.createOne(dto, city);
   }
 
@@ -25,7 +26,8 @@ export class StoresService {
   }
 
   async update(id: string, dto: UpdateStoreDto) {
-    await this.citiesService.findOne(dto.cityId);
+    const city = await this.cityRepository.findById(dto.cityId);
+    if (!city) throw new NotFoundException('city not found');
     const store = await this.findOne(id);
     const updateStore = await this.storeRepository.updateOne(store, dto);
     return updateStore;

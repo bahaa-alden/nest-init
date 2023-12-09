@@ -1,20 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { ImageCleanupService } from './image-cleanup.service';
+import { PhotoCleanupService } from './image-cleanup.service';
 
 @Injectable()
-export class ImageCleanupScheduler {
-  constructor(private readonly imageCleanupService: ImageCleanupService) {}
+export class PhotoCleanupScheduler {
+  constructor(private readonly imageCleanupService: PhotoCleanupService) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleFileCleanup() {
     try {
-      await this.imageCleanupService.deleteImagesOlderThanDays();
-      Logger.log(`Image cleanup completed for 1 days.`, 'ImageCleanupService');
+      await this.imageCleanupService.deletePhotosOlderThanDays();
+      Logger.log(`Photo cleanup completed for 1 days.`, 'PhotoCleanupService');
     } catch (error) {
       Logger.error(
         `Error occurred during file cleanup: ${error}`,
-        'ImageCleanupService',
+        'PhotoCleanupService',
       );
     }
   }

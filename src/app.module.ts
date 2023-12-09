@@ -4,10 +4,14 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth';
 import { CloudinaryModule } from './shared/cloudinary';
-import { IsExistConstraint, IsUniqueConstraint } from './common';
-import { JwtGuard } from './common';
-import { ImagesModule } from './images';
-import { ImageCleanupModule } from './jobs/image-cleanup';
+import {
+  IsExistConstraint,
+  IsPhotoExistConstraint,
+  IsUniqueConstraint,
+} from './common/decorators';
+import { JwtGuard } from './common/guards';
+import { PhotosModule } from './photos';
+import { PhotoCleanupModule } from './jobs/image-cleanup';
 import { AdminsModule } from './models/admins/admins.module';
 import { PermissionsModule } from './models/permissions/permissions.module';
 import { RolesModule } from './models/roles/roles.module';
@@ -21,11 +25,9 @@ import { StoresModule } from './models/stores/stores.module';
 import { CategoriesModule } from './models/categories/categories.module';
 import { ProductsModule } from './models/products/products.module';
 import { JwtTokenModule } from './shared/jwt';
-import { RepositoriesModule } from './shared/repositories';
-// import { PaymentsModule } from './models/payments/payments.module';
+import { RepositoriesModule } from './shared/repositories/repositories.module';
 import { CouponsModule } from './models/coupons/coupons.module';
 import { CommentsModule } from './models/comments/comments.module';
-import { CouponsModule } from './models/coupons/coupons.module';
 
 @Module({
   imports: [
@@ -44,36 +46,36 @@ import { CouponsModule } from './models/coupons/coupons.module';
       }),
       // load: [postgresConfig],
     }),
-    DatabaseModule,
-    CaslModule,
-    CloudinaryModule,
-    ImageCleanupModule,
-    JwtTokenModule,
     AuthModule,
     UsersModule,
     AdminsModule,
     EmployeesModule,
     ProductsModule,
+    CommentsModule,
+    CouponsModule,
     CategoriesModule,
     CitiesModule,
     StoresModule,
     RolesModule,
     PermissionsModule,
-    ImagesModule,
+    PhotosModule,
+    DatabaseModule,
+    JwtTokenModule,
+    PhotoCleanupModule,
+    CaslModule,
     RepositoriesModule,
-    CouponsModule,
-    CommentsModule,
-    // PaymentsModule,
+    CloudinaryModule,
   ],
   controllers: [],
   providers: [
     IsUniqueConstraint,
     IsExistConstraint,
+    IsPhotoExistConstraint,
+    Logger,
     {
       provide: APP_GUARD,
       useClass: JwtGuard,
     },
-    Logger,
   ],
 })
 export class AppModule {}

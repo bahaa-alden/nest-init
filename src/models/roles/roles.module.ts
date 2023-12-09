@@ -3,7 +3,6 @@ import { RolesController } from './controllers';
 import { RolesService } from './services';
 import { PermissionsModule } from '../permissions/permissions.module';
 
-@Global()
 @Module({
   imports: [PermissionsModule],
   controllers: [RolesController],

@@ -15,18 +15,17 @@ import {
 import { PermissionsService } from '../services/permissions.service';
 import { Permission } from '../entities/permission.entity';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CaslAbilitiesGuard } from '../../../common';
+import { CaslAbilitiesGuard } from '../../../common/guards';
 import { CreatePermissionDto } from '../dtos';
-import { CheckAbilities } from '../../../common';
-import { Action, Entities } from '../../../common';
+import { CheckAbilities } from '../../../common/decorators';
+import { Action, Entities, GROUPS } from '../../../common/enums';
 import { UpdatePermissionDto } from '../dtos';
-import { GROUPS } from '../../../common';
 
 @ApiTags('Permissions')
 @ApiBearerAuth('token')
 @CheckAbilities({ action: Action.Manage, subject: Entities.Permission })
 @UseGuards(CaslAbilitiesGuard)
-@Controller('permissions')
+@Controller({ path: 'permissions', version: '1' })
 export class PermissionsController {
   constructor(public permissionsService: PermissionsService) {}
   @SerializeOptions({ groups: [GROUPS.ALL_PERMISSIONS] })

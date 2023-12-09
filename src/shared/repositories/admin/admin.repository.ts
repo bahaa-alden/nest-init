@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { defaultImage, ROLE } from './../../../common';
 import {
   Admin,
   CreateAdminDto,
@@ -7,20 +6,22 @@ import {
 } from './../../../models/admins';
 import { Role } from './../../../models/roles';
 import { Repository, DataSource, Equal, FindOneOptions } from 'typeorm';
-import { AdminImagesRepository } from './admin-images.repository';
+import { AdminPhotosRepository } from './admin-photos.repository';
+import { defaultPhoto } from '../../../common/constants/default-image.constant';
+import { ROLE } from '../../../common/enums';
 
 @Injectable()
 export class AdminRepository extends Repository<Admin> {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly adminImagesRepository: AdminImagesRepository,
+    private readonly adminPhotosRepository: AdminPhotosRepository,
   ) {
     super(Admin, dataSource.createEntityManager());
   }
 
   async createOne(dto: CreateAdminDto, role: Role) {
-    const admin = this.create({ ...dto, role, images: [] });
-    admin.images.push(this.adminImagesRepository.create(defaultImage));
+    const admin = this.create({ ...dto, role, photos: [] });
+    admin.photos.push(this.adminPhotosRepository.create(defaultPhoto));
     await admin.save();
     return admin;
   }
@@ -29,7 +30,7 @@ export class AdminRepository extends Repository<Admin> {
     return this.find({
       where: { role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
       withDeleted,
-      relations: { images: true, role: true },
+      relations: { photos: true, role: true },
     });
   }
 
@@ -45,7 +46,7 @@ export class AdminRepository extends Repository<Admin> {
         createdAt: true,
         updatedAt: true,
       },
-      relations: { images: true, role: true },
+      relations: { photos: true, role: true },
     };
 
     return await this.findOne(options);
@@ -62,12 +63,12 @@ export class AdminRepository extends Repository<Admin> {
         createdAt: true,
         updatedAt: true,
       },
-      relations: { images: true, role: true },
+      relations: { photos: true, role: true },
     });
   }
 
   async updateOne(admin: Admin, dto: UpdateAdminDto) {
-    admin.images.push(await this.adminImagesRepository.updatePhoto(dto.photo));
+    admin.photos.push(await this.adminPhotosRepository.uploadPhoto(dto.photo));
     Object.assign(admin, {
       email: dto.email,
       name: dto.name,

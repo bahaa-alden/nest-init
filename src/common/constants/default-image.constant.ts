@@ -1,6 +1,6 @@
-import { IImage } from '../types';
+import { IPhoto } from '../types/photos.type';
 
-export const defaultImage: IImage = {
+export const defaultPhoto: IPhoto = {
   blurHash: 'UFGIo.of00ayM{j[IUj[~qfQ-;j[D%j[M{ay',
   profileUrl:
     'https://res.cloudinary.com/drhuktnth/image/upload/t_profile/v1/Users/ukewivaufygrplkgclev',

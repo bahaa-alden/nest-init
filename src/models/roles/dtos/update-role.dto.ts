@@ -8,5 +8,5 @@ export class UpdateRoleDto {
   @IsOptional()
   @IsUUID('all', { each: true })
   @ApiProperty()
-  permissions: string[];
+  permissionsIds: string[];
 }

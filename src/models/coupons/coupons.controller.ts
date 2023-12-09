@@ -1,9 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { CouponsService } from './coupons.service';
-import { CreateCouponDto } from './dto/create-coupon.dto';
-import { UpdateCouponDto } from './dto/update-coupon.dto';
+import { CreateCouponDto } from './dtos/create-coupon.dto';
+import { UpdateCouponDto } from './dtos/update-coupon.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CaslAbilitiesGuard } from '../../common/guards';
 
-@Controller('coupons')
+@ApiTags('Coupons')
+@ApiBearerAuth('token')
+@UseGuards(CaslAbilitiesGuard)
+@Controller({ path: 'coupons', version: '1' })
 export class CouponsController {
   constructor(private readonly couponsService: CouponsService) {}
 

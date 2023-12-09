@@ -21,15 +21,15 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CaslAbilitiesGuard } from '../../../common';
-import { CheckAbilities } from '../../../common';
-import { Action, Entities } from '../../../common';
+import { CaslAbilitiesGuard } from '../../../common/guards';
+import { CheckAbilities } from '../../../common/decorators';
+import { Action, Entities } from '../../../common/enums';
 import { Store } from '../entities/store.entity';
 
 @ApiTags('Stores')
 @ApiBearerAuth('token')
 @UseGuards(CaslAbilitiesGuard)
-@Controller('stores')
+@Controller({ path: 'stores', version: '1' })
 export class StoresController {
   constructor(private readonly storesService: StoresService) {}
 

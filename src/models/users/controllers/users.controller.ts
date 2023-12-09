@@ -19,19 +19,19 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { Roles, CheckAbilities } from '../../../common';
-import { GetUser } from '../../../common';
-import { GROUPS, ROLE, Entities, Action } from '../../../common';
-import { CaslAbilitiesGuard, RolesGuard } from '../../../common';
-import { LoggingInterceptor } from '../../../common';
+
 import { UpdateUserDto } from '../dtos';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../services/users.service';
+import { GetUser, Roles, CheckAbilities } from '../../../common/decorators';
+import { GROUPS, ROLE, Entities, Action } from '../../../common/enums';
+import { CaslAbilitiesGuard, RolesGuard } from '../../../common/guards';
+import { LoggingInterceptor } from '../../../common/interceptors';
 
 @ApiTags('users')
 @ApiBearerAuth('token')
-@UseGuards(CaslAbilitiesGuard, RolesGuard)
 @UseInterceptors(new LoggingInterceptor())
+@UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
   constructor(private usersService: UsersService) {}

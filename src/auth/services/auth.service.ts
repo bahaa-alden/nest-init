@@ -1,4 +1,3 @@
-import { AdminRepository, UserRepository } from './../../shared/repositories';
 import {
   Injectable,
   UnauthorizedException,
@@ -9,13 +8,15 @@ import {
   FindOptionsSelect,
   FindOptionsWhere,
 } from 'typeorm';
-import { ROLE } from '../../common';
+import { ROLE } from '../../common/enums';
 import { User } from '../../models/users';
 import { JwtTokenService } from '../../shared/jwt';
-import { SignUpDto, LoginDto, PasswordChangeDto } from '../dtos';
+import { SignUpDto, PasswordChangeDto, LoginUserDto } from '../dtos';
 import { jwtPayload } from '../interfaces';
 import { Admin } from './../../models/admins';
-import { RolesService } from './../../models/roles/services';
+import { AdminRepository } from '../../shared/repositories/admin';
+import { UserRepository } from '../../shared/repositories/user';
+import { RoleRepository } from '../../shared/repositories/role/role.repository';
 
 @Injectable()
 export class AuthService {
@@ -23,10 +24,10 @@ export class AuthService {
     private jwtTokenService: JwtTokenService,
     private usersRepository: UserRepository,
     private adminsRepository: AdminRepository,
-    private rolesService: RolesService,
+    private roleRepository: RoleRepository,
   ) {}
   async signup(dto: SignUpDto) {
-    const role = await this.rolesService.findByName(ROLE.USER);
+    const role = await this.roleRepository.findByName(ROLE.USER);
     const user = await this.usersRepository.createOne(dto, role);
     const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
     return {
@@ -35,7 +36,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginUserDto) {
     const user = await this.usersRepository.findByEmail(dto.email);
     if (!user || !(await user.verifyHash(user.password, dto.password))) {
       throw new UnauthorizedException('Credentials incorrect');
@@ -80,11 +81,11 @@ export class AuthService {
       },
       createdAt: true,
       updatedAt: true,
-      images: false,
+      photos: false,
     };
     const relations: FindOptionsRelations<User> = {
       role: { permissions: true },
-      images: true,
+      photos: true,
     };
     if (payload.role === ROLE.ADMIN) {
       user = await this.adminsRepository.findOne({

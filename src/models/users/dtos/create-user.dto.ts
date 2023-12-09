@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
-import { IsUnique } from '../../../common';
-import { Entities } from '../../../common';
+import { IsUnique } from '../../../common/decorators';
+import { Entities } from '../../../common/enums';
 import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
@@ -21,7 +21,4 @@ export class CreateUserDto {
   @IsString()
   @Length(6, 15)
   readonly password: string;
-
-  // @IsEnum(Role)
-  // role: Role;
 }

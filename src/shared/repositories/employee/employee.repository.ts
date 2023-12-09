@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { defaultImage, ROLE } from './../../../common';
+import { ROLE } from './../../../common/enums';
 import {
   Employee,
   CreateEmployeeDto,
@@ -7,20 +7,22 @@ import {
 } from './../../../models/employees';
 import { Role } from './../../../models/roles';
 import { Repository, DataSource, Equal, FindOneOptions } from 'typeorm';
-import { EmployeeImagesRepository } from './employee-images.repository';
+import { EmployeePhotosRepository } from './employee-photos.repository';
+import { defaultPhoto } from '../../../common/constants';
+import { Store } from '../../../models/stores';
 
 @Injectable()
 export class EmployeeRepository extends Repository<Employee> {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly employeeImagesRepository: EmployeeImagesRepository,
+    private readonly employeePhotosRepository: EmployeePhotosRepository,
   ) {
     super(Employee, dataSource.createEntityManager());
   }
 
-  async createOne(dto: CreateEmployeeDto, role: Role) {
-    const employee = this.create({ ...dto, role, images: [] });
-    employee.images.push(this.employeeImagesRepository.create(defaultImage));
+  async createOne(dto: CreateEmployeeDto, role: Role, store: Store) {
+    const employee = this.create({ ...dto, role, photos: [], store });
+    employee.photos.push(this.employeePhotosRepository.create(defaultPhoto));
     await employee.save();
     return employee;
   }
@@ -29,7 +31,7 @@ export class EmployeeRepository extends Repository<Employee> {
     return this.find({
       where: { role: withDeleted ? {} : { name: Equal(ROLE.EMPLOYEE) } },
       withDeleted,
-      relations: { images: true, role: true },
+      relations: { photos: true, role: true },
     });
   }
 
@@ -45,7 +47,7 @@ export class EmployeeRepository extends Repository<Employee> {
         createdAt: true,
         updatedAt: true,
       },
-      relations: { images: true, role: true, store: true },
+      relations: { photos: true, role: true, store: true },
     };
 
     return await this.findOne(options);
@@ -62,20 +64,20 @@ export class EmployeeRepository extends Repository<Employee> {
         createdAt: true,
         updatedAt: true,
       },
-      relations: { images: true, role: true, store: true },
+      relations: { photos: true, role: true, store: true },
     });
   }
 
-  async updateOne(employee: Employee, dto: UpdateEmployeeDto) {
-    employee.images.push(
-      await this.employeeImagesRepository.updatePhoto(dto.photo),
+  async updateOne(employee: Employee, dto: UpdateEmployeeDto, store: Store) {
+    employee.photos.push(
+      await this.employeePhotosRepository.uploadPhoto(dto.photo),
     );
     Object.assign<Employee, any>(employee, {
       email: dto.email,
       name: dto.name,
       password: dto.password,
       address: dto.address,
-      store: { id: dto.storeId },
+      store,
     });
     await this.save(employee);
     return this.findById(employee.id);

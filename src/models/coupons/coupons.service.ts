@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCouponDto } from './dto/create-coupon.dto';
-import { UpdateCouponDto } from './dto/update-coupon.dto';
+import { CreateCouponDto } from './dtos/create-coupon.dto';
+import { UpdateCouponDto } from './dtos/update-coupon.dto';
 
 @Injectable()
 export class CouponsService {

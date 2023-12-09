@@ -25,6 +25,8 @@ export class BasePerson extends GlobalEntity {
       GROUPS.ADMIN,
       GROUPS.ALL_EMPLOYEES,
       GROUPS.EMPLOYEE,
+      GROUPS.ALL_PRODUCTS,
+      GROUPS.PRODUCT,
     ],
   })
   @ApiProperty()
@@ -39,6 +41,8 @@ export class BasePerson extends GlobalEntity {
       GROUPS.ADMIN,
       GROUPS.ALL_EMPLOYEES,
       GROUPS.EMPLOYEE,
+      GROUPS.ALL_PRODUCTS,
+      GROUPS.PRODUCT,
     ],
   })
   @ApiProperty()

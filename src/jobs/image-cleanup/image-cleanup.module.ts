@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ImageCleanupService } from './image-cleanup.service';
-import { ImageCleanupScheduler } from './image-cleanup.scheduler';
+import { PhotoCleanupService } from './image-cleanup.service';
+import { PhotoCleanupScheduler } from './image-cleanup.scheduler';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
-  providers: [ImageCleanupService, ImageCleanupScheduler],
+  providers: [PhotoCleanupService, PhotoCleanupScheduler],
 })
-export class ImageCleanupModule {}
+export class PhotoCleanupModule {}

@@ -1,11 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Admin } from './admin.entity';
-import { BaseImage } from '../../../common';
-import { Exclude } from 'class-transformer';
 
-@Entity({ name: 'admin_images' })
-export class AdminImage extends BaseImage {
-  @ManyToOne(() => Admin, (admin) => admin.images)
+import { Exclude } from 'class-transformer';
+import { BasePhoto } from '../../../common/entities';
+
+@Entity({ name: 'admin_photos' })
+export class AdminPhoto extends BasePhoto {
+  @ManyToOne(() => Admin, (admin) => admin.photos)
   @JoinColumn({ name: 'adminId' })
   admin: Admin;
 

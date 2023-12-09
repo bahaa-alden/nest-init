@@ -11,7 +11,7 @@ import {
 import { GlobalEntity } from './global-entity.entity';
 
 @Entity()
-export class BaseImage extends GlobalEntity {
+export class BasePhoto extends GlobalEntity {
   @Exclude()
   @Column()
   publicId: string;

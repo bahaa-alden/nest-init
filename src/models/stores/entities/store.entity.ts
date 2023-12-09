@@ -15,7 +15,7 @@ import {
 import { City } from '../../cities';
 import { Exclude, Transform } from 'class-transformer';
 import { Employee } from '../../employees/entities/employee.entity';
-import { GlobalEntity } from '../../../common';
+import { GlobalEntity } from '../../../common/entities';
 
 @Entity({ name: 'stores' })
 export class Store extends GlobalEntity {

@@ -9,19 +9,39 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { GlobalEntity } from '../../../common/entities';
 
 @Entity('coupons')
-export class Coupon {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @ManyToOne(() => User, (user) => user.coupons)
-  @JoinColumn()
+export class Coupon extends GlobalEntity {
+  @ManyToOne(() => User, (user) => user.myCoupons, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => Product, (product) => product.coupons)
-  @JoinColumn()
+  @Column({ type: 'uuid' })
+  userId: string;
+
+  @ManyToOne(() => User, (proOwner) => proOwner.ownedCoupons, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'proOwnerId' })
+  proOwner: User;
+
+  @Column({ type: 'uuid' })
+  proOwnerId: string;
+
+  @ManyToOne(() => Product, (product) => product.coupons, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'productId' })
   product: Product;
+
+  @Column({ type: 'uuid' })
+  productId: string;
 
   @Column({ default: null, nullable: true })
   expire: Date;

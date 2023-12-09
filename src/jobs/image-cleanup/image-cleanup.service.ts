@@ -3,13 +3,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
-export class ImageCleanupService {
-  async deleteImagesOlderThanDays(): Promise<void> {
+export class PhotoCleanupService {
+  async deletePhotosOlderThanDays(): Promise<void> {
     const now = new Date();
     now.setDate(now.getDate() - 1);
 
     // Iterate through files in the directory
-    const dir = path.join(__dirname, '..', '..', '..', 'public', 'images');
+    const dir = path.join(__dirname, '..', '..', '..', 'public', 'photos');
     fs.readdir(dir, (err, files) => {
       if (err) {
         throw err;

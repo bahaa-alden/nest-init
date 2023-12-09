@@ -6,9 +6,10 @@ import {
   IsEmail,
   IsOptional,
 } from 'class-validator';
-import { IsUnique } from '../../../common';
-import { Entities } from '../../../common';
+import { IsPhotoExist, IsUnique } from '../../../common/decorators';
+import { Entities } from '../../../common/enums';
 import { Transform } from 'class-transformer';
+import { getPhotoPath } from '../../../common/helpers';
 
 export class CreateAdminDto {
   @ApiProperty()
@@ -29,8 +30,9 @@ export class CreateAdminDto {
   readonly password: string;
 
   @ApiProperty({ required: false })
-  @IsNotEmpty()
   @IsOptional()
   @IsString()
+  @Transform(({ value }: { value: string }) => getPhotoPath(value))
+  @IsPhotoExist()
   readonly photo?: string;
 }

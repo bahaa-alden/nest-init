@@ -21,16 +21,16 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CaslAbilitiesGuard } from '../../../common';
-import { CheckAbilities } from '../../../common';
-import { Action, Entities } from '../../../common';
+import { CaslAbilitiesGuard } from '../../../common/guards';
+import { CheckAbilities } from '../../../common/decorators';
+import { Action, Entities } from '../../../common/enums';
 import { City } from '../entities/city.entity';
 
 @ApiTags('cities')
 @ApiBearerAuth('token')
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Manage, subject: Entities.City })
-@Controller('cities')
+@Controller({ path: 'cities', version: '1' })
 export class CitiesController {
   constructor(private readonly citiesService: CitiesService) {}
 

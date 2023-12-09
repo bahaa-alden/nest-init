@@ -1,7 +1,16 @@
 import * as path from 'path';
 import * as sharp from 'sharp';
+import * as fs from 'fs';
 
 export const customize = async (image: Express.Multer.File) => {
+  const folderPath = path.join(__dirname, '..', '..', '..', 'public', 'photos');
+
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, {
+      recursive: true,
+    });
+  }
+
   const randomName = Array(32)
     .fill(null)
     .map(() => Math.round(Math.random() * 16).toString(16))
@@ -24,9 +33,7 @@ export const customize = async (image: Express.Multer.File) => {
       mozjpeg: true,
       quantisationTable: 0,
     })
-    .toFile(
-      path.join(__dirname, '..', '..', '..', 'public', 'images', filename),
-    );
+    .toFile(path.join(folderPath, filename));
 
   return filename;
 };

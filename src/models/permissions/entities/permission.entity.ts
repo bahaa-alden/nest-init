@@ -11,12 +11,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IPermission } from '../interfaces';
-import { Action, Entities } from '../../../common';
 import { Role } from '../../roles';
 import { ApiProperty } from '@nestjs/swagger';
-import { GROUPS } from '../../../common';
+import { GROUPS, Action, Entities } from '../../../common/enums';
 import { Exclude, Expose } from 'class-transformer';
-import { GlobalEntity } from '../../../common';
+import { GlobalEntity } from '../../../common/entities';
 
 @Entity({ name: 'permissions' })
 @Unique('un_permission', ['action', 'subject'])

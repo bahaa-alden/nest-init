@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Action, Entities } from './../../../common';
+import { Action, Entities } from './../../../common/enums';
 import {
   Permission,
   CreatePermissionDto,

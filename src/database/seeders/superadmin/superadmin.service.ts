@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { superadmin } from './data';
-import { ROLE, defaultImage } from '../../../common';
 import { Role } from '../../../models/roles';
-import { Admin, AdminImage } from '../../../models/admins';
+import { Admin, AdminPhoto } from '../../../models/admins';
+import { ROLE } from '../../../common/enums';
+import { defaultPhoto } from '../../../common/constants';
 
 @Injectable()
 
@@ -24,8 +25,8 @@ export class SuperadminService {
   constructor(
     @InjectRepository(Admin)
     private readonly adminRepository: Repository<Admin>,
-    @InjectRepository(AdminImage)
-    private adminImagesRepository: Repository<AdminImage>,
+    @InjectRepository(AdminPhoto)
+    private adminPhotosRepository: Repository<AdminPhoto>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
   ) {}
@@ -53,10 +54,10 @@ export class SuperadminService {
           name: superadmin.name,
           email: superadmin.email,
           password: superadmin.password,
-          images: [],
+          photos: [],
           role,
         });
-        admin.images.push(this.adminImagesRepository.create(defaultImage));
+        admin.photos.push(this.adminPhotosRepository.create(defaultPhoto));
         return Promise.resolve(
           // or create(superadmin).then(() => { ... });
           await this.adminRepository.save(admin),

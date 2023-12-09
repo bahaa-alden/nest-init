@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { BasePerson } from '../../../common';
+import { BasePerson } from '../../../common/entities';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { GROUPS } from '../../../common';
+import { GROUPS } from '../../../common/enums';
 import { Role } from '../../roles';
-import { EmployeeImage } from './employee-image.entity';
+import { EmployeePhoto } from './employee-image.entity';
 import { Store } from '../../stores';
 
 @Entity({ name: 'employees' })
@@ -12,7 +12,7 @@ export class Employee extends BasePerson {
   @Column()
   address: string;
 
-  @Expose({ groups: [GROUPS.EMPLOYEE] })
+  @Expose({ groups: [GROUPS.EMPLOYEE, GROUPS.ALL_EMPLOYEES] })
   @Transform(({ value }) => {
     return { id: value.id, name: value.name };
   })
@@ -35,13 +35,13 @@ export class Employee extends BasePerson {
   roleId: string;
 
   @Exclude()
-  @OneToMany(() => EmployeeImage, (employeeImage) => employeeImage.employee, {
+  @OneToMany(() => EmployeePhoto, (employeePhoto) => employeePhoto.employee, {
     cascade: true,
   })
-  images: EmployeeImage[];
+  photos: EmployeePhoto[];
 
-  @Expose()
   photo() {
-    return this.images[this.images.length - 1];
+    if (this.photos) return this.photos[this.photos.length - 1];
+    return undefined;
   }
 }

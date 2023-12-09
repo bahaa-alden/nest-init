@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ImagesController } from './images.controller';
+import { PhotosController } from './photos.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { multerOptions } from '../config/multer';
-import { ImagesService } from './images.service';
+import { PhotosService } from './photos.service';
 
 @Module({
   imports: [MulterModule.register(multerOptions)],
-  controllers: [ImagesController],
-  providers: [ImagesService],
+  controllers: [PhotosController],
+  providers: [PhotosService],
 })
-export class ImagesModule {}
+export class PhotosModule {}

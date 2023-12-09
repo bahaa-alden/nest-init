@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleDto, UpdateRoleDto } from '../dtos';
-import { Role } from '../entities/role.entity';
 import { PermissionsService } from '../../permissions/services/permissions.service';
-import { RoleRepository } from '../../../shared/repositories';
+import { Role } from '../entities/role.entity';
+import { RoleRepository } from '../../../shared/repositories/role';
 
 @Injectable()
 export class RolesService {
@@ -29,7 +29,9 @@ export class RolesService {
     return this.roleRepository.findByName(name);
   }
   async create(dto: CreateRoleDto): Promise<Role> {
-    const permissions = await this.permissionsService.findAll(dto.permissions);
+    const permissions = await this.permissionsService.findAll(
+      dto.permissionsIds,
+    );
 
     const role = await this.roleRepository.createOne(dto, permissions);
     return role;
@@ -40,7 +42,9 @@ export class RolesService {
 
     if (!role) throw new NotFoundException('Role not found');
 
-    const permissions = await this.permissionsService.findAll(dto.permissions);
+    const permissions = await this.permissionsService.findAll(
+      dto.permissionsIds,
+    );
 
     return this.roleRepository.updateOne(role, permissions);
   }
@@ -53,7 +57,9 @@ export class RolesService {
 
     if (!role) throw new NotFoundException('Role not found');
 
-    const permissions = await this.permissionsService.findAll(dto.permissions);
+    const permissions = await this.permissionsService.findAll(
+      dto.permissionsIds,
+    );
 
     return this.roleRepository.addPermissions(role, permissions);
   }
@@ -64,22 +70,21 @@ export class RolesService {
   ): Promise<Role | undefined> {
     const role = await this.findOne(id);
 
-    const permissions = await this.permissionsService.findAll(dto.permissions);
+    const permissions = await this.permissionsService.findAll(
+      dto.permissionsIds,
+    );
 
     return this.roleRepository.deletePermissions(role, permissions);
   }
 
   async recover(id: string): Promise<Role> {
     const role = await this.findOne(id, true, ['users', 'admins']);
-
     await role.recover();
-
     return role;
   }
 
   async delete(id: string) {
     const role = await this.findOne(id, false, ['users', 'admins']);
-
     if (!role) throw new NotFoundException('role not found');
     await role.softRemove();
     return;

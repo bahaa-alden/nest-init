@@ -7,13 +7,15 @@ import {
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
-import { HttpExceptionFilter } from './common';
+import { HttpExceptionFilter } from './common/exceptions';
 import { SwaggerModule } from '@nestjs/swagger';
-import { createDocument, errorsFormat } from './common';
+import { createDocument, errorsFormat } from './common/helpers';
 import { useContainer } from 'class-validator';
 import { join } from 'path';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { AppConfig } from './config/app';
+import * as morgan from 'morgan';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -25,6 +27,16 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
+  if (appConfig.env !== 'production') {
+    app.use(morgan('dev'));
+  }
+  app.use(
+    helmet({
+      xssFilter: true,
+      contentSecurityPolicy: true,
+      xPoweredBy: false,
+    }),
+  );
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     extensions: ['jpg'],
     index: false,

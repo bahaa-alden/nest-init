@@ -1,9 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { BasePerson } from '../../../common';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { GROUPS } from '../../../common';
+
 import { Role } from '../../roles';
-import { AdminImage } from './admin-image.entity';
+import { AdminPhoto } from './admin-image.entity';
+import { BasePerson } from '../../../common/entities';
+import { GROUPS } from '../../../common/enums';
 
 @Entity({ name: 'admins' })
 export class Admin extends BasePerson {
@@ -18,13 +19,13 @@ export class Admin extends BasePerson {
   roleId: string;
 
   @Exclude()
-  @OneToMany(() => AdminImage, (adminImage) => adminImage.admin, {
+  @OneToMany(() => AdminPhoto, (adminPhoto) => adminPhoto.admin, {
     cascade: true,
   })
-  images: AdminImage[];
+  photos: AdminPhoto[];
 
   @Expose()
   photo() {
-    return this.images[this.images.length - 1];
+    return this.photos[this.photos.length - 1];
   }
 }

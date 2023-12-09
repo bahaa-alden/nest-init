@@ -1,4 +1,4 @@
-export type IImage = {
+export type IPhoto = {
   blurHash: string;
   webUrl: string;
   profileUrl: string;

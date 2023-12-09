@@ -26,6 +26,14 @@ export class CategoryRepository extends Repository<Category> {
     });
   }
 
+  async findCategoryProducts(id: string, withDeleted = false) {
+    return this.findOne({
+      where: { id, products: { is_paid: false } },
+      withDeleted,
+      relations: { products: true },
+    });
+  }
+
   async updateOne(category: Category, dto: UpdateCategoryDto) {
     Object.assign<Category, UpdateCategoryDto>(category, dto);
     await category.save();

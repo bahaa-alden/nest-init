@@ -1,4 +1,4 @@
-import { CloudinaryService } from './../shared/cloudinary';
+import { CloudinaryService } from '../shared/cloudinary';
 import {
   Body,
   Controller,
@@ -21,17 +21,15 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { ImagesService } from './images.service';
-import { SharpPipe } from '../common';
-import { checkIfExist } from '../common';
-import { Public } from '../common';
+import { SharpPipe } from '../common/pipes';
+import { PhotosService } from './photos.service';
 
-@ApiTags('images')
+@ApiTags('photos')
 @ApiBearerAuth('token')
-@Controller('images')
-export class ImagesController {
+@Controller({ path: 'photos', version: '1' })
+export class PhotosController {
   constructor(
-    private imagesService: ImagesService,
+    private photosService: PhotosService,
     private cloudinaryService: CloudinaryService,
   ) {}
 
@@ -60,10 +58,10 @@ export class ImagesController {
     photo: string,
     @Req() req: Request,
   ) {
-    return this.imagesService.uploadSingle(photo, req);
+    return this.photosService.uploadSingle(photo, req);
   }
 
-  //Upload multiple images
+  //Upload multiple photos
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: 'Upload multiple photos',
@@ -93,6 +91,6 @@ export class ImagesController {
     photos: string[],
     @Req() req: Request,
   ) {
-    return this.imagesService.uploadMultiple(photos, req);
+    return this.photosService.uploadMultiple(photos, req);
   }
 }

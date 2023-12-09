@@ -21,19 +21,19 @@ import {
   ApiParam,
   ApiOperation,
 } from '@nestjs/swagger';
-import { Action } from '../../../common';
-import { CheckAbilities } from '../../../common';
-import { Entities, GROUPS } from '../../../common';
-import { CaslAbilitiesGuard } from '../../../common';
+
 import { CreateRoleDto, UpdateRoleDto } from '../dtos';
 import { Role } from '../entities/role.entity';
 import { RolesService } from '../services/roles.service';
+import { CheckAbilities } from '../../../common/decorators';
+import { Action, Entities, GROUPS } from '../../../common/enums';
+import { CaslAbilitiesGuard } from '../../../common/guards';
 
 @ApiBearerAuth('token')
 @ApiTags('Roles')
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Manage, subject: Entities.Role })
-@Controller('roles')
+@Controller({ path: 'roles', version: '1' })
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 

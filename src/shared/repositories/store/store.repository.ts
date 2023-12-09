@@ -28,11 +28,9 @@ export class StoreRepository extends Repository<Store> {
     });
   }
   async updateOne(store: Store, dto: UpdateStoreDto) {
-    Object.assign(store, {
-      city: { id: dto.cityId },
-      name: dto.name,
-      address: dto.address,
-    });
+    store.name = dto.name;
+    store.address = dto.address;
+    store.city.id = dto.cityId;
     await store.save();
     return this.findById(store.id);
   }

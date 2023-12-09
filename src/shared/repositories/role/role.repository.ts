@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ROLE } from '../../../common';
+import { ROLE } from '../../../common/enums';
 import { Permission } from '../../../models/permissions';
 import { Role, CreateRoleDto } from '../../../models/roles';
 import { Repository, DataSource, Not, And, Equal } from 'typeorm';

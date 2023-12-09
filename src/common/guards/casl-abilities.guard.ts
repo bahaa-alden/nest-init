@@ -24,9 +24,7 @@ export class CaslAbilitiesGuard implements CanActivate {
     const ability = this.caslAbilityFactory.defineAbility(user);
 
     rules.forEach((rule) =>
-      ForbiddenError.from(ability)
-        .setMessage('You can not perform this action')
-        .throwUnlessCan(rule.action, rule.subject),
+      ForbiddenError.from(ability).throwUnlessCan(rule.action, rule.subject),
     );
     return true;
   }

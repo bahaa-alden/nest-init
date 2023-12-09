@@ -7,9 +7,10 @@ import {
   IsEmail,
   IsUUID,
 } from 'class-validator';
-import { IsUnique } from '../../../common';
-import { Entities } from '../../../common';
+import { IsPhotoExist, IsUnique } from '../../../common/decorators';
+import { Entities } from '../../../common/enums';
 import { Transform } from 'class-transformer';
+import { getPhotoPath } from '../../../common/helpers';
 
 export class UpdateEmployeeDto {
   @IsString()
@@ -37,9 +38,10 @@ export class UpdateEmployeeDto {
   storeId?: string;
 
   @ApiProperty({ required: false })
-  @IsNotEmpty()
   @IsOptional()
   @IsString()
+  @Transform(({ value }: { value: string }) => getPhotoPath(value))
+  @IsPhotoExist()
   readonly photo?: string;
 
   @ApiProperty()

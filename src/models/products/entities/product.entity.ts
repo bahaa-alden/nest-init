@@ -8,12 +8,15 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  Relation,
 } from 'typeorm';
-import { GROUPS, GlobalEntity } from '../../../common';
+import { GROUPS } from '../../../common/enums';
 import { Store } from './../../stores';
-import { ProductImage } from './product-image.entity';
+import { ProductPhoto } from '../../product-photos/entities/product-photo.entity';
 import { User } from '../../users';
 import { Exclude, Expose } from 'class-transformer';
+import { Comment } from '../../comments/entities/comment.entity';
+import { GlobalEntity } from '../../../common/entities';
 
 @Entity({ name: 'products' })
 export class Product extends GlobalEntity {
@@ -30,11 +33,11 @@ export class Product extends GlobalEntity {
   is_paid: boolean;
 
   @Column({ default: 0 })
-  comments: number;
+  commentsNum: number;
 
   @ManyToOne(() => User, (user) => user.products)
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
-  user: User;
+  user: Relation<User>;
 
   @Exclude()
   @Column({ type: 'uuid' })
@@ -43,13 +46,16 @@ export class Product extends GlobalEntity {
   @OneToMany(() => Coupon, (coupon) => coupon.product, { cascade: true })
   coupons: Coupon[];
 
-  @OneToMany(() => ProductImage, (productImage) => productImage.product)
-  images: ProductImage[];
+  @OneToMany(() => ProductPhoto, (productPhoto) => productPhoto.product, {
+    cascade: true,
+  })
+  photos: ProductPhoto[];
 
   @Exclude()
   @ManyToMany(() => User, (user) => user.likedProducts, {
     cascade: true,
     onDelete: 'CASCADE',
+    eager: true,
   })
   @JoinTable({
     joinColumn: { name: 'productId', referencedColumnName: 'id' },
@@ -72,8 +78,13 @@ export class Product extends GlobalEntity {
   @Column({ type: 'uuid' })
   storeId: string;
 
+  @Exclude()
+  @OneToMany(() => Comment, (comment) => comment.product, { cascade: true })
+  comments: Comment[];
+
   @Expose({})
   likes() {
-    return this.likedBy !== null ? this.likedBy.length : 0;
+    if (this.likedBy) return this.likedBy.length;
+    return 0;
   }
 }

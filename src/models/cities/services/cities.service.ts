@@ -4,7 +4,7 @@ import { UpdateCityDto } from '../dtos';
 import { InjectRepository } from '@nestjs/typeorm';
 import { City } from '../entities/city.entity';
 import { Repository } from 'typeorm';
-import { CityRepository } from '../../../shared/repositories';
+import { CityRepository } from '../../../shared/repositories/city';
 
 @Injectable()
 export class CitiesService {

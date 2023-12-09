@@ -1,4 +1,4 @@
-import { ROLE } from '../../../common';
+import { ROLE } from '../../../common/enums';
 
 export type IAdmin = {
   name: string;

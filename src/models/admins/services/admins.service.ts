@@ -3,14 +3,13 @@ import {
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
-import { LoginDto } from '../../../auth';
-import { ROLE } from '../../../common';
+import { ROLE } from '../../../common/enums';
 import { JwtTokenService } from '../../../shared/jwt';
 import { Role } from '../../roles';
-import { CreateAdminDto, UpdateAdminDto } from '../dtos';
+import { CreateAdminDto, LoginAdminDto, UpdateAdminDto } from '../dtos';
 import { Admin } from '../entities/admin.entity';
-import { RoleRepository } from '../../../shared/repositories';
-import { AdminRepository } from '../../../shared/repositories';
+import { RoleRepository } from '../../../shared/repositories/role';
+import { AdminRepository } from '../../../shared/repositories/admin';
 
 @Injectable()
 export class AdminsService {
@@ -20,7 +19,7 @@ export class AdminsService {
     private adminRepository: AdminRepository,
   ) {}
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginAdminDto) {
     const admin = await this.adminRepository.findByEmail(dto.email);
     if (!admin || !(await admin.verifyHash(admin.password, dto.password))) {
       throw new UnauthorizedException('Credentials incorrect');

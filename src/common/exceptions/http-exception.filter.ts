@@ -31,56 +31,41 @@ export class HttpExceptionFilter implements ExceptionFilter {
   ) {}
 
   catch(exception: any, host: ArgumentsHost) {
-    const { httpAdapter } = this.httpAdapterHost;
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     let error: any =
       exception instanceof ForbiddenError
-        ? new ForbiddenException(exception.message)
+        ? new ForbiddenException('you can not perform this action')
         : exception.code === '23505'
         ? new BadRequestException(exception.detail)
         : exception.code === '23503'
         ? new NotFoundException(exception.detail + ' not found')
         : exception instanceof HttpException
-        ? exception.getResponse()
+        ? exception
         : new InternalServerErrorException('something went very wrong');
 
     if (error.message === 'Unauthorized') error = handelPassportError();
-    const status = (() => {
-      switch (true) {
-        case exception instanceof HttpException:
-          return exception.getStatus();
-        case exception instanceof ForbiddenError:
-          return HttpStatus.FORBIDDEN;
-        default:
-          return HttpStatus.INTERNAL_SERVER_ERROR;
-      }
-    })();
 
     if (this.appConfig.env === 'production') {
-      if (status === 500) console.log(exception);
+      if (error.getStatus() === 500) console.log(exception);
       const rep = {
         type: error.errors ? 'form' : 'default',
         message: error.message,
         errors: error.errors,
       };
-      this.reply(httpAdapter, response, status, rep);
+      this.reply(response, rep, error.getStatus());
     } else {
       const rep = {
         error: exception,
         stack: exception.stack,
-        message: exception.message,
+        message: error.message,
       };
-      this.reply(httpAdapter, response, status, rep);
+      this.reply(response, rep, error.getStatus());
     }
   }
 
-  reply(
-    httpAdapter: AbstractHttpAdapter,
-    response: Response,
-    status: number,
-    rep: any,
-  ) {
+  reply(response: Response, rep: any, status: number) {
+    const { httpAdapter } = this.httpAdapterHost;
     httpAdapter.reply(response, rep, status);
   }
 }

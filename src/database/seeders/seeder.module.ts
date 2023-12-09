@@ -1,7 +1,7 @@
 import { Logger, Module } from '@nestjs/common';
 import { PermissionsSeederModule } from './permissions';
 import { DatabaseModule } from '../../providers/database';
-import { Seeder } from './seeder';
+import { InitialDatabaseSeeder } from './seeder';
 import { ConfigModule } from '@nestjs/config';
 import { SuperadminModule } from './superadmin';
 import Joi = require('@hapi/joi');
@@ -28,6 +28,6 @@ import { RolesSeederModule } from './roles';
     SuperadminModule,
     RolesSeederModule,
   ],
-  providers: [Logger, Seeder],
+  providers: [Logger, InitialDatabaseSeeder],
 })
 export class SeederModule {}

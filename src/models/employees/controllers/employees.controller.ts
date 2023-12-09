@@ -20,11 +20,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { EmployeesService } from '../services/employees.service';
-import { LoginResponseDto, LoginDto } from '../../../auth';
-import { Public, CheckAbilities } from '../../../common';
-import { GROUPS, Entities, Action } from '../../../common';
-import { CaslAbilitiesGuard, JwtGuard } from '../../../common';
+import { Public, CheckAbilities } from '../../../common/decorators';
+import { GROUPS, Entities, Action } from '../../../common/enums';
+import { CaslAbilitiesGuard, JwtGuard } from '../../../common/guards';
 import { CreateEmployeeDto, UpdateEmployeeDto } from '../dtos';
+import { LoginResponseDto, LoginUserDto } from '../../../auth';
 
 @ApiTags('Employees')
 @Controller({ path: 'employees', version: '1' })
@@ -40,7 +40,7 @@ export class EmployeesController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  login(@Body() dto: LoginDto) {
+  login(@Body() dto: LoginUserDto) {
     return this.employeesService.login(dto);
   }
 

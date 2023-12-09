@@ -9,4 +9,6 @@ export enum GROUPS {
   ADMIN = 'group_admin_details',
   ALL_EMPLOYEES = 'group_all_employees',
   EMPLOYEE = 'group_employee_details',
+  ALL_PRODUCTS = 'group_all_products',
+  PRODUCT = 'group_product_details',
 }
