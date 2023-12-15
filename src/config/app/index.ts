@@ -14,4 +14,10 @@ const JwtConfig = registerAs('jwt', () => ({
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN,
 }));
-export { AppConfig, CloudinaryConfig, JwtConfig };
+
+const SuperAdminInfo = registerAs('superadmin', () => ({
+  name: process.env.SUPER_ADMIN_NAME,
+  email: process.env.SUPER_ADMIN_EMAIL,
+  password: process.env.SUPER_ADMIN_PASSWORD,
+}));
+export { AppConfig, CloudinaryConfig, JwtConfig, SuperAdminInfo };

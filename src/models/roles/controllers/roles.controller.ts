@@ -20,6 +20,8 @@ import {
   ApiCreatedResponse,
   ApiParam,
   ApiOperation,
+  ApiBadRequestResponse,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 
 import { CreateRoleDto, UpdateRoleDto } from '../dtos';
@@ -29,8 +31,10 @@ import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { CaslAbilitiesGuard } from '../../../common/guards';
 
-@ApiBearerAuth('token')
 @ApiTags('Roles')
+@ApiBearerAuth('token')
+@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiForbiddenResponse({ description: 'You can not perform this action' })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Manage, subject: Entities.Role })
 @Controller({ path: 'roles', version: '1' })
@@ -51,10 +55,10 @@ export class RolesController {
     return this.rolesService.create(dto);
   }
 
+  @ApiOkResponse({ type: Role })
   @SerializeOptions({
     groups: [GROUPS.ROLE],
   })
-  @ApiOkResponse({ type: Role })
   @ApiParam({ name: 'id' })
   @Get(':id')
   async findById(@Param('id') id: string): Promise<Role | undefined> {

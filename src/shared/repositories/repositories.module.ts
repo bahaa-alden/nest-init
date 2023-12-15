@@ -9,10 +9,12 @@ import { PermissionRepository } from './permission';
 import { CommentsRepository } from './comment';
 import { ProductPhotosRepository, ProductRepository } from './product';
 import { UserPhotosRepository, UserRepository } from './user';
+import { CouponRepository } from './coupon/coupon.repository';
 
 @Global()
 @Module({
   providers: [
+    CouponRepository,
     UserPhotosRepository,
     UserRepository,
     AdminRepository,
@@ -43,6 +45,7 @@ import { UserPhotosRepository, UserRepository } from './user';
     CommentsRepository,
     ProductRepository,
     ProductPhotosRepository,
+    CouponRepository,
   ],
 })
 export class RepositoriesModule {}

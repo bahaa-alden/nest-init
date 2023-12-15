@@ -2,17 +2,13 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 
 import { ROLE } from '../../../common/enums';
-import { CloudinaryService } from '../../../shared/cloudinary';
 import { JwtTokenService } from '../../../shared/jwt';
 import { CreateEmployeeDto } from '../dtos/create-employee.dto';
 import { UpdateEmployeeDto } from '../dtos/update-employee.dto';
-import { EmployeePhoto } from '../entities/employee-image.entity';
 import { Employee } from '../entities/employee.entity';
-import { StoresService } from '../../stores/services/stores.service';
 import { EmployeeRepository } from '../../../shared/repositories/employee';
 import { LoginUserDto } from '../../../auth';
 import { RoleRepository } from '../../../shared/repositories/role';
@@ -58,10 +54,9 @@ export class EmployeesService {
   }
 
   async create(dto: CreateEmployeeDto) {
+    const role = await this.roleRepository.findOneBy({ name: ROLE.EMPLOYEE });
     const store = await this.storeRepository.findById(dto.storeId);
-    const role = await this.roleRepository.findByName(ROLE.EMPLOYEE);
-    console.log(role);
-    return this.employeeRepository.createOne(dto, role, store);
+    return this.employeeRepository.createOne(dto, store, role);
   }
 
   async update(id: string, dto: UpdateEmployeeDto): Promise<Employee> {

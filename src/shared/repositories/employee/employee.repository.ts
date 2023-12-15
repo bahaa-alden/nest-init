@@ -20,7 +20,7 @@ export class EmployeeRepository extends Repository<Employee> {
     super(Employee, dataSource.createEntityManager());
   }
 
-  async createOne(dto: CreateEmployeeDto, role: Role, store: Store) {
+  async createOne(dto: CreateEmployeeDto, store: Store, role: Role) {
     const employee = this.create({ ...dto, role, photos: [], store });
     employee.photos.push(this.employeePhotosRepository.create(defaultPhoto));
     await employee.save();

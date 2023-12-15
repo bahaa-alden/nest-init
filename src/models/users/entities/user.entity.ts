@@ -8,9 +8,9 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { BasePerson } from '../../../common/entities';
+import { BasePerson, BasePhoto } from '../../../common/entities';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { GROUPS } from '../../../common/enums';
+import { GROUPS, ROLE } from '../../../common/enums';
 import { Role } from '../../roles';
 import { UserPhoto } from './user-image.entity';
 import * as crypto from 'crypto';
@@ -36,6 +36,7 @@ export class User extends BasePerson {
   @Exclude()
   @OneToMany(() => UserPhoto, (userPhoto) => userPhoto.user, {
     cascade: true,
+    eager: true,
   })
   photos: UserPhoto[];
 
@@ -52,7 +53,7 @@ export class User extends BasePerson {
   products: Product[];
 
   @Exclude()
-  @ManyToOne(() => Product, (product) => product.likedBy)
+  @ManyToMany(() => Product, (product) => product.likedBy)
   likedProducts: Product[];
 
   @ManyToMany(() => Category, (category) => category.users)
@@ -67,14 +68,8 @@ export class User extends BasePerson {
   })
   comments: Comment[];
 
-  @Expose({
-    groups: [
-      GROUPS.USER,
-      GROUPS.ALL_USERS,
-      GROUPS.ALL_PRODUCTS,
-      GROUPS.PRODUCT,
-    ],
-  })
+  @Expose({})
+  @ApiProperty({ type: BasePhoto })
   photo() {
     if (this.photos) return this.photos[this.photos.length - 1];
     return undefined;

@@ -25,12 +25,13 @@
     "db1:dev:rm": "docker compose rm -s -f -v dev-db",
     "db:dev:up": "docker compose up -d dev-db",
     "db:dev:restart": "yarn db:dev:rm && yarn db:dev:up",
-    "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
-    "seed:prod": "ENV=production ts-node -r tsconfig-paths/register src/seed.ts",
-    "db:create": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs db:create  -r src/config/database/postgres --initialDatabase=postgres",
-    "db:drop": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs db:drop  -r src/config/database/postgres --initialDatabase=postgres",
-    "db:seed": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run  -r src/config/database/postgres",
-    "db:seed:create": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:create  --name  src/database/seeders/category/category.seeder.ts"
+    "db:create": "ts-node -r dotenv/config ./node_modules/typeorm-extension/bin/cli.cjs db:create  -r src/config/database/postgres --initialDatabase=postgres",
+    "db:drop": "ts-node -r dotenv/config ./node_modules/typeorm-extension/bin/cli.cjs db:drop  -r src/config/database/postgres --initialDatabase=postgres",
+    "db:seed:fake": "ts-node -r dotenv/config ./node_modules/typeorm-extension/bin/cli.cjs seed:run  -r src/config/database/postgres",
+    "db:seed:create": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:create  --name  src/database/seeders/category/category.seeder.ts",
+    "db:seed:real": "ts-node -r tsconfig-paths/register src/seed.ts",
+    "db:seed:prod": "ENV=production ts-node -r tsconfig-paths/register src/seed.ts",
+    "db:seed": "yarn db:create && yarn db:seed:real && yarn db:seed:fake"
   },
   "dependencies": {
     "@casl/ability": "^6.5.0",

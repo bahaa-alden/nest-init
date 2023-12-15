@@ -1,5 +1,8 @@
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -27,35 +30,42 @@ import { CreateEmployeeDto, UpdateEmployeeDto } from '../dtos';
 import { LoginResponseDto, LoginUserDto } from '../../../auth';
 
 @ApiTags('Employees')
+@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiForbiddenResponse({ description: 'You can not perform this action' })
 @Controller({ path: 'employees', version: '1' })
-export class EmployeesController {
+export class EmployeesAuthController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Public()
-  @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })
   @ApiOperation({ summary: 'Login' })
   @ApiOkResponse({
     description: 'Employee logged in successfully',
     type: LoginResponseDto,
   })
+  @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })
   @HttpCode(HttpStatus.OK)
   @Post('login')
   login(@Body() dto: LoginUserDto) {
     return this.employeesService.login(dto);
   }
+}
 
-  @ApiBearerAuth('token')
-  @UseGuards(CaslAbilitiesGuard)
-  @SerializeOptions({ groups: [GROUPS.ALL_EMPLOYEES] })
+@ApiTags('Employees')
+@ApiBearerAuth('token')
+@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@UseGuards(CaslAbilitiesGuard)
+@Controller({ path: 'employees', version: '1' })
+export class EmployeesController {
+  constructor(private readonly employeesService: EmployeesService) {}
   @ApiOkResponse({ type: Employee })
+  @SerializeOptions({ groups: [GROUPS.ALL_EMPLOYEES] })
   @CheckAbilities({ action: Action.Read, subject: Entities.Employee })
   @Get()
   findAll() {
     return this.employeesService.findAll();
   }
 
-  @ApiBearerAuth('token')
-  @UseGuards(CaslAbilitiesGuard)
   @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })
   @ApiOkResponse({ type: Employee })
   @CheckAbilities({ action: Action.Create, subject: Entities.Employee })
@@ -64,8 +74,6 @@ export class EmployeesController {
     return this.employeesService.create(createEmployeeDto);
   }
 
-  @ApiBearerAuth('token')
-  @UseGuards(CaslAbilitiesGuard)
   @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })
   @ApiOkResponse({ type: Employee })
   @CheckAbilities({ action: Action.Read, subject: Entities.Employee })
@@ -74,8 +82,6 @@ export class EmployeesController {
     return this.employeesService.findOne(id);
   }
 
-  @ApiBearerAuth('token')
-  @UseGuards(JwtGuard, CaslAbilitiesGuard)
   @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })
   @ApiOkResponse({ type: Employee })
   @CheckAbilities({ action: Action.Update, subject: Entities.Employee })
@@ -87,8 +93,7 @@ export class EmployeesController {
     return this.employeesService.update(id, dto);
   }
 
-  @ApiBearerAuth('token')
-  @UseGuards(JwtGuard, CaslAbilitiesGuard)
+  @ApiNoContentResponse()
   @CheckAbilities({ action: Action.Delete, subject: Entities.Employee })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')

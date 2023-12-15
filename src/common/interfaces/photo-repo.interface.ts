@@ -1,5 +1,6 @@
 export interface IPhotoRepository<T> {
-  findById(id: string): Promise<T>;
-  removeOne(publicId: string): Promise<T>;
+  findAll(productId: string): Promise<T[]>;
+  findById(id: string, relations?: string[]): Promise<T>;
+  removeOne(photo: T): Promise<void>;
   uploadPhotos(paths: string[]): Promise<T[]>;
 }

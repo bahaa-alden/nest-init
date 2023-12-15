@@ -43,7 +43,7 @@ export class AdminsService {
   }
 
   async create(dto: CreateAdminDto) {
-    const role = await this.roleRepository.findByName(ROLE.ADMIN);
+    const role = await Role.findOneBy({ name: ROLE.ADMIN });
 
     const admin = await this.adminRepository.createOne(dto, role);
 

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { UserPhoto } from '../../../models/users';
 import { Repository, DataSource } from 'typeorm';
-import { CloudinaryService } from '../../cloudinary/cloudinary.service';
 import { createBlurHash } from '../../../common/helpers';
+import { CloudinaryService } from '../../cloudinary';
 
 @Injectable()
 export class UserPhotosRepository extends Repository<UserPhoto> {

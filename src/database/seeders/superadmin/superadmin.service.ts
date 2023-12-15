@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { superadmin } from './data';
 import { Role } from '../../../models/roles';
 import { Admin, AdminPhoto } from '../../../models/admins';
 import { ROLE } from '../../../common/enums';
 import { defaultPhoto } from '../../../common/constants';
+import { SuperAdminInfo } from '../../../config/app';
+import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 
@@ -29,6 +30,8 @@ export class SuperadminService {
     private adminPhotosRepository: Repository<AdminPhoto>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @Inject(SuperAdminInfo.KEY)
+    private superAdminInfo: ConfigType<typeof SuperAdminInfo>,
   ) {}
   /**
    * Seed all Admin.
@@ -51,9 +54,9 @@ export class SuperadminService {
           name: ROLE.SUPER_ADMIN,
         });
         const admin = this.adminRepository.create({
-          name: superadmin.name,
-          email: superadmin.email,
-          password: superadmin.password,
+          name: this.superAdminInfo.name,
+          email: this.superAdminInfo.email,
+          password: this.superAdminInfo.password,
           photos: [],
           role,
         });

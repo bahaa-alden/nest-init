@@ -1,10 +1,19 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Exclude, Expose, Transform } from 'class-transformer';
 
 import { Role } from '../../roles';
 import { AdminPhoto } from './admin-image.entity';
-import { BasePerson } from '../../../common/entities';
-import { GROUPS } from '../../../common/enums';
+import { BasePerson, BasePhoto } from '../../../common/entities';
+import { GROUPS, ROLE } from '../../../common/enums';
+import { ApiProperty } from '@nestjs/swagger';
+import { UserPhoto } from '../../users';
 
 @Entity({ name: 'admins' })
 export class Admin extends BasePerson {
@@ -25,6 +34,7 @@ export class Admin extends BasePerson {
   photos: AdminPhoto[];
 
   @Expose()
+  @ApiProperty({ type: BasePhoto })
   photo() {
     return this.photos[this.photos.length - 1];
   }

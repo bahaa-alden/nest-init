@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Param } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CommentsRepository } from '../../../shared/repositories/comment';
 import { Comment } from '../entities/comment.entity';
 import { CaslAbilityFactory } from '../../../shared/casl/casl-ability.factory';
@@ -6,21 +6,19 @@ import { CreateCommentDto, UpdateCommentDto } from '../dtos';
 import { User } from '../../users';
 import { ForbiddenError } from '@casl/ability';
 import { Action } from '../../../common/enums';
+import { ProductRepository } from '../../../shared/repositories/product/product.repository';
+import { PaginatedResponse } from '../../../common/types';
 
 @Injectable()
 export class CommentsService {
   constructor(
     private readonly commentRepository: CommentsRepository,
+    private readonly productRepository: ProductRepository,
     private caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
-  async findAll(page: number, limit: number): Promise<Comment[]> {
-    const skip = ((page - 1) * limit) | 0;
-    const take = limit | 100;
-    return this.commentRepository.find({
-      skip,
-      take,
-    });
+  async findAll(productId: string, page: number, limit: number) {
+    return this.commentRepository.findAll(productId, page, limit);
   }
 
   async findOne(id: string): Promise<Comment> {
@@ -31,9 +29,14 @@ export class CommentsService {
     return comment;
   }
 
-  async create(dto: CreateCommentDto): Promise<Comment> {
-    const comment = this.commentRepository.create(dto);
-    return this.commentRepository.save(comment);
+  async create(
+    productId: string,
+    user: User,
+    dto: CreateCommentDto,
+  ): Promise<Comment> {
+    const product = await this.productRepository.findById(productId);
+    if (!product) throw new NotFoundException('Product not found');
+    return this.commentRepository.createOne(product, user, dto);
   }
 
   async update(
@@ -44,8 +47,7 @@ export class CommentsService {
     const comment = await this.findOne(id); // Check if the comment exists
     const ability = this.caslAbilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(Action.Update, comment);
-    await this.commentRepository.update(id, dto);
-    return this.findOne(id); // Return the updated comment
+    return this.commentRepository.updateOne(id, dto); // Return the updated comment
   }
 
   async remove(id: string, user: User): Promise<void> {

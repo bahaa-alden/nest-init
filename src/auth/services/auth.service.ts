@@ -27,7 +27,7 @@ export class AuthService {
     private roleRepository: RoleRepository,
   ) {}
   async signup(dto: SignUpDto) {
-    const role = await this.roleRepository.findByName(ROLE.USER);
+    const role = await this.roleRepository.findOneBy({ name: ROLE.USER });
     const user = await this.usersRepository.createOne(dto, role);
     const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
     return {

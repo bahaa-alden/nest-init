@@ -11,4 +11,6 @@ export enum GROUPS {
   EMPLOYEE = 'group_employee_details',
   ALL_PRODUCTS = 'group_all_products',
   PRODUCT = 'group_product_details',
+  ALL_COMMENTS = 'group_all_comments',
+  COMMENT = 'group_comment_details',
 }

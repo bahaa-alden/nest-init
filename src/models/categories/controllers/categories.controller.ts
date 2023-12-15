@@ -12,8 +12,10 @@ import {
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiTags,
@@ -25,34 +27,36 @@ import { Category } from '../entities/category.entity';
 
 @ApiTags('Categories')
 @ApiBearerAuth('token')
+@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiForbiddenResponse({ description: 'You can not perform this action' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'categories', version: '1' })
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @CheckAbilities({ action: Action.Create, subject: Entities.Category })
   @ApiCreatedResponse({ type: Category })
+  @CheckAbilities({ action: Action.Create, subject: Entities.Category })
   @Post()
   create(@Body() dto: CreateCategoryDto): any {
     return this.categoriesService.create(dto);
   }
 
-  @CheckAbilities({ action: Action.Read, subject: Entities.Category })
   @ApiOkResponse({ type: Category, isArray: true })
+  @CheckAbilities({ action: Action.Read, subject: Entities.Category })
   @Get()
   findAll() {
     return this.categoriesService.findAll();
   }
 
-  @CheckAbilities({ action: Action.Read, subject: Entities.Category })
   @ApiOkResponse({ type: Category })
+  @CheckAbilities({ action: Action.Read, subject: Entities.Category })
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.findOne(id);
   }
 
-  @CheckAbilities({ action: Action.Update, subject: Entities.Category })
   @ApiOkResponse({ type: Category })
+  @CheckAbilities({ action: Action.Update, subject: Entities.Category })
   @Patch(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -61,15 +65,15 @@ export class CategoriesController {
     return this.categoriesService.update(id, dto);
   }
 
-  @CheckAbilities({ action: Action.Delete, subject: Entities.Category })
   @ApiNoContentResponse({})
+  @CheckAbilities({ action: Action.Delete, subject: Entities.Category })
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.remove(id);
   }
 
-  @CheckAbilities({ action: Action.Update, subject: Entities.Category })
   @ApiOkResponse({ type: Category })
+  @CheckAbilities({ action: Action.Update, subject: Entities.Category })
   @Post(':id/recover')
   recover(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.recover(id);

@@ -4,48 +4,53 @@ import { User } from '../../users';
 
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
   JoinColumn,
+  Unique,
+  Relation,
 } from 'typeorm';
 import { GlobalEntity } from '../../../common/entities';
+import { ApiProperty } from '@nestjs/swagger';
 
+@Unique('un_coupon', ['userId', 'productId'])
 @Entity('coupons')
 export class Coupon extends GlobalEntity {
+  @ApiProperty({ type: User })
   @ManyToOne(() => User, (user) => user.myCoupons, {
     eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: Relation<User>;
 
   @Column({ type: 'uuid' })
   userId: string;
 
   @ManyToOne(() => User, (proOwner) => proOwner.ownedCoupons, {
-    eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'proOwnerId' })
-  proOwner: User;
+  proOwner: Relation<User>;
 
   @Column({ type: 'uuid' })
   proOwnerId: string;
 
+  @ApiProperty({ type: Product })
   @ManyToOne(() => Product, (product) => product.coupons, {
-    eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'productId' })
-  product: Product;
+  product: Relation<Product>;
 
   @Column({ type: 'uuid' })
   productId: string;
 
-  @Column({ default: null, nullable: true })
+  @ApiProperty()
+  @Column({ default: null, nullable: true, type: 'date' })
   expire: Date;
 
+  @ApiProperty()
   @Column()
   discount: number;
 

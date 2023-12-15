@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { UserPhotosRepository } from './user-photos.repository';
 import { CreateUserDto, UpdateUserDto, User } from '../../../models/users';
 import { defaultPhoto } from '../../../common/constants';
+import { pagination } from '../../../common/helpers';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -21,8 +22,17 @@ export class UserRepository extends Repository<User> {
     return user;
   }
 
-  async findAll(withDeleted: boolean) {
-    return this.find({ withDeleted, relations: { photos: true, role: true } });
+  async findAll(page: number, limit: number, withDeleted: boolean) {
+    const skip = (page - 1) * limit || 0;
+    const take = limit || 100;
+    const data = await this.find({
+      relations: { photos: true, role: true },
+      skip,
+      take,
+      withDeleted,
+    });
+    const totalDataCount = await this.count({ withDeleted });
+    return pagination(page, limit, totalDataCount, data);
   }
 
   async findById(id: string, withDeleted = false) {
@@ -37,6 +47,17 @@ export class UserRepository extends Repository<User> {
       },
       withDeleted,
       relations: { photos: true, role: true },
+    });
+  }
+
+  async findByIdForThings(id: string) {
+    return await this.findOne({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+      },
+      relations: { photos: true },
     });
   }
 

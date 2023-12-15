@@ -28,6 +28,7 @@ import { JwtTokenModule } from './shared/jwt';
 import { RepositoriesModule } from './shared/repositories/repositories.module';
 import { CouponsModule } from './models/coupons/coupons.module';
 import { CommentsModule } from './models/comments/comments.module';
+import { ProductPhotosModule } from './models/product-photos/product-photos.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CommentsModule } from './models/comments/comments.module';
     AdminsModule,
     EmployeesModule,
     ProductsModule,
+    ProductPhotosModule,
     CommentsModule,
     CouponsModule,
     CategoriesModule,

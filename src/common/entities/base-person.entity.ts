@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Exclude } from 'class-transformer';
+import { Expose, Exclude, Transform } from 'class-transformer';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -17,18 +17,6 @@ import { GlobalEntity } from './global-entity.entity';
 
 @Entity()
 export class BasePerson extends GlobalEntity {
-  @Expose({
-    groups: [
-      GROUPS.ALL_USERS,
-      GROUPS.USER,
-      GROUPS.ALL_ADMINS,
-      GROUPS.ADMIN,
-      GROUPS.ALL_EMPLOYEES,
-      GROUPS.EMPLOYEE,
-      GROUPS.ALL_PRODUCTS,
-      GROUPS.PRODUCT,
-    ],
-  })
   @ApiProperty()
   @Column({})
   name: string;
@@ -41,8 +29,6 @@ export class BasePerson extends GlobalEntity {
       GROUPS.ADMIN,
       GROUPS.ALL_EMPLOYEES,
       GROUPS.EMPLOYEE,
-      GROUPS.ALL_PRODUCTS,
-      GROUPS.PRODUCT,
     ],
   })
   @ApiProperty()

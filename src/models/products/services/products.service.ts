@@ -8,6 +8,7 @@ import { ForbiddenError } from '@casl/ability';
 import { Action } from '../../../common/enums';
 import { CategoryRepository } from '../../../shared/repositories/category';
 import { StoreRepository } from '../../../shared/repositories/store';
+import { PaginatedResponse } from '../../../common/types';
 
 @Injectable()
 export class ProductsService {
@@ -18,10 +19,12 @@ export class ProductsService {
     private readonly storeRepository: StoreRepository,
   ) {}
 
-  async findAll(page: number, limit: number): Promise<Product[]> {
-    const skip = ((page - 1) * limit) | 0;
-    const take = limit | 100;
-    return this.productRepository.findAll(skip, take);
+  async findAll(
+    page: number,
+    limit: number,
+    is_paid: boolean,
+  ): Promise<PaginatedResponse<Product>> {
+    return this.productRepository.findAll(page, limit, is_paid);
   }
 
   async findOne(id: string): Promise<Product> {

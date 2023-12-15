@@ -15,8 +15,10 @@ import { CitiesService } from '../services/cities.service';
 import { CreateCityDto } from '../dtos';
 import { UpdateCityDto } from '../dtos';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiTags,
@@ -28,6 +30,8 @@ import { City } from '../entities/city.entity';
 
 @ApiTags('cities')
 @ApiBearerAuth('token')
+@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiForbiddenResponse({ description: 'You can not perform this action' })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Manage, subject: Entities.City })
 @Controller({ path: 'cities', version: '1' })

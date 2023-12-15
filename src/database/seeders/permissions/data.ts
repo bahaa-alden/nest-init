@@ -72,6 +72,11 @@ export const permissions: pp[] = [
     roles: [ROLE.EMPLOYEE, ROLE.ADMIN],
   },
   {
+    action: Action.Read,
+    subject: Entities.Product,
+    roles: [ROLE.USER, ROLE.ADMIN, ROLE.EMPLOYEE],
+  },
+  {
     action: Action.Create,
     subject: Entities.Product,
     roles: [ROLE.USER],

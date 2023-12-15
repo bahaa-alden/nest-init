@@ -9,8 +9,6 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { City } from '../../cities';
 import { Exclude, Transform } from 'class-transformer';

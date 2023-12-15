@@ -17,28 +17,32 @@ import { User } from '../../users';
 import { Exclude, Expose } from 'class-transformer';
 import { Comment } from '../../comments/entities/comment.entity';
 import { GlobalEntity } from '../../../common/entities';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({ name: 'products' })
 export class Product extends GlobalEntity {
+  @ApiProperty()
   @Column()
   title: string;
 
+  @ApiProperty()
   @Column()
   content: string;
 
+  @ApiProperty({ minimum: 1 })
   @Column()
   price: number;
 
+  @ApiProperty({ default: false })
   @Column({ default: false })
   is_paid: boolean;
 
-  @Column({ default: 0 })
-  commentsNum: number;
-
+  @ApiProperty({ type: User })
   @ManyToOne(() => User, (user) => user.products)
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Relation<User>;
 
+  // @ApiProperty()
   @Exclude()
   @Column({ type: 'uuid' })
   userId: string;
@@ -46,6 +50,7 @@ export class Product extends GlobalEntity {
   @OneToMany(() => Coupon, (coupon) => coupon.product, { cascade: true })
   coupons: Coupon[];
 
+  @ApiProperty({ type: ProductPhoto, isArray: false })
   @OneToMany(() => ProductPhoto, (productPhoto) => productPhoto.product, {
     cascade: true,
   })
@@ -63,16 +68,19 @@ export class Product extends GlobalEntity {
   })
   likedBy: User[];
 
+  @ApiProperty({ type: Category })
   @ManyToOne(() => Category, (category) => category.products)
   @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
-  category: Category;
+  category: Relation<Category>;
 
+  // @ApiProperty()
   @Column({ type: 'uuid' })
   categoryId: string;
 
-  @ManyToOne(() => Store, (store) => store.products)
+  @ApiProperty({ type: Store })
+  @ManyToOne((type) => Store, (store) => store.products)
   @JoinColumn({ name: 'storeId', referencedColumnName: 'id' })
-  store: Store;
+  store: Relation<Store>;
 
   @Exclude()
   @Column({ type: 'uuid' })
@@ -80,11 +88,19 @@ export class Product extends GlobalEntity {
 
   @Exclude()
   @OneToMany(() => Comment, (comment) => comment.product, { cascade: true })
-  comments: Comment[];
+  _comments: Comment[];
 
+  @ApiProperty({ default: 0 })
   @Expose({})
   likes() {
     if (this.likedBy) return this.likedBy.length;
+    return 0;
+  }
+
+  @ApiProperty({ default: 0 })
+  @Expose({})
+  comments() {
+    if (this.comments) return this.comments.length;
     return 0;
   }
 }

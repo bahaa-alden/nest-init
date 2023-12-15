@@ -10,13 +10,14 @@ export const SWAGGER_CONFIG: SwaggerConfig = {
 
 export function createDocument(app: INestApplication): OpenAPIObject {
   const builder = new DocumentBuilder()
+    .setBasePath('http://localhost:' + process.env.PORT)
     .setTitle(SWAGGER_CONFIG.title)
     .setDescription(SWAGGER_CONFIG.description)
+    .setVersion(SWAGGER_CONFIG.version)
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'jwt' },
       'token',
-    )
-    .setVersion(SWAGGER_CONFIG.version);
+    );
 
   const options = builder.build();
   return SwaggerModule.createDocument(app, options);

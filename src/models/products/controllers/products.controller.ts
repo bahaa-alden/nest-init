@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  SerializeOptions,
 } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
@@ -15,8 +16,10 @@ import { CheckAbilities, GetUser } from '../../../common/decorators';
 import { User } from '../../users';
 import { ProductsService } from '../services';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiQuery,
@@ -24,10 +27,13 @@ import {
 } from '@nestjs/swagger';
 import { CaslAbilitiesGuard } from '../../../common/guards';
 import { Product } from '../entities/product.entity';
-import { Action, Entities } from '../../../common/enums';
+import { Action, Entities, GROUPS } from '../../../common/enums';
+import { PaginatedResponse } from '../../../common/types';
 
-@ApiBearerAuth('token')
 @ApiTags('Products')
+@ApiBearerAuth('token')
+@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiForbiddenResponse({ description: 'You can not perform this action' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'products', version: '1' })
 export class ProductsController {
@@ -40,7 +46,7 @@ export class ProductsController {
     return this.productsService.create(createProductDto, user);
   }
 
-  @ApiOkResponse({ type: Product, isArray: true })
+  @ApiOkResponse({ type: PaginatedResponse<Product> })
   @ApiQuery({
     name: 'page',
     allowEmptyValue: false,
@@ -53,10 +59,21 @@ export class ProductsController {
     example: 10,
     required: false,
   })
+  @ApiQuery({
+    name: 'is_paid',
+    allowEmptyValue: false,
+    type: 'boolean',
+    example: false,
+  })
   @CheckAbilities({ action: Action.Read, subject: Entities.Product })
+  @SerializeOptions({ groups: [GROUPS.ALL_PRODUCTS] })
   @Get()
-  findAll(@Query('page') page: number, @Query('limit') limit: number) {
-    return this.productsService.findAll(page, limit);
+  findAll(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('is_paid') is_paid: boolean,
+  ) {
+    return this.productsService.findAll(page, limit, is_paid);
   }
 
   @ApiCreatedResponse({ type: Product })

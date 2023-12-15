@@ -5,8 +5,6 @@ import PostgresConfig from '../../../config/database/postgres';
 import { AppConfig } from '../../../config/app';
 import { DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
-import categoryFactory from '../../../database/factories/category.factory';
-import { CategorySeeder } from '../../../database/seeders/category/category.seeder';
 
 @Injectable()
 export class PostgresService implements TypeOrmOptionsFactory {
@@ -30,9 +28,12 @@ export class PostgresService implements TypeOrmOptionsFactory {
     const entities: DataSourceOptions['entities'] = [
       __dirname + '/../../../models/**/entities/*.entity.{js,ts}',
     ];
-    const factories: SeederOptions['factories'] = [categoryFactory];
-    const seeds: SeederOptions['seeds'] = [CategorySeeder];
-
+    const factories: SeederOptions['factories'] = [
+      __dirname + '/../../../database/factories/**/*.factory.{js,ts}',
+    ];
+    const seeds: SeederOptions['seeds'] = [
+      __dirname + '/../../../database/seeders/**/*.seeder.{js,ts}',
+    ];
     const dataSourceOptions: DataSourceOptions & SeederOptions = {
       type,
       host: this.postgresConfig.host,

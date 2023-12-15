@@ -14,20 +14,18 @@ import { Coupon } from '../../models/coupons';
 @Injectable()
 export class CaslAbilityFactory {
   defineAbility(currentUser: User) {
-    const { can, build, cannot } = new AbilityBuilder<AppAbility>(
-      createMongoAbility,
-    );
+    const { can, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
 
     currentUser.role.permissions.forEach((p) => {
       can(p.action, p.subject);
     });
-    cannot(Action.Update, Comment, { userId: { $ne: currentUser.id } });
-    cannot(Action.Delete, Comment, { userId: { $ne: currentUser.id } });
-    cannot(Action.Update, Product, { userId: { $ne: currentUser.id } });
-    cannot(Action.Delete, Product, { userId: { $ne: currentUser.id } });
-    cannot(Action.Create, Coupon, { proOwnerId: { $ne: currentUser.id } });
-    cannot(Action.Update, Coupon, { proOwnerId: { $ne: currentUser.id } });
-    cannot(Action.Delete, Coupon, { proOwnerId: { $ne: currentUser.id } });
+    can(Action.Update, Comment, { userId: { $eq: currentUser.id } });
+    can(Action.Delete, Comment, { userId: { $eq: currentUser.id } });
+    can(Action.Update, Product, { userId: { $eq: currentUser.id } });
+    can(Action.Delete, Product, { userId: { $eq: currentUser.id } });
+    can(Action.Create, Coupon, { proOwnerId: { $eq: currentUser.id } });
+    can(Action.Update, Coupon, { proOwnerId: { $eq: currentUser.id } });
+    can(Action.Delete, Coupon, { proOwnerId: { $eq: currentUser.id } });
     return build({
       detectSubjectType: (item) =>
         item.constructor as ExtractSubjectType<Subjects>,

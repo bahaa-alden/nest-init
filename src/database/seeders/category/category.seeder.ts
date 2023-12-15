@@ -8,6 +8,7 @@ export class CategorySeeder implements Seeder {
     factoryManager: SeederFactoryManager,
   ): Promise<void> {
     const categoryFactory = factoryManager.get(Category);
-    await categoryFactory.saveMany(10);
+    const categories = await categoryFactory.saveMany(5);
+    console.log('Complete seeding categories,count: ' + categories.length);
   }
 }

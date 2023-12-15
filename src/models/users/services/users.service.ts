@@ -8,11 +8,11 @@ import { UserRepository } from '../../../shared/repositories/user';
 export class UsersService {
   constructor(private userRepository: UserRepository) {}
 
-  findAll(user: User) {
+  findAll(page: number, limit: number, user: User) {
     if (user.role.name === ROLE.ADMIN || user.role.name === ROLE.SUPER_ADMIN)
-      return this.userRepository.findAll(true);
+      return this.userRepository.findAll(page, limit, true);
 
-    return this.userRepository.findAll(false);
+    return this.userRepository.findAll(page, limit, false);
   }
 
   async findOne(id: string, withDeleted = false) {
