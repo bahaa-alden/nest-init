@@ -1,18 +1,16 @@
 import {
-  BeforeInsert,
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
 } from 'typeorm';
 import { BasePerson, BasePhoto } from '../../../common/entities';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { GROUPS, ROLE } from '../../../common/enums';
+import { GROUPS } from '../../../common/enums';
 import { Role } from '../../roles';
-import { UserPhoto } from './user-image.entity';
+import { UserPhoto } from './user-photo.entity';
 import * as crypto from 'crypto';
 import { Coupon } from '../../coupons/entities/coupon.entity';
 import { Product } from '../../products';

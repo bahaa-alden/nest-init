@@ -7,13 +7,11 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Exclude, Expose, Transform } from 'class-transformer';
-
 import { Role } from '../../roles';
-import { AdminPhoto } from './admin-image.entity';
+import { AdminPhoto } from './admin-photo.entity';
 import { BasePerson, BasePhoto } from '../../../common/entities';
-import { GROUPS, ROLE } from '../../../common/enums';
+import { GROUPS } from '../../../common/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserPhoto } from '../../users';
 
 @Entity({ name: 'admins' })
 export class Admin extends BasePerson {

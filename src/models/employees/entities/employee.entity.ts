@@ -10,7 +10,7 @@ import { BasePerson, BasePhoto } from '../../../common/entities';
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { GROUPS, ROLE } from '../../../common/enums';
 import { Role } from '../../roles';
-import { EmployeePhoto } from './employee-image.entity';
+import { EmployeePhoto } from './employee-photo.entity';
 import { Store } from '../../stores';
 import { ApiProperty } from '@nestjs/swagger';
 

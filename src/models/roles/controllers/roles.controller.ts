@@ -22,6 +22,7 @@ import {
   ApiOperation,
   ApiBadRequestResponse,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger';
 
 import { CreateRoleDto, UpdateRoleDto } from '../dtos';
@@ -30,22 +31,24 @@ import { RolesService } from '../services/roles.service';
 import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { CaslAbilitiesGuard } from '../../../common/guards';
+import { ICrud } from '../../../common/interfaces';
 
 @ApiTags('Roles')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Manage, subject: Entities.Role })
 @Controller({ path: 'roles', version: '1' })
-export class RolesController {
+export class RolesController implements ICrud<Role> {
   constructor(private readonly rolesService: RolesService) {}
 
   @ApiOkResponse({ type: OmitType(Role, ['permissions']), isArray: true })
   @SerializeOptions({ groups: [GROUPS.ALL_ROLES] })
   @Get()
-  async findAll(): Promise<Role[]> {
-    return this.rolesService.findAll();
+  async get(): Promise<Role[]> {
+    return this.rolesService.get();
   }
 
   @ApiCreatedResponse({ type: Role })
@@ -61,8 +64,8 @@ export class RolesController {
   })
   @ApiParam({ name: 'id' })
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<Role | undefined> {
-    return this.rolesService.findOne(id);
+  async getOne(@Param('id') id: string): Promise<Role | undefined> {
+    return this.rolesService.getOne(id);
   }
 
   @ApiOkResponse({ type: Role })
@@ -109,7 +112,7 @@ export class RolesController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    return this.rolesService.delete(id);
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.rolesService.remove(id);
   }
 }

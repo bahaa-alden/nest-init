@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BasePhoto } from '../../../common/entities';
 import { Product } from '../../products/entities/product.entity';
 import { Exclude } from 'class-transformer';

@@ -9,9 +9,10 @@ import { Action } from '../../../common/enums';
 import { CategoryRepository } from '../../../shared/repositories/category';
 import { StoreRepository } from '../../../shared/repositories/store';
 import { PaginatedResponse } from '../../../common/types';
+import { ICrud } from '../../../common/interfaces';
 
 @Injectable()
-export class ProductsService {
+export class ProductsService implements ICrud<Product> {
   constructor(
     private readonly productRepository: ProductRepository,
     private caslAbilityFactory: CaslAbilityFactory,
@@ -19,7 +20,7 @@ export class ProductsService {
     private readonly storeRepository: StoreRepository,
   ) {}
 
-  async findAll(
+  async get(
     page: number,
     limit: number,
     is_paid: boolean,
@@ -27,7 +28,7 @@ export class ProductsService {
     return this.productRepository.findAll(page, limit, is_paid);
   }
 
-  async findOne(id: string): Promise<Product> {
+  async getOne(id: string): Promise<Product> {
     const product = await this.productRepository.findById(id);
     if (!product)
       throw new NotFoundException(`Product with ID ${id} not found`);
@@ -54,7 +55,7 @@ export class ProductsService {
     dto: UpdateProductDto,
     user: User,
   ): Promise<Product> {
-    const product = await this.findOne(id); // Check if the product exists
+    const product = await this.getOne(id); // Check if the product exists
 
     const ability = this.caslAbilityFactory.defineAbility(user);
 
@@ -70,11 +71,11 @@ export class ProductsService {
     }
 
     await this.productRepository.updateOne(product, dto);
-    return this.findOne(id); // Return the updated product
+    return this.getOne(id); // Return the updated product
   }
 
   async remove(id: string, user: User): Promise<void> {
-    const product = await this.findOne(id); // Check if the product exists
+    const product = await this.getOne(id); // Check if the product exists
     const ability = this.caslAbilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(Action.Delete, product);
     await product.softRemove();

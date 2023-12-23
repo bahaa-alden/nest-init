@@ -15,11 +15,11 @@ export class StoresService {
     return this.storeRepository.createOne(dto, city);
   }
 
-  findAll() {
+  get() {
     return this.storeRepository.find();
   }
 
-  async findOne(id: string, withDeleted = false) {
+  async getOne(id: string, withDeleted = false) {
     const store = await this.storeRepository.findById(id, withDeleted);
     if (!store) throw new NotFoundException('Store not found');
     return store;
@@ -28,13 +28,13 @@ export class StoresService {
   async update(id: string, dto: UpdateStoreDto) {
     const city = await this.cityRepository.findById(dto.cityId);
     if (!city) throw new NotFoundException('city not found');
-    const store = await this.findOne(id);
+    const store = await this.getOne(id);
     const updateStore = await this.storeRepository.updateOne(store, dto);
     return updateStore;
   }
 
   async recover(id: string) {
-    const store = await this.findOne(id, true);
+    const store = await this.getOne(id, true);
     await store.recover();
     return store;
   }
@@ -44,6 +44,7 @@ export class StoresService {
       where: { id },
       withDeleted: true,
     });
-    return store.softRemove();
+    await store.softRemove();
+    return;
   }
 }

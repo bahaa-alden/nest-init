@@ -1,15 +1,6 @@
 import { Product } from './../../products';
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { City } from '../../cities';
 import { Exclude, Transform } from 'class-transformer';
 import { Employee } from '../../employees/entities/employee.entity';

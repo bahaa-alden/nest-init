@@ -21,6 +21,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiQuery,
   ApiTags,
@@ -29,14 +30,16 @@ import { CaslAbilitiesGuard } from '../../../common/guards';
 import { Product } from '../entities/product.entity';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { PaginatedResponse } from '../../../common/types';
+import { ICrud } from '../../../common/interfaces';
 
 @ApiTags('Products')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'products', version: '1' })
-export class ProductsController {
+export class ProductsController implements ICrud<Product> {
   constructor(private readonly productsService: ProductsService) {}
 
   @ApiCreatedResponse({ type: Product })
@@ -68,19 +71,19 @@ export class ProductsController {
   @CheckAbilities({ action: Action.Read, subject: Entities.Product })
   @SerializeOptions({ groups: [GROUPS.ALL_PRODUCTS] })
   @Get()
-  findAll(
+  get(
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('is_paid') is_paid: boolean,
   ) {
-    return this.productsService.findAll(page, limit, is_paid);
+    return this.productsService.get(page, limit, is_paid);
   }
 
   @ApiCreatedResponse({ type: Product })
   @CheckAbilities({ action: Action.Read, subject: Entities.Product })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  getOne(@Param('id') id: string) {
+    return this.productsService.getOne(id);
   }
 
   @ApiOkResponse({ type: Product })

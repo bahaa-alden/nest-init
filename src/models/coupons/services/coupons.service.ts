@@ -13,9 +13,11 @@ import { User } from '../../users';
 import { CaslAbilityFactory } from '../../../shared/casl';
 import { ForbiddenError } from '@casl/ability';
 import { Action } from '../../../common/enums';
+import { Coupon } from '../entities/coupon.entity';
+import { ICrud } from '../../../common/interfaces';
 
 @Injectable()
-export class CouponsService {
+export class CouponsService implements ICrud<Coupon> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly productRepository: ProductRepository,
@@ -38,15 +40,16 @@ export class CouponsService {
     return coupon;
   }
 
-  async findAll(productId: string, user: User) {
+  async get(productId: string, user: User) {
     await this.isProductOwner(productId, user);
     const coupons = await this.couponRepository.findAll({ productId });
     return coupons;
   }
 
-  async findOne(id: string) {
+  async getOne(id: string, user?: User) {
     const coupon = await this.couponRepository.findById(id);
     if (!coupon) throw new NotFoundException('Coupon not found');
+    if (user) await this.couponCasl(coupon, user, Action.Read);
     return coupon;
   }
 
@@ -56,21 +59,24 @@ export class CouponsService {
   }
 
   async update(id: string, dto: UpdateCouponDto, user: User) {
-    const coupon = await this.couponCasl(id, user, Action.Update);
+    const coupon = await this.getOne(id, user);
+    await this.couponCasl(coupon, user, Action.Update);
     return this.couponRepository.updateOne(coupon, dto);
   }
 
   async remove(id: string, user: User) {
-    const coupon = await this.couponCasl(id, user, Action.Delete);
-    return coupon.softRemove();
+    const coupon = await this.getOne(id, user);
+    await this.couponCasl(coupon, user, Action.Delete);
+    await coupon.remove();
+    return;
   }
 
-  async couponCasl(id: string, user: User, action: Action) {
-    const coupon = await this.findOne(id);
+  async couponCasl(coupon: Coupon, user: User, action: Action) {
     const ability = this.caslAbilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(action, coupon);
     return coupon;
   }
+
   async isProductOwner(productId: string, proOwner: User) {
     const product = await this.productRepository.findByIdForThings(productId);
     if (!product) throw new NotFoundException('Product not found');

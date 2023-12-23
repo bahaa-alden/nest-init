@@ -1,23 +1,23 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateCouponDto } from './create-coupon.dto';
 import {
   IsDate,
+  IsDateString,
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsPositive,
+  Min,
 } from 'class-validator';
 
 export class UpdateCouponDto {
   @ApiProperty()
   @IsOptional()
   @IsNotEmpty()
-  @IsPositive()
   @IsNumber()
+  @Min(1)
   discount: number;
 
   @ApiProperty()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   expire: Date;
 }

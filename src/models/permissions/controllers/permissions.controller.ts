@@ -20,6 +20,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -30,15 +31,17 @@ import { CreatePermissionDto } from '../dtos';
 import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { UpdatePermissionDto } from '../dtos';
+import { ICrud } from '../../../common/interfaces';
 
 @ApiTags('Permissions')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @CheckAbilities({ action: Action.Manage, subject: Entities.Permission })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'permissions', version: '1' })
-export class PermissionsController {
+export class PermissionsController implements ICrud<Permission> {
   constructor(public permissionsService: PermissionsService) {}
   @ApiOkResponse({
     type: OmitType(Permission, ['createdAt', 'updatedAt']),
@@ -46,8 +49,8 @@ export class PermissionsController {
   })
   @SerializeOptions({ groups: [GROUPS.ALL_PERMISSIONS] })
   @Get('')
-  getAll() {
-    return this.permissionsService.findAll();
+  get() {
+    return this.permissionsService.get();
   }
 
   @ApiCreatedResponse({ type: Permission })
@@ -60,8 +63,8 @@ export class PermissionsController {
   @ApiOkResponse({ type: Permission })
   @SerializeOptions({ groups: [GROUPS.PERMISSION] })
   @Get(':id')
-  get(@Param('id', ParseUUIDPipe) id: string) {
-    return this.permissionsService.findOne(id);
+  getOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.permissionsService.getOne(id);
   }
 
   @ApiOkResponse({ type: Permission })
@@ -77,8 +80,8 @@ export class PermissionsController {
   @ApiNoContentResponse({ type: Permission })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  delete(@Param('id', ParseUUIDPipe) id: string) {
-    return this.permissionsService.delete(id);
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.permissionsService.remove(id);
   }
 
   @ApiOkResponse({ type: Permission })

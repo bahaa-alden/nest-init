@@ -20,6 +20,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -27,15 +28,17 @@ import { CaslAbilitiesGuard } from '../../../common/guards';
 import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities } from '../../../common/enums';
 import { City } from '../entities/city.entity';
+import { ICrud } from '../../../common/interfaces';
 
 @ApiTags('cities')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Manage, subject: Entities.City })
 @Controller({ path: 'cities', version: '1' })
-export class CitiesController {
+export class CitiesController implements ICrud<City> {
   constructor(private readonly citiesService: CitiesService) {}
 
   @ApiCreatedResponse({ description: 'city has created', type: City })
@@ -46,14 +49,14 @@ export class CitiesController {
 
   @ApiOkResponse({ type: City, isArray: true, description: 'get all cities' })
   @Get()
-  findAll() {
-    return this.citiesService.findAll();
+  get() {
+    return this.citiesService.get();
   }
 
   @ApiOkResponse({ type: City, description: 'get one city' })
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.citiesService.findOne(id);
+  getOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.citiesService.getOne(id);
   }
 
   @ApiOkResponse({ type: City, description: 'update city' })

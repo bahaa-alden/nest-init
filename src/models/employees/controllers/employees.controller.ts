@@ -3,6 +3,7 @@ import {
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -25,13 +26,16 @@ import {
 import { EmployeesService } from '../services/employees.service';
 import { Public, CheckAbilities } from '../../../common/decorators';
 import { GROUPS, Entities, Action } from '../../../common/enums';
-import { CaslAbilitiesGuard, JwtGuard } from '../../../common/guards';
+import { CaslAbilitiesGuard } from '../../../common/guards';
 import { CreateEmployeeDto, UpdateEmployeeDto } from '../dtos';
-import { LoginResponseDto, LoginUserDto } from '../../../auth';
+import { LoginDto } from '../../../auth';
+import { ICrud } from '../../../common/interfaces';
+import { AuthEmployeeResponse } from '../interfaces';
 
 @ApiTags('Employees')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @Controller({ path: 'employees', version: '1' })
 export class EmployeesAuthController {
   constructor(private readonly employeesService: EmployeesService) {}
@@ -40,12 +44,12 @@ export class EmployeesAuthController {
   @ApiOperation({ summary: 'Login' })
   @ApiOkResponse({
     description: 'Employee logged in successfully',
-    type: LoginResponseDto,
+    type: AuthEmployeeResponse,
   })
   @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  login(@Body() dto: LoginUserDto) {
+  login(@Body() dto: LoginDto) {
     return this.employeesService.login(dto);
   }
 }
@@ -54,16 +58,17 @@ export class EmployeesAuthController {
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'employees', version: '1' })
-export class EmployeesController {
+export class EmployeesController implements ICrud<Employee> {
   constructor(private readonly employeesService: EmployeesService) {}
   @ApiOkResponse({ type: Employee })
   @SerializeOptions({ groups: [GROUPS.ALL_EMPLOYEES] })
   @CheckAbilities({ action: Action.Read, subject: Entities.Employee })
   @Get()
-  findAll() {
-    return this.employeesService.findAll();
+  get() {
+    return this.employeesService.get();
   }
 
   @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })
@@ -78,8 +83,8 @@ export class EmployeesController {
   @ApiOkResponse({ type: Employee })
   @CheckAbilities({ action: Action.Read, subject: Entities.Employee })
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.employeesService.findOne(id);
+  getOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.employeesService.getOne(id);
   }
 
   @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })

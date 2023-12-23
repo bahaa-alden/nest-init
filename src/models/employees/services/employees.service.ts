@@ -10,12 +10,14 @@ import { CreateEmployeeDto } from '../dtos/create-employee.dto';
 import { UpdateEmployeeDto } from '../dtos/update-employee.dto';
 import { Employee } from '../entities/employee.entity';
 import { EmployeeRepository } from '../../../shared/repositories/employee';
-import { LoginUserDto } from '../../../auth';
+import { LoginDto } from '../../../auth';
 import { RoleRepository } from '../../../shared/repositories/role';
 import { StoreRepository } from '../../../shared/repositories/store/store.repository';
+import { AuthEmployeeResponse } from '../interfaces';
+import { ICrud } from '../../../common/interfaces';
 
 @Injectable()
-export class EmployeesService {
+export class EmployeesService implements ICrud<Employee> {
   constructor(
     private jwtTokenService: JwtTokenService,
     private employeeRepository: EmployeeRepository,
@@ -23,7 +25,7 @@ export class EmployeesService {
     private storeRepository: StoreRepository,
   ) {}
 
-  async login(dto: LoginUserDto) {
+  async login(dto: LoginDto): Promise<AuthEmployeeResponse> {
     const employee = await this.employeeRepository.findByEmail(dto.email);
     if (
       !employee ||
@@ -38,14 +40,14 @@ export class EmployeesService {
     return { token, employee };
   }
 
-  findAll() {
+  get() {
     return this.employeeRepository.find({
       withDeleted: true,
       relations: ['store'],
     });
   }
 
-  async findOne(id: string, withDeleted?: boolean) {
+  async getOne(id: string, withDeleted?: boolean) {
     const employee = await this.employeeRepository.findById(id, withDeleted);
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${id} not found.`);
@@ -60,20 +62,20 @@ export class EmployeesService {
   }
 
   async update(id: string, dto: UpdateEmployeeDto): Promise<Employee> {
-    const employee = await this.findOne(id);
+    const employee = await this.getOne(id);
     const store = await this.storeRepository.findById(dto.storeId);
     if (!store) throw new NotFoundException('store not found');
     return this.employeeRepository.updateOne(employee, dto, store);
   }
 
   async recover(id: string) {
-    const employee = await this.findOne(id, true);
+    const employee = await this.getOne(id, true);
     await this.employeeRepository.recover(employee);
     return employee;
   }
 
   async remove(id: string): Promise<void> {
-    await this.findOne(id);
+    await this.getOne(id);
     await this.employeeRepository.softDelete(id);
     return;
   }

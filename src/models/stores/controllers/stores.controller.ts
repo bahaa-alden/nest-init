@@ -20,6 +20,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -27,14 +28,16 @@ import { CaslAbilitiesGuard } from '../../../common/guards';
 import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities } from '../../../common/enums';
 import { Store } from '../entities/store.entity';
+import { ICrud } from '../../../common/interfaces';
 
 @ApiTags('Stores')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'stores', version: '1' })
-export class StoresController {
+export class StoresController implements ICrud<Store> {
   constructor(private readonly storesService: StoresService) {}
 
   @ApiCreatedResponse({ description: 'Store has created', type: Store })
@@ -47,15 +50,15 @@ export class StoresController {
   @ApiOkResponse({ type: Store, isArray: true, description: 'get all Stores' })
   @CheckAbilities({ action: Action.Read, subject: Entities.Store })
   @Get()
-  findAll() {
-    return this.storesService.findAll();
+  get() {
+    return this.storesService.get();
   }
 
   @ApiOkResponse({ type: Store, description: 'get one Store' })
   @CheckAbilities({ action: Action.Read, subject: Entities.Store })
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.storesService.findOne(id);
+  getOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.storesService.getOne(id);
   }
 
   @ApiOkResponse({ type: Store, description: 'update Store' })

@@ -1,13 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCityDto } from '../dtos';
 import { UpdateCityDto } from '../dtos';
-import { InjectRepository } from '@nestjs/typeorm';
 import { City } from '../entities/city.entity';
-import { Repository } from 'typeorm';
 import { CityRepository } from '../../../shared/repositories/city';
+import { ICrud } from '../../../common/interfaces';
 
 @Injectable()
-export class CitiesService {
+export class CitiesService implements ICrud<City> {
   constructor(private cityRepository: CityRepository) {}
   async create(dto: CreateCityDto) {
     const city = this.cityRepository.create(dto);
@@ -15,28 +14,29 @@ export class CitiesService {
     return city;
   }
 
-  findAll() {
+  get() {
     return this.cityRepository.find();
   }
 
-  async findOne(id: string, withDeleted?: boolean, relations?: string[]) {
+  async getOne(id: string, withDeleted?: boolean, relations?: string[]) {
     const city = await this.cityRepository.findById(id, withDeleted, relations);
     if (!city) throw new NotFoundException('city not found');
     return city;
   }
 
   async update(id: string, dto: UpdateCityDto) {
-    const city = await this.findOne(id);
+    const city = await this.getOne(id);
     return this.cityRepository.updateOne(city, dto);
   }
 
   async recover(id: string) {
-    const city = await this.findOne(id, true, ['stores']);
+    const city = await this.getOne(id, true, ['stores']);
     return city.recover();
   }
 
   async remove(id: string) {
-    const city = await this.findOne(id, false, ['stores']);
-    return city.softRemove();
+    const city = await this.getOne(id, false, ['stores']);
+    await city.softRemove();
+    return;
   }
 }

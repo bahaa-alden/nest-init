@@ -2,7 +2,7 @@ import * as Joi from '@hapi/joi';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthModule } from './auth';
+import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './shared/cloudinary';
 import {
   IsExistConstraint,
@@ -11,7 +11,7 @@ import {
 } from './common/decorators';
 import { JwtGuard } from './common/guards';
 import { PhotosModule } from './photos';
-import { PhotoCleanupModule } from './jobs/image-cleanup';
+import { PhotoCleanupModule } from './jobs/photo-cleanup';
 import { AdminsModule } from './models/admins/admins.module';
 import { PermissionsModule } from './models/permissions/permissions.module';
 import { RolesModule } from './models/roles/roles.module';

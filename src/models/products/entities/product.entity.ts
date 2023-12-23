@@ -91,14 +91,14 @@ export class Product extends GlobalEntity {
   _comments: Comment[];
 
   @ApiProperty({ default: 0 })
-  @Expose({})
+  @Expose({ groups: [GROUPS.ALL_PRODUCTS, GROUPS.PRODUCT] })
   likes() {
     if (this.likedBy) return this.likedBy.length;
     return 0;
   }
 
   @ApiProperty({ default: 0 })
-  @Expose({})
+  @Expose({ groups: [GROUPS.ALL_PRODUCTS, GROUPS.PRODUCT] })
   comments() {
     if (this.comments) return this.comments.length;
     return 0;

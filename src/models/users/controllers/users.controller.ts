@@ -23,6 +23,7 @@ import {
   ApiBadRequestResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger';
 
 import { UpdateUserDto } from '../dtos';
@@ -33,16 +34,17 @@ import { GROUPS, ROLE, Entities, Action } from '../../../common/enums';
 import { CaslAbilitiesGuard, RolesGuard } from '../../../common/guards';
 import { LoggingInterceptor } from '../../../common/interceptors';
 import { PaginatedResponse } from '../../../common/types';
-import { Comment } from '../../comments';
+import { ICrud } from '../../../common/interfaces';
 
 @ApiTags('users')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @UseInterceptors(new LoggingInterceptor())
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'users', version: '1' })
-export class UsersController {
+export class UsersController implements ICrud<User> {
   constructor(private usersService: UsersService) {}
 
   @SerializeOptions({ groups: [GROUPS.ALL_USERS] })
@@ -60,12 +62,12 @@ export class UsersController {
     required: false,
   })
   @Get()
-  getAll(
+  get(
     @Query('page') page: number,
     @Query('limit') limit: number,
     @GetUser() user: User,
   ) {
-    return this.usersService.findAll(page, limit, user);
+    return this.usersService.get(page, limit, user);
   }
 
   @ApiOkResponse({ type: User })
@@ -92,11 +94,14 @@ export class UsersController {
     return this.usersService.deleteMe(user);
   }
 
+  create(...n: any[]): Promise<User> {
+    return;
+  }
   @ApiOkResponse({ type: User })
   @SerializeOptions({ groups: [GROUPS.USER] })
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.findOne(id);
+  getOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.getOne(id);
   }
 
   @ApiOkResponse({ type: User })
@@ -111,8 +116,8 @@ export class UsersController {
   @CheckAbilities({ action: Action.Delete, subject: Entities.User })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  delete(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.delete(id);
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.remove(id);
   }
 
   @ApiOperation({ summary: 'recover deleted user' })

@@ -6,12 +6,14 @@ import {
 import { CreatePermissionDto } from '../dtos';
 import { UpdatePermissionDto } from '../dtos';
 import { PermissionRepository } from '../../../shared/repositories/permission';
+import { Permission } from '../entities/permission.entity';
+import { ICrud } from '../../../common/interfaces';
 
 @Injectable()
-export class PermissionsService {
+export class PermissionsService implements ICrud<Permission> {
   constructor(public permissionRepository: PermissionRepository) {}
 
-  async findAll(permissionsIds?: string[]) {
+  async get(permissionsIds?: string[]) {
     const permissions = await this.permissionRepository.findAll(permissionsIds);
 
     if (permissionsIds && permissionsIds.length !== permissions.length)
@@ -20,7 +22,7 @@ export class PermissionsService {
     return permissions;
   }
 
-  async findOne(id: string, withDeleted?: boolean) {
+  async getOne(id: string, withDeleted?: boolean) {
     const permission = await this.permissionRepository.findById(
       id,
       withDeleted,
@@ -39,18 +41,19 @@ export class PermissionsService {
   }
 
   async update(id: string, dto: UpdatePermissionDto) {
-    const permission = await this.findOne(id);
+    const permission = await this.getOne(id);
     return this.permissionRepository.updateOne(permission, dto);
   }
 
   async recover(id: string) {
-    const permission = await this.findOne(id, true);
+    const permission = await this.getOne(id, true);
     await permission.recover();
     return permission;
   }
 
-  async delete(id: string) {
-    const permission = await this.findOne(id);
-    return await permission.softRemove();
+  async remove(id: string) {
+    const permission = await this.getOne(id);
+    await permission.softRemove();
+    return;
   }
 }

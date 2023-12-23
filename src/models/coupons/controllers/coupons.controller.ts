@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CouponsService } from '../services/coupons.service';
 import { CreateCouponDto } from '../dtos/create-coupon.dto';
@@ -18,6 +20,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -26,15 +29,20 @@ import { CheckAbilities, GetUser, Roles } from '../../../common/decorators';
 import { User } from '../../users';
 import { Action, Entities, ROLE } from '../../../common/enums';
 import { Coupon } from '../entities/coupon.entity';
+import {
+  IGenericController,
+  INestedController,
+} from '../../../common/interfaces';
 
 @ApiTags('Coupons')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @Roles(ROLE.USER)
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'coupons', version: '1' })
-export class GenericCouponsController {
+export class GenericCouponsController implements IGenericController<Coupon> {
   constructor(private readonly couponsService: CouponsService) {}
 
   @ApiCreatedResponse({ type: Coupon })
@@ -45,23 +53,20 @@ export class GenericCouponsController {
   }
 
   @ApiOkResponse({ type: Coupon, isArray: true })
-  @CheckAbilities({ action: Action.Read, subject: Entities.Coupon })
   @Get('myCoupons')
-  findMyCoupons(@GetUser() userId: string) {
+  getMyCoupons(@GetUser('id') userId: string) {
     return this.couponsService.findMyCoupons(userId);
   }
 
   @ApiOkResponse({ type: Coupon })
-  @CheckAbilities({ action: Action.Read, subject: Entities.Coupon })
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.couponsService.findOne(id);
+  getOne(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
+    return this.couponsService.getOne(id, user);
   }
 
   @ApiOkResponse({ type: Coupon })
-  @CheckAbilities({ action: Action.Update, subject: Entities.Coupon })
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateCouponDto,
     @GetUser() user: User,
@@ -70,9 +75,9 @@ export class GenericCouponsController {
   }
 
   @ApiNoContentResponse({})
-  @CheckAbilities({ action: Action.Delete, subject: Entities.Coupon })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
+  async remove(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
     return this.couponsService.remove(id, user);
   }
 }
@@ -81,14 +86,14 @@ export class GenericCouponsController {
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @Roles(ROLE.USER)
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'products/:productId/coupons', version: '1' })
-export class CouponsController {
+export class CouponsController implements INestedController<Coupon> {
   constructor(private readonly couponsService: CouponsService) {}
 
   @ApiCreatedResponse({ type: Coupon })
-  @CheckAbilities({ action: Action.Create, subject: Entities.Coupon })
   @Post()
   create(
     @Param('productId', ParseUUIDPipe) productId: string,
@@ -98,13 +103,12 @@ export class CouponsController {
     return this.couponsService.create(dto, user, productId);
   }
 
-  @CheckAbilities({ action: Action.Read, subject: Entities.Coupon })
   @ApiOkResponse({ type: Coupon })
   @Get()
-  findAll(
+  get(
     @Param('productId', ParseUUIDPipe) productId: string,
     @GetUser() user: User,
   ) {
-    return this.couponsService.findAll(productId, user);
+    return this.couponsService.get(productId, user);
   }
 }

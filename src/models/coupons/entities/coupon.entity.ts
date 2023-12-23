@@ -1,7 +1,5 @@
 import { Product } from './../../products';
 import { User } from '../../users';
-// src/coupons/coupon.entity.ts
-
 import {
   Entity,
   Column,
@@ -12,6 +10,7 @@ import {
 } from 'typeorm';
 import { GlobalEntity } from '../../../common/entities';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 @Unique('un_coupon', ['userId', 'productId'])
 @Entity('coupons')
@@ -24,15 +23,18 @@ export class Coupon extends GlobalEntity {
   @JoinColumn({ name: 'userId' })
   user: Relation<User>;
 
+  @Exclude()
   @Column({ type: 'uuid' })
   userId: string;
 
+  @Exclude()
   @ManyToOne(() => User, (proOwner) => proOwner.ownedCoupons, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'proOwnerId' })
   proOwner: Relation<User>;
 
+  @Exclude()
   @Column({ type: 'uuid' })
   proOwnerId: string;
 
@@ -43,6 +45,7 @@ export class Coupon extends GlobalEntity {
   @JoinColumn({ name: 'productId' })
   product: Relation<Product>;
 
+  @Exclude()
   @Column({ type: 'uuid' })
   productId: string;
 

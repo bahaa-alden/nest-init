@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseEntity, Column, Entity, ManyToMany, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToMany, OneToMany } from 'typeorm';
 import { Store } from '../../stores';
-import { Exclude } from 'class-transformer';
 import { GlobalEntity } from '../../../common/entities';
 import { User } from '../../users';
 

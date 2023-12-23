@@ -22,6 +22,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiQuery,
   ApiTags,
@@ -33,14 +34,19 @@ import { Action, Entities, GROUPS } from '../../../common/enums';
 import { CaslAbilitiesGuard } from '../../../common/guards';
 import { CommentsService } from '../services/comments.service';
 import { PaginatedResponse } from '../../../common/types/paginated-response.type';
+import {
+  IGenericController,
+  INestedController,
+} from '../../../common/interfaces';
 
 @ApiTags('Comments')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'products/:productId/comments', version: '1' })
-export class CommentsController {
+export class CommentsController implements INestedController<Comment> {
   constructor(private readonly commentsService: CommentsService) {}
 
   @ApiCreatedResponse({ type: Comment })
@@ -71,12 +77,12 @@ export class CommentsController {
   @CheckAbilities({ action: Action.Read, subject: Entities.Comment })
   @SerializeOptions({ groups: [GROUPS.ALL_COMMENTS] })
   @Get()
-  findAll(
+  get(
     @Param('productId', ParseUUIDPipe) productId: string,
     @Query('page') page: number,
     @Query('limit') limit: number,
   ) {
-    return this.commentsService.findAll(productId, page, limit);
+    return this.commentsService.get(productId, page, limit);
   }
 }
 
@@ -84,15 +90,15 @@ export class CommentsController {
 @ApiBearerAuth('token')
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'comments', version: '1' })
-export class GenericCommentsController {
+export class GenericCommentsController implements IGenericController<Comment> {
   constructor(private readonly commentsService: CommentsService) {}
 
   @ApiOkResponse({ type: Comment })
   @CheckAbilities({ action: Action.Read, subject: Entities.Comment })
   @SerializeOptions({ groups: [GROUPS.COMMENT] })
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.commentsService.findOne(id);
+  getOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.commentsService.getOne(id);
   }
 
   @ApiOkResponse({ type: Comment })
