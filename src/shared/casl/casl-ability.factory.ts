@@ -15,7 +15,7 @@ import { Coupon } from '../../models/coupons';
 export class CaslAbilityFactory {
   defineAbility(currentUser: User) {
     const { can, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
-
+    console.log(currentUser.id);
     currentUser.role.permissions.forEach((p) => {
       can(p.action, p.subject);
     });
@@ -23,6 +23,7 @@ export class CaslAbilityFactory {
     can(Action.Delete, Comment, { userId: { $eq: currentUser.id } });
     can(Action.Update, Product, { userId: { $eq: currentUser.id } });
     can(Action.Delete, Product, { userId: { $eq: currentUser.id } });
+    can(Action.Read, Coupon, { proOwnerId: { $eq: currentUser.id } });
     can(Action.Create, Coupon, { proOwnerId: { $eq: currentUser.id } });
     can(Action.Update, Coupon, { proOwnerId: { $eq: currentUser.id } });
     can(Action.Delete, Coupon, { proOwnerId: { $eq: currentUser.id } });

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { PhotoCleanupService } from './image-cleanup.service';
+import { PhotoCleanupService } from './photo-cleanup.service';
 
 @Injectable()
 export class PhotoCleanupScheduler {

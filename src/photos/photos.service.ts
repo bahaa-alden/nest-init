@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import * as fs from 'fs';
 
 @Injectable()
 export class PhotosService {

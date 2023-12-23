@@ -13,17 +13,13 @@ import {
   SerializeOptions,
 } from '@nestjs/common';
 import { AdminsService } from '../services/admins.service';
-import {
-  UpdateAdminDto,
-  CreateAdminDto,
-  LoginResponseDto,
-  LoginAdminDto,
-} from '../dtos';
+import { UpdateAdminDto, CreateAdminDto, LoginAdminDto } from '../dtos';
 
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -33,19 +29,22 @@ import { Role } from '../../roles';
 import { Public, CheckAbilities, GetUser } from '../../../common/decorators';
 import { GROUPS, Entities, Action } from '../../../common/enums';
 import { CaslAbilitiesGuard, JwtGuard } from '../../../common/guards';
+import { ICrud } from '../../../common/interfaces';
+import { AdminAuthResponse } from '../interfaces';
 
 @ApiTags('Admins')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiNotFoundResponse({ description: 'Data Not found' })
 @Controller({ path: 'admins', version: '1' })
-export class AdminsController {
+export class AdminsController implements ICrud<Admin> {
   constructor(private readonly adminsService: AdminsService) {}
 
   @Public()
   @ApiOperation({ summary: 'Login' })
   @ApiOkResponse({
     description: 'User logged in successfully',
-    type: LoginResponseDto,
+    type: AdminAuthResponse,
   })
   @SerializeOptions({ groups: [GROUPS.ADMIN] })
   @HttpCode(HttpStatus.OK)
@@ -70,8 +69,8 @@ export class AdminsController {
   @CheckAbilities({ action: Action.Read, subject: Entities.Admin })
   @SerializeOptions({ groups: [GROUPS.ALL_ADMINS] })
   @Get()
-  findAll(@GetUser('role') role: Role) {
-    return this.adminsService.findAll(role.name);
+  get(@GetUser('role') role: Role) {
+    return this.adminsService.get(role.name);
   }
 
   @ApiBearerAuth('token')
@@ -80,8 +79,8 @@ export class AdminsController {
   @SerializeOptions({ groups: [GROUPS.ADMIN] })
   @CheckAbilities({ action: Action.Read, subject: Entities.Admin })
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string, @GetUser('role') role: Role) {
-    return this.adminsService.findOne(id, role.name);
+  getOne(@Param('id', ParseUUIDPipe) id: string, @GetUser('role') role: Role) {
+    return this.adminsService.getOne(id, role.name);
   }
 
   @ApiBearerAuth('token')

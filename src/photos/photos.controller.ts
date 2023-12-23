@@ -28,10 +28,7 @@ import { PhotosService } from './photos.service';
 @ApiBearerAuth('token')
 @Controller({ path: 'photos', version: '1' })
 export class PhotosController {
-  constructor(
-    private photosService: PhotosService,
-    private cloudinaryService: CloudinaryService,
-  ) {}
+  constructor(private photosService: PhotosService) {}
 
   //Upload single image
   @ApiConsumes('multipart/form-data')

@@ -1,7 +1,8 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import * as cloudinary from 'cloudinary';
 import { ConfigType } from '@nestjs/config';
-import { CheckUrl, IPhoto } from '../../common/types';
+import { CheckUrl } from '../../common/types';
+import { IPhoto } from '../../common/interfaces';
 import { CloudinaryConfig } from '../../config/app';
 
 @Injectable()
