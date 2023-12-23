@@ -33,3 +33,4 @@ export type Subjects =
   | Entities
   | 'all';
 export type AppAbility = MongoAbility<[Action, Subjects], MongoQuery>;
+ 
