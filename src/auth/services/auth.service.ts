@@ -11,8 +11,8 @@ import {
 import { ROLE } from '../../common/enums';
 import { User } from '../../models/users';
 import { JwtTokenService } from '../../shared/jwt';
-import { SignUpDto, PasswordChangeDto, LoginUserDto } from '../dtos';
-import { jwtPayload } from '../interfaces';
+import { SignUpDto, PasswordChangeDto, LoginDto } from '../dtos';
+import { AuthUserResponse, jwtPayload } from '../interfaces';
 import { Admin } from './../../models/admins';
 import { AdminRepository } from '../../shared/repositories/admin';
 import { UserRepository } from '../../shared/repositories/user';
@@ -26,7 +26,7 @@ export class AuthService {
     private adminsRepository: AdminRepository,
     private roleRepository: RoleRepository,
   ) {}
-  async signup(dto: SignUpDto) {
+  async signup(dto: SignUpDto): Promise<AuthUserResponse> {
     const role = await this.roleRepository.findOneBy({ name: ROLE.USER });
     const user = await this.usersRepository.createOne(dto, role);
     const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
@@ -36,7 +36,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginUserDto) {
+  async login(dto: LoginDto): Promise<AuthUserResponse> {
     const user = await this.usersRepository.findByEmail(dto.email);
     if (!user || !(await user.verifyHash(user.password, dto.password))) {
       throw new UnauthorizedException('Credentials incorrect');

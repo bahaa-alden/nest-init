@@ -1,4 +1,4 @@
-import { IPhoto } from '../types/photos.type';
+import { IPhoto } from '../interfaces';
 
 export const defaultPhoto: IPhoto = {
   blurHash: 'UFGIo.of00ayM{j[IUj[~qfQ-;j[D%j[M{ay',

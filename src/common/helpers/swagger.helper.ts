@@ -10,7 +10,6 @@ export const SWAGGER_CONFIG: SwaggerConfig = {
 
 export function createDocument(app: INestApplication): OpenAPIObject {
   const builder = new DocumentBuilder()
-    .setBasePath('http://localhost:' + process.env.PORT)
     .setTitle(SWAGGER_CONFIG.title)
     .setDescription(SWAGGER_CONFIG.description)
     .setVersion(SWAGGER_CONFIG.version)

@@ -15,30 +15,23 @@ import {
   ApiOkResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import {
-  Public,
-  GetUser,
-  CheckAbilities,
-  Roles,
-} from '../../common/decorators';
-import { Action, Entities, GROUPS, ROLE } from '../../common/enums';
+import { Public, GetUser, Roles } from '../../common/decorators';
+import { GROUPS, ROLE } from '../../common/enums';
 import { AuthService } from '../services/auth.service';
-import {
-  SignUpDto,
-  LoginResponseDto,
-  PasswordChangeDto,
-  LoginUserDto,
-} from '../dtos';
-import { CaslAbilitiesGuard, RolesGuard } from '../../common/guards';
+import { SignUpDto, PasswordChangeDto, LoginDto } from '../dtos';
+import { RolesGuard } from '../../common/guards';
+import { IAuthController } from '../../common/interfaces';
+import { User } from '../../models/users';
+import { AuthUserResponse } from '../interfaces';
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
-export class AuthController {
+export class AuthController implements IAuthController<AuthUserResponse> {
   constructor(private authService: AuthService) {}
 
   @Public()
   @SerializeOptions({ groups: [GROUPS.USER] })
-  @ApiCreatedResponse({ type: SignUpDto })
+  @ApiCreatedResponse({ type: AuthUserResponse })
   @Post('signup')
   signup(@Body() dto: SignUpDto) {
     return this.authService.signup(dto);
@@ -50,10 +43,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Login' })
   @ApiOkResponse({
     description: 'User logged in successfully',
-    type: LoginResponseDto,
+    type: AuthUserResponse,
   })
   @Post('login')
-  login(@Body() dto: LoginUserDto) {
+  login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
 
@@ -67,5 +60,11 @@ export class AuthController {
     @GetUser('email') email: string,
   ) {
     return this.authService.updateMyPassword(dto, email);
+  }
+  forgotPassword(...n: any[]): Promise<AuthUserResponse> {
+    return;
+  }
+  resetPassword(...n: any[]): Promise<AuthUserResponse> {
+    return;
   }
 }

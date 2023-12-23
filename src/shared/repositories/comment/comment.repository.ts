@@ -35,7 +35,6 @@ export class CommentsRepository extends Repository<Comment> {
       take,
     });
     const totalDataCount = await this.count({ where: { productId } });
-
     return pagination(page, limit, totalDataCount, data);
   }
   async findById(id: string) {

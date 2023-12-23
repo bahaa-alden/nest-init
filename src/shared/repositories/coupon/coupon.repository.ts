@@ -10,6 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../../../models/users';
 import { Product } from '../../../models/products/entities/product.entity';
 import { CreateCouponDto } from '../../../models/coupons/dtos/create-coupon.dto';
+import { Action } from '../../../common/enums';
 
 @Injectable()
 export class CouponRepository extends Repository<Coupon> {
@@ -19,21 +20,26 @@ export class CouponRepository extends Repository<Coupon> {
 
   async findAll(options?: FindOptionsWhere<Coupon>) {
     const currentDate = new Date();
+    const where: FindOptionsWhere<Coupon> | FindOptionsWhere<Coupon>[] =
+      options.productId
+        ? { ...options, active: true, product: { is_paid: false } }
+        : [
+            {
+              ...options,
+              expire: MoreThan(currentDate),
+              active: true,
+              product: { is_paid: false },
+            },
+            {
+              ...options,
+              expire: IsNull(),
+              active: true,
+              product: { is_paid: false },
+            },
+          ];
+
     return this.find({
-      where: [
-        {
-          ...options,
-          expire: MoreThan(currentDate),
-          active: true,
-          product: { is_paid: false },
-        },
-        {
-          ...options,
-          expire: IsNull(),
-          active: true,
-          product: { is_paid: false },
-        },
-      ],
+      where,
       select: {
         id: true,
         discount: true,
@@ -57,28 +63,16 @@ export class CouponRepository extends Repository<Coupon> {
   }
 
   async findById(id: string) {
-    const currentDate = new Date();
     return this.findOne({
-      where: [
-        {
-          id,
-          expire: MoreThan(currentDate),
-          active: true,
-          product: { is_paid: false },
-        },
-        {
-          id,
-          expire: IsNull(),
-          active: true,
-          product: { is_paid: false },
-        },
-      ],
+      where: { id, active: true, product: { is_paid: false } },
       select: {
         id: true,
         discount: true,
         expire: true,
-        user: { name: true },
-        proOwner: { name: true },
+        user: { id: true, name: true },
+        userId: true,
+        proOwner: { id: true, name: true },
+        proOwnerId: true,
         product: {
           id: true,
           title: true,
@@ -86,6 +80,7 @@ export class CouponRepository extends Repository<Coupon> {
           is_paid: true,
           category: { name: true },
         },
+        productId: true,
       },
       relations: {
         user: { photos: true },
@@ -116,7 +111,7 @@ export class CouponRepository extends Repository<Coupon> {
 
   async updateOne(coupon: Coupon, dto: UpdateCouponDto) {
     Object.assign(coupon, dto);
-    this.update(coupon.id, coupon);
+    await this.update(coupon.id, coupon);
     return this.findById(coupon.id);
   }
 }

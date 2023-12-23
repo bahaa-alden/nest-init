@@ -1,6 +1,8 @@
 import { registerAs } from '@nestjs/config';
 
 const AppConfig = registerAs('application', () => ({
+  name: process.env.APP_NAME,
+  server_origin: process.env.APP_SERVER_ORIGIN,
   port: process.env.PORT || 3000,
   env: process.env.ENV,
 }));
@@ -11,8 +13,8 @@ const CloudinaryConfig = registerAs('cloudinary', () => ({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 }));
 const JwtConfig = registerAs('jwt', () => ({
-  jwtSecret: process.env.JWT_SECRET,
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN,
+  jwt_secret: process.env.JWT_SECRET,
+  jwt_expires_in: process.env.JWT_EXPIRES_IN,
 }));
 
 const SuperAdminInfo = registerAs('superadmin', () => ({

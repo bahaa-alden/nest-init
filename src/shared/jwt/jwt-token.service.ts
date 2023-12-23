@@ -13,8 +13,8 @@ export class JwtTokenService {
   signToken = (id: string, role: string): Promise<string> => {
     const payload = { sub: id, role };
     const token = this.jwt.signAsync(payload, {
-      secret: this.jwtConfig.jwtSecret,
-      expiresIn: this.jwtConfig.jwtExpiresIn,
+      secret: this.jwtConfig.jwt_secret,
+      expiresIn: this.jwtConfig.jwt_expires_in,
     });
     return token;
   };

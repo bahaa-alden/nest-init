@@ -1,6 +1,5 @@
 import { MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { LoggerMiddleware } from '../common/middlewares';
 import { AuthController } from './controllers/auth.controller';
