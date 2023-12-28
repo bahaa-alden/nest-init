@@ -74,6 +74,16 @@ export class ProductsService implements ICrud<Product> {
     return this.getOne(id); // Return the updated product
   }
 
+  async like(id: string, user: User) {
+    const product = await this.getOne(id);
+    return await this.productRepository.like(product, user);
+  }
+
+  async dislike(id: string, user: User) {
+    const product = await this.getOne(id);
+    return await this.productRepository.dislike(product, user);
+  }
+
   async remove(id: string, user: User): Promise<void> {
     const product = await this.getOne(id); // Check if the product exists
     const ability = this.caslAbilityFactory.defineAbility(user);

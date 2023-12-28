@@ -73,7 +73,7 @@ export class Product extends GlobalEntity {
   @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
   category: Relation<Category>;
 
-  // @ApiProperty()
+  @Exclude()
   @Column({ type: 'uuid' })
   categoryId: string;
 
@@ -100,7 +100,7 @@ export class Product extends GlobalEntity {
   @ApiProperty({ default: 0 })
   @Expose({ groups: [GROUPS.ALL_PRODUCTS, GROUPS.PRODUCT] })
   comments() {
-    if (this.comments) return this.comments.length;
+    if (this._comments) return this._comments.length;
     return 0;
   }
 }

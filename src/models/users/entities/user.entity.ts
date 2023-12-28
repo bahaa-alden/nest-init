@@ -21,7 +21,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({ name: 'users' })
 export class User extends BasePerson {
-  @Expose({ groups: [GROUPS.USER, GROUPS.PRODUCT] })
+  @Expose({ groups: [GROUPS.USER] })
   @Transform(({ value }) => value.name)
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'roleId' })

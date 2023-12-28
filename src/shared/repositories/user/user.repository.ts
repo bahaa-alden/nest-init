@@ -5,6 +5,7 @@ import { UserPhotosRepository } from './user-photos.repository';
 import { CreateUserDto, UpdateUserDto, User } from '../../../models/users';
 import { defaultPhoto } from '../../../common/constants';
 import { pagination } from '../../../common/helpers';
+import { ResetPasswordDto } from '../../../auth';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -79,6 +80,15 @@ export class UserRepository extends Repository<User> {
   async updateOne(user: User, dto: UpdateUserDto) {
     user.photos.push(await this.userPhotosRepository.uploadPhoto(dto.photo));
     Object.assign(user, { email: dto.email, name: dto.name });
+    await this.save(user);
+    return this.findById(user.id);
+  }
+
+  async resetPassword(user: User, dto: ResetPasswordDto) {
+    user.password = dto.password;
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    user.passwordChangedAt = new Date(Date.now() - 1000);
     await this.save(user);
     return this.findById(user.id);
   }

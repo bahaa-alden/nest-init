@@ -9,6 +9,9 @@ import {
   UseGuards,
   Query,
   SerializeOptions,
+  ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
@@ -79,18 +82,36 @@ export class ProductsController implements ICrud<Product> {
     return this.productsService.get(page, limit, is_paid);
   }
 
+  @ApiOkResponse({ description: 'ok' })
+  @CheckAbilities({ action: Action.Update, subject: Entities.Product })
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/likes')
+  async like(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
+    return this.productsService.like(id, user);
+  }
+
+  @ApiOkResponse({ description: 'ok' })
+  @CheckAbilities({ action: Action.Update, subject: Entities.Product })
+  @HttpCode(HttpStatus.OK)
+  @Delete(':id/likes')
+  async dislike(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
+    return this.productsService.dislike(id, user);
+  }
+
   @ApiCreatedResponse({ type: Product })
   @CheckAbilities({ action: Action.Read, subject: Entities.Product })
+  @SerializeOptions({ groups: [GROUPS.PRODUCT] })
   @Get(':id')
-  getOne(@Param('id') id: string) {
+  getOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.getOne(id);
   }
 
   @ApiOkResponse({ type: Product })
   @CheckAbilities({ action: Action.Update, subject: Entities.Product })
+  @SerializeOptions({ groups: [GROUPS.PRODUCT] })
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
     @GetUser() user: User,
   ) {
@@ -99,8 +120,10 @@ export class ProductsController implements ICrud<Product> {
 
   @ApiNoContentResponse()
   @CheckAbilities({ action: Action.Delete, subject: Entities.Product })
+  @SerializeOptions({ groups: [GROUPS.PRODUCT] })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  remove(@Param('id') id: string, @GetUser() user: User) {
+  remove(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
     return this.productsService.remove(id, user);
   }
 }
