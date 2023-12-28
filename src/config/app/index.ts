@@ -2,7 +2,6 @@ import { registerAs } from '@nestjs/config';
 
 const AppConfig = registerAs('application', () => ({
   name: process.env.APP_NAME,
-  server_origin: process.env.APP_SERVER_ORIGIN,
   port: process.env.PORT || 3000,
   env: process.env.ENV,
 }));

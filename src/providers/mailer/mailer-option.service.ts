@@ -15,7 +15,7 @@ export class MailerOptionService implements MailerOptionsFactory {
       transport: {
         host: this.mailConfig.host,
         port: this.mailConfig.port,
-        secure: this.mailConfig.secure,
+        // secure: this.mailConfig.secure,
         // tls: { ciphers: 'SSLv3', }, // gmail
         auth: {
           user: this.mailConfig.user,

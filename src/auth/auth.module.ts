@@ -5,9 +5,10 @@ import { LoggerMiddleware } from '../common/middlewares';
 import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategy';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [PassportModule.register({})],
+  imports: [PassportModule.register({}), MailModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   exports: [PassportModule],

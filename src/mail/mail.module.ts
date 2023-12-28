@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { MailProcessor } from './mail.processor';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { BullModule } from '@nestjs/bull';
@@ -22,8 +22,9 @@ import { QUEUE_NAME } from '../common/constants';
       useClass: BullService,
     }),
     ConfigModule.forFeature(AppConfig),
+    ConfigModule.forFeature(MailConfig),
   ],
-  providers: [MailService, MailProcessor],
+  providers: [MailService, MailProcessor, Logger],
   exports: [MailService],
 })
 export class MailModule {}

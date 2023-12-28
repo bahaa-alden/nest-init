@@ -22,6 +22,6 @@ export interface IAuthController<T> {
   signup(...n): Promise<T>;
   login(...n): Promise<T>;
   updateMyPassword(...n): Promise<T>;
-  forgotPassword(...n): Promise<T>;
+  forgotPassword(...n): Promise<{ message: string }>;
   resetPassword(...n): Promise<T>;
 }

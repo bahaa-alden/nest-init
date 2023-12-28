@@ -110,4 +110,18 @@ export class ProductRepository extends Repository<Product> {
     await this.productPhotosRepository.removeOne(photo);
     await this.findById(photo.productId);
   }
+
+  async like(product: Product, user: User) {
+    product.likedBy.push(user);
+    await this.save(product);
+    return 'OK';
+  }
+
+  async dislike(product: Product, user: User) {
+    await this.createQueryBuilder()
+      .relation(Product, 'likedBy')
+      .of(product) // you can use just post id as well
+      .remove(user);
+    return 'OK';
+  }
 }

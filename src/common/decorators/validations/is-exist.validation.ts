@@ -21,15 +21,12 @@ export class IsExistConstraint implements ValidatorConstraintInterface {
       .getRepository(args.constraints[0])
       .findOne({
         where: {
-          id: value,
+          email: value,
         },
         withDeleted: true,
       })
       .then((entity) => {
-        if (!entity)
-          throw new BadRequestException(
-            args.constraints[0] + ' with id:' + value + ' not found',
-          );
+        if (!entity) return false;
         return true;
       });
   }

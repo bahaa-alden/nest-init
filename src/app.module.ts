@@ -29,6 +29,7 @@ import { RepositoriesModule } from './shared/repositories/repositories.module';
 import { CouponsModule } from './models/coupons/coupons.module';
 import { CommentsModule } from './models/comments/comments.module';
 import { ProductPhotosModule } from './models/product-photos/product-photos.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
