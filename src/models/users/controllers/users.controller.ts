@@ -26,7 +26,7 @@ import {
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
 
-import { UpdateUserDto } from '../dtos';
+import { FavoritesDto, UpdateUserDto } from '../dtos';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../services/users.service';
 import { GetUser, Roles, CheckAbilities } from '../../../common/decorators';
@@ -35,11 +35,12 @@ import { CaslAbilitiesGuard, RolesGuard } from '../../../common/guards';
 import { LoggingInterceptor } from '../../../common/interceptors';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
+import { denied_error } from '../../../common/constants';
 
 @ApiTags('users')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @UseInterceptors(new LoggingInterceptor())
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
@@ -62,7 +63,7 @@ export class UsersController implements ICrud<User> {
     required: false,
   })
   @Get()
-  get(
+  async get(
     @Query('page') page: number,
     @Query('limit') limit: number,
     @GetUser() user: User,
@@ -73,8 +74,20 @@ export class UsersController implements ICrud<User> {
   @ApiOkResponse({ type: User })
   @SerializeOptions({ groups: [GROUPS.USER] })
   @Roles(ROLE.USER)
+  @Get('myPhotos')
+  async getMyPhotos(@GetUser() user: User) {
+    return this.usersService.getMyPhotos(user);
+  }
+
+  create(...n: any[]): Promise<User> {
+    return;
+  }
+
+  @ApiOkResponse({ type: User })
+  @SerializeOptions({ groups: [GROUPS.USER] })
+  @Roles(ROLE.USER)
   @Get('me')
-  getMe(@GetUser() user: User) {
+  async getMe(@GetUser() user: User) {
     return user;
   }
 
@@ -82,7 +95,7 @@ export class UsersController implements ICrud<User> {
   @SerializeOptions({ groups: [GROUPS.USER] })
   @Roles(ROLE.USER)
   @Patch('me')
-  updateMe(@Body() dto: UpdateUserDto, @GetUser() user: User) {
+  async updateMe(@Body() dto: UpdateUserDto, @GetUser() user: User) {
     return this.usersService.updateMe(dto, user);
   }
 
@@ -90,17 +103,25 @@ export class UsersController implements ICrud<User> {
   @SerializeOptions({ groups: [GROUPS.USER] })
   @Roles(ROLE.USER)
   @Delete('me')
-  deleteMe(@GetUser() user: User) {
+  async deleteMe(@GetUser() user: User) {
     return this.usersService.deleteMe(user);
   }
 
-  create(...n: any[]): Promise<User> {
-    return;
+  @ApiOkResponse({ type: User })
+  @Roles(ROLE.USER)
+  @SerializeOptions({ groups: [GROUPS.USER] })
+  @Patch('favorites')
+  async favorites(
+    @Body() dto: FavoritesDto,
+    @GetUser() user: User,
+  ): Promise<User> {
+    return this.usersService.favorites(dto, user);
   }
+
   @ApiOkResponse({ type: User })
   @SerializeOptions({ groups: [GROUPS.USER] })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string) {
+  async getOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.getOne(id);
   }
 
@@ -108,7 +129,10 @@ export class UsersController implements ICrud<User> {
   @SerializeOptions({ groups: [GROUPS.USER] })
   @CheckAbilities({ action: Action.Update, subject: Entities.User })
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUserDto) {
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateUserDto,
+  ) {
     return this.usersService.update(id, dto);
   }
 
@@ -116,7 +140,7 @@ export class UsersController implements ICrud<User> {
   @CheckAbilities({ action: Action.Delete, subject: Entities.User })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
   }
 
@@ -125,7 +149,7 @@ export class UsersController implements ICrud<User> {
   @SerializeOptions({ groups: [GROUPS.USER] })
   @HttpCode(HttpStatus.OK)
   @Post(':id/recover')
-  recover(@Param('id', ParseUUIDPipe) id: string) {
+  async recover(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.recover(id);
   }
 }

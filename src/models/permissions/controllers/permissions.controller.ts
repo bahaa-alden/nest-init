@@ -32,11 +32,12 @@ import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { UpdatePermissionDto } from '../dtos';
 import { ICrud } from '../../../common/interfaces';
+import { denied_error } from '../../../common/constants';
 
 @ApiTags('Permissions')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @CheckAbilities({ action: Action.Manage, subject: Entities.Permission })
 @UseGuards(CaslAbilitiesGuard)

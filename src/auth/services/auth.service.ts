@@ -9,7 +9,7 @@ import {
   FindOptionsWhere,
   MoreThan,
 } from 'typeorm';
-import { ROLE } from '../../common/enums';
+import { Entities, ROLE } from '../../common/enums';
 import { User } from '../../models/users';
 import { JwtTokenService } from '../../shared/jwt';
 import {
@@ -27,15 +27,26 @@ import { RoleRepository } from '../../shared/repositories/role/role.repository';
 import { MailService } from '../../mail/mail.service';
 import { IAuthController } from '../../common/interfaces';
 import * as crypto from 'crypto';
+import {
+  item_not_found,
+  incorrect_current_password,
+  incorrect_credentials,
+  reset_token_message,
+  reset_token_expired,
+  password_changed_recently,
+} from '../../common/constants';
+import { Employee } from '../../models/employees';
+import { EmployeeRepository } from '../../shared/repositories/employee/employee.repository';
 
 @Injectable()
 export class AuthService implements IAuthController<AuthUserResponse> {
   constructor(
-    private jwtTokenService: JwtTokenService,
-    private usersRepository: UserRepository,
-    private adminsRepository: AdminRepository,
-    private roleRepository: RoleRepository,
-    private mailService: MailService,
+    private readonly jwtTokenService: JwtTokenService,
+    private readonly usersRepository: UserRepository,
+    private readonly adminsRepository: AdminRepository,
+    private employeeRepository: EmployeeRepository,
+    private readonly roleRepository: RoleRepository,
+    private readonly mailService: MailService,
   ) {}
   async signup(
     dto: SignUpDto,
@@ -48,36 +59,34 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async login(dto: LoginDto): Promise<AuthUserResponse> {
-    const user = await this.usersRepository.findByEmail(dto.email);
+    const user = await this.usersRepository.findByIdOrEmail(dto.email);
     if (!user || !(await user.verifyHash(user.password, dto.password))) {
-      throw new UnauthorizedException('Credentials incorrect');
+      throw new UnauthorizedException(incorrect_credentials);
     }
     return this.sendAuthResponse(user);
   }
 
   async updateMyPassword(dto: PasswordChangeDto, email: string) {
-    const user = await this.usersRepository.findByEmail(email);
+    const user = await this.usersRepository.findByIdOrEmail(email);
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException(item_not_found(Entities.User));
 
     // 2)check if the passwordConfirm is correct
     if (!(await user.verifyHash(user.password, dto.passwordCurrent))) {
-      throw new UnauthorizedException('كلمة المرور الحالية غير صحيحة');
+      throw new UnauthorizedException(incorrect_current_password);
     }
-
-    user.password = dto.password;
-    await this.usersRepository.save(user);
-    const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
+    await this.usersRepository.resetPassword(user, dto);
+    const token = await this.jwtTokenService.signToken(user.id, User.name);
 
     return { token, user };
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const user = await this.usersRepository.findByEmail(dto.email);
+    const user = await this.usersRepository.findByIdOrEmail(dto.email);
     const resetToken = user.createPasswordResetToken();
     await user.save();
     await this.mailService.sendPasswordReset(user, resetToken);
-    return { message: 'تم ارسال رمز اعادة التعيين لبريدك الالكتروني' };
+    return { message: reset_token_message };
   }
 
   async resetPassword(
@@ -93,7 +102,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
       passwordResetExpires: MoreThan(new Date()),
     });
     if (!user) {
-      throw new NotFoundException('الرمز غير صحيح او منتهي الصلاحية');
+      throw new NotFoundException(reset_token_expired);
     }
     user = await this.usersRepository.resetPassword(user, dto);
     await this.mailService.sendPasswordChanged(user, dynamicOrigin);
@@ -101,43 +110,19 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async sendAuthResponse(user: User): Promise<AuthUserResponse> {
-    const token = await this.jwtTokenService.signToken(user.id, ROLE.USER);
+    const token = await this.jwtTokenService.signToken(user.id, User.name);
     return { token, user };
   }
 
   async validate(payload: jwtPayload) {
-    let user: User | Admin;
-    const where: FindOptionsWhere<User> = { id: payload.sub };
-    const select: FindOptionsSelect<User> = {
-      id: true,
-      name: true,
-      email: true,
-      passwordChangedAt: true,
-      role: {
-        id: true,
-        name: true,
-        permissions: {
-          id: true,
-          action: true,
-          subject: true,
-        },
-      },
-      createdAt: true,
-      updatedAt: true,
-      photos: false,
-    };
-    const relations: FindOptionsRelations<User> = {
-      role: { permissions: true },
-      photos: true,
-    };
-    if (payload.role === ROLE.ADMIN) {
-      user = await this.adminsRepository.findOne({
-        where,
-        select,
-        relations,
-      });
-    } else if (payload.role === ROLE.USER) {
-      user = await this.usersRepository.findOne({ where, select, relations });
+    let user: User | Admin | Employee;
+
+    if (payload.entity === Admin.name) {
+      user = await this.adminsRepository.validate(payload.sub);
+    } else if (payload.entity === User.name) {
+      user = await this.usersRepository.validate(payload.sub);
+    } else {
+      user = await this.employeeRepository.validate(payload.sub);
     }
 
     if (!user) {
@@ -145,9 +130,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
     }
 
     if (user.isPasswordChanged(payload.iat)) {
-      throw new UnauthorizedException(
-        'User recently changed the password!, please login again.',
-      );
+      throw new UnauthorizedException(password_changed_recently);
     }
     return user;
   }

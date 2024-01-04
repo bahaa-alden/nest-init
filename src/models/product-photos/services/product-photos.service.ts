@@ -7,7 +7,8 @@ import {
 } from '../../../shared/repositories/product';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ForbiddenError } from '@casl/ability';
-import { Action } from '../../../common/enums';
+import { Action, Entities } from '../../../common/enums';
+import { item_not_found } from '../../../common/constants';
 
 @Injectable()
 export class ProductPhotosService {
@@ -19,7 +20,7 @@ export class ProductPhotosService {
 
   async create(productId: string, user: User, dto: CreateProductPhotoDto) {
     const product = await this.productRepository.findById(productId);
-    if (!product) throw new NotFoundException('Product not found');
+    if (!product) throw new NotFoundException(item_not_found(Entities.Product));
     const ability = this.caslAbilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(Action.Update, product);
     return this.productRepository.updatePhotos(productId, dto);
@@ -27,13 +28,14 @@ export class ProductPhotosService {
 
   async find(productId: string) {
     const product = await this.productRepository.findById(productId);
-    if (!product) throw new NotFoundException('Product not found');
+    if (!product)
+      throw new NotFoundException(item_not_found(Entities.Permission));
     return this.productPhotosRepository.findAll(productId);
   }
 
   async remove(id: string, user: User) {
     const photo = await this.productPhotosRepository.findById(id, ['product']);
-    if (!photo) throw new NotFoundException('Photo not found');
+    if (!photo) throw new NotFoundException(item_not_found(Entities.Photo));
     const ability = this.caslAbilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(Action.Update, photo.product);
     return this.productRepository.removePhoto(photo);

@@ -3,7 +3,7 @@ import {
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
-import { ROLE } from '../../../common/enums';
+import { Entities, ROLE } from '../../../common/enums';
 import { JwtTokenService } from '../../../shared/jwt';
 import { Role } from '../../roles';
 import { CreateAdminDto, LoginAdminDto, UpdateAdminDto } from '../dtos';
@@ -12,6 +12,10 @@ import { RoleRepository } from '../../../shared/repositories/role';
 import { AdminRepository } from '../../../shared/repositories/admin';
 import { AdminAuthResponse } from '../interfaces';
 import { ICrud } from '../../../common/interfaces';
+import {
+  incorrect_credentials,
+  item_not_found,
+} from '../../../common/constants';
 
 @Injectable()
 export class AdminsService implements ICrud<Admin> {
@@ -22,11 +26,11 @@ export class AdminsService implements ICrud<Admin> {
   ) {}
 
   async login(dto: LoginAdminDto): Promise<AdminAuthResponse> {
-    const admin = await this.adminRepository.findByEmail(dto.email);
+    const admin = await this.adminRepository.findByIdOrEmail(dto.email);
     if (!admin || !(await admin.verifyHash(admin.password, dto.password))) {
-      throw new UnauthorizedException('Credentials incorrect');
+      throw new UnauthorizedException(incorrect_credentials);
     }
-    const token = await this.jwtTokenService.signToken(admin.id, ROLE.ADMIN);
+    const token = await this.jwtTokenService.signToken(admin.id, Admin.name);
     return { token, admin };
   }
 
@@ -37,9 +41,9 @@ export class AdminsService implements ICrud<Admin> {
 
   async getOne(id: string, role: string = ROLE.SUPER_ADMIN) {
     const withDeleted = role === ROLE.SUPER_ADMIN ? true : false;
-    const admin = await this.adminRepository.findById(id, withDeleted);
+    const admin = await this.adminRepository.findByIdOrEmail(id, withDeleted);
     if (!admin) {
-      throw new NotFoundException(`Admin with ID ${id} not found.`);
+      throw new NotFoundException(item_not_found(Entities.Admin));
     }
     return admin;
   }

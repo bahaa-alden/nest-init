@@ -4,6 +4,8 @@ import { PermissionsService } from '../../permissions/services/permissions.servi
 import { Role } from '../entities/role.entity';
 import { RoleRepository } from '../../../shared/repositories/role';
 import { ICrud } from '../../../common/interfaces';
+import { item_not_found } from '../../../common/constants';
+import { Entities } from '../../../common/enums';
 
 @Injectable()
 export class RolesService implements ICrud<Role> {
@@ -22,7 +24,7 @@ export class RolesService implements ICrud<Role> {
     relations?: string[],
   ): Promise<Role | undefined> {
     const role = await this.roleRepository.findById(id, withDeleted, relations);
-    if (!role) throw new NotFoundException('role not found');
+    if (!role) throw new NotFoundException(item_not_found(Entities.Role));
     return role;
   }
 
@@ -39,7 +41,7 @@ export class RolesService implements ICrud<Role> {
   async update(id: string, dto: UpdateRoleDto): Promise<Role | undefined> {
     const role = await this.getOne(id);
 
-    if (!role) throw new NotFoundException('Role not found');
+    if (!role) throw new NotFoundException(item_not_found(Entities.Role));
 
     const permissions = await this.permissionsService.get(dto.permissionsIds);
 
@@ -52,7 +54,7 @@ export class RolesService implements ICrud<Role> {
   ): Promise<Role | undefined> {
     const role = await this.getOne(id);
 
-    if (!role) throw new NotFoundException('Role not found');
+    if (!role) throw new NotFoundException(item_not_found(Entities.Role));
 
     const permissions = await this.permissionsService.get(dto.permissionsIds);
 
@@ -78,7 +80,7 @@ export class RolesService implements ICrud<Role> {
 
   async remove(id: string) {
     const role = await this.getOne(id, false, ['users', 'admins']);
-    if (!role) throw new NotFoundException('role not found');
+    if (!role) throw new NotFoundException(item_not_found(Entities.Role));
     await role.softRemove();
     return;
   }

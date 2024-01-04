@@ -13,7 +13,7 @@ import {
 export class IsPhotoExistConstraint implements ValidatorConstraintInterface {
   async validate(value: any, args: ValidationArguments) {
     if (!fs.existsSync(value)) {
-      throw new BadRequestException('image not found');
+      return false;
     }
     return true;
   }

@@ -33,11 +33,12 @@ import {
   IGenericController,
   INestedController,
 } from '../../../common/interfaces';
+import { denied_error } from '../../../common/constants';
 
 @ApiTags('Product-Photos')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Update, subject: Entities.Product })
@@ -74,7 +75,7 @@ export class ProductPhotosController
 @ApiTags('Product-Photos')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Read, subject: Entities.Product })

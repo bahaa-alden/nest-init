@@ -3,10 +3,11 @@ import { Entities, ROLE } from '../../../common/enums';
 import { UUID } from 'crypto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsExist, IsUnique } from '../../../common/decorators';
+import { item_already_exist } from '../../../common/constants';
 
 export class CreateRoleDto {
   @ApiProperty({ description: 'the rule name' })
-  @IsUnique(Entities.Role)
+  @IsUnique(Entities.Role, { message: item_already_exist('name') })
   @NotEquals(ROLE.SUPER_ADMIN)
   name: string;
 

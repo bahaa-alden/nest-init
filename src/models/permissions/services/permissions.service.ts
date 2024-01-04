@@ -8,6 +8,8 @@ import { UpdatePermissionDto } from '../dtos';
 import { PermissionRepository } from '../../../shared/repositories/permission';
 import { Permission } from '../entities/permission.entity';
 import { ICrud } from '../../../common/interfaces';
+import { item_already_exist, item_not_found } from '../../../common/constants';
+import { Entities } from '../../../common/enums';
 
 @Injectable()
 export class PermissionsService implements ICrud<Permission> {
@@ -27,7 +29,8 @@ export class PermissionsService implements ICrud<Permission> {
       id,
       withDeleted,
     );
-    if (!permission) throw new NotFoundException('permission not found');
+    if (!permission)
+      throw new NotFoundException(item_not_found(Entities.Permission));
     return permission;
   }
 
@@ -35,7 +38,8 @@ export class PermissionsService implements ICrud<Permission> {
     const exist = await this.permissionRepository.findOne({
       where: { action: dto.action, subject: dto.subject },
     });
-    if (exist) throw new ConflictException('permission already exist');
+    if (exist)
+      throw new ConflictException(item_already_exist(Entities.Permission));
     const permissions = await this.permissionRepository.createOne(dto);
     return permissions;
   }

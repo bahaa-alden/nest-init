@@ -12,7 +12,6 @@ import { ConfigType } from '@nestjs/config';
 import { Job } from 'bull';
 
 // Import utility functions and configurations
-import { plainToInstance } from 'class-transformer';
 import { AppConfig } from '../config/app';
 import { User } from '../models/users';
 import { QUEUE_NAME, mailLive } from '../common/constants';
@@ -21,13 +20,18 @@ import MailConfig from '../config/mail';
 // Decorate the class as a processor for the specified queue
 @Processor(QUEUE_NAME)
 export class MailProcessor {
+  private from: string;
+  private appName: string;
+
   // Constructor to inject configuration and mailer service
   constructor(
     @Inject(AppConfig.KEY) private appConfig: ConfigType<typeof AppConfig>,
     @Inject(MailConfig.KEY) private mailConfig: ConfigType<typeof MailConfig>,
-
     private readonly mailerService: MailerService,
-  ) {}
+  ) {
+    this.from = this.mailConfig.from;
+    this.appName = this.appConfig.name;
+  }
 
   // Logger instance for logging messages
   private readonly logger = new Logger(this.constructor.name);
@@ -84,11 +88,11 @@ export class MailProcessor {
         context: {
           name: job.data.user.name,
           url,
-          appName: this.appConfig.name,
+          appName: this.appName,
         },
         subject: `Welcome to ${this.appConfig.name} Dear ${job.data.user.name}`,
         to: job.data.user.email,
-        from: this.mailConfig.from,
+        from: this.from,
       });
       return result;
     } catch (error) {
@@ -124,7 +128,7 @@ export class MailProcessor {
         },
         subject: 'Your reset token valid for only 10 minute',
         to: job.data.user.email,
-        from: this.mailConfig.from,
+        from: this.from,
       });
       return result;
     } catch (error) {
@@ -158,11 +162,11 @@ export class MailProcessor {
         context: {
           name: job.data.user.name,
           url: job.data.dynamicOrigin,
-          appName: this.appConfig.name,
+          appName: this.appName,
         },
         subject: 'Your password has been reset',
         to: job.data.user.email,
-        from: this.mailConfig.from,
+        from: this.from,
       });
       return result;
     } catch (error) {

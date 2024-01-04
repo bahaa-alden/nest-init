@@ -16,9 +16,12 @@ import { ConfigService, ConfigType } from '@nestjs/config';
 import { AppConfig } from './config/app';
 import * as morgan from 'morgan';
 import helmet from 'helmet';
+import { LoggerMiddleware } from './common/middlewares';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    snapshot: true,
+  });
   const httpAdapter = app.get(HttpAdapterHost);
   const logger = app.get(Logger);
   const appConfig: ConfigType<typeof AppConfig> = app

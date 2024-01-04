@@ -33,11 +33,12 @@ import {
   IGenericController,
   INestedController,
 } from '../../../common/interfaces';
+import { denied_error } from '../../../common/constants';
 
 @ApiTags('Coupons')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @Roles(ROLE.USER)
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
@@ -85,7 +86,7 @@ export class GenericCouponsController implements IGenericController<Coupon> {
 @ApiTags('Coupons')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @Roles(ROLE.USER)
 @UseGuards(CaslAbilitiesGuard, RolesGuard)

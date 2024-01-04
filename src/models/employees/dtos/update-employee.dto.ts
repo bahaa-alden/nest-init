@@ -11,6 +11,7 @@ import { IsPhotoExist, IsUnique } from '../../../common/decorators';
 import { Entities } from '../../../common/enums';
 import { Transform } from 'class-transformer';
 import { getPhotoPath } from '../../../common/helpers';
+import { item_already_exist } from '../../../common/constants';
 
 export class UpdateEmployeeDto {
   @IsString()
@@ -24,7 +25,7 @@ export class UpdateEmployeeDto {
   @IsOptional()
   @IsEmail({}, { message: 'Please provide a valid email' })
   @Transform(({ value }) => value.toLowerCase())
-  @IsUnique(Entities.Employee)
+  @IsUnique(Entities.Employee, { message: item_already_exist('email') })
   readonly email?: string;
 
   @ApiProperty()

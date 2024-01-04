@@ -12,9 +12,14 @@ import { CouponRepository } from '../../../shared/repositories/coupon/coupon.rep
 import { User } from '../../users';
 import { CaslAbilityFactory } from '../../../shared/casl';
 import { ForbiddenError } from '@casl/ability';
-import { Action } from '../../../common/enums';
+import { Action, Entities } from '../../../common/enums';
 import { Coupon } from '../entities/coupon.entity';
 import { ICrud } from '../../../common/interfaces';
+import {
+  denied_error,
+  item_already_exist,
+  item_not_found,
+} from '../../../common/constants';
 
 @Injectable()
 export class CouponsService implements ICrud<Coupon> {
@@ -27,10 +32,10 @@ export class CouponsService implements ICrud<Coupon> {
   async create(dto: CreateCouponDto, proOwner: User, productId?: string) {
     const prodId = dto.productId || productId;
     const product = await this.isProductOwner(prodId, proOwner);
-    const user = await this.userRepository.findByIdForThings(dto.userId);
-    if (!user) throw new NotFoundException('User not found');
+    const user = await this.userRepository.findByIdOrEmailForThings(dto.userId);
+    if (!user) throw new NotFoundException(item_not_found(Entities.User));
     const exist = await this.couponRepository.existedCoupon(prodId, dto.userId);
-    if (exist) throw new ConflictException('Coupon already exist');
+    if (exist) throw new ConflictException(item_already_exist(Entities.Coupon));
     const coupon = await this.couponRepository.createOne(
       dto,
       proOwner,
@@ -48,7 +53,7 @@ export class CouponsService implements ICrud<Coupon> {
 
   async getOne(id: string, user?: User) {
     const coupon = await this.couponRepository.findById(id);
-    if (!coupon) throw new NotFoundException('Coupon not found');
+    if (!coupon) throw new NotFoundException(item_not_found(Entities.Coupon));
     if (user) await this.couponCasl(coupon, user, Action.Read);
     return coupon;
   }
@@ -79,9 +84,9 @@ export class CouponsService implements ICrud<Coupon> {
 
   async isProductOwner(productId: string, proOwner: User) {
     const product = await this.productRepository.findByIdForThings(productId);
-    if (!product) throw new NotFoundException('Product not found');
+    if (!product) throw new NotFoundException(item_not_found(Entities.Product));
     if (product.user.id !== proOwner.id)
-      throw new ForbiddenException('You can not perform this action');
+      throw new ForbiddenException(denied_error);
     return product;
   }
 }

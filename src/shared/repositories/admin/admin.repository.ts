@@ -34,9 +34,12 @@ export class AdminRepository extends Repository<Admin> {
     });
   }
 
-  async findById(id: string, withDeleted = false) {
+  async findByIdOrEmail(ie: string, withDeleted = false) {
     const options: FindOneOptions<Admin> = {
-      where: { id, role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
+      where: [
+        { id: ie, role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
+        { email: ie, role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
+      ],
       withDeleted,
       select: {
         id: true,
@@ -52,21 +55,6 @@ export class AdminRepository extends Repository<Admin> {
     return await this.findOne(options);
   }
 
-  async findByEmail(email: string) {
-    return await this.findOne({
-      where: { email },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      relations: { photos: true, role: true },
-    });
-  }
-
   async updateOne(admin: Admin, dto: UpdateAdminDto) {
     admin.photos.push(await this.adminPhotosRepository.uploadPhoto(dto.photo));
     Object.assign(admin, {
@@ -75,6 +63,34 @@ export class AdminRepository extends Repository<Admin> {
       password: dto.password,
     });
     await this.save(admin);
-    return this.findById(admin.id);
+    return this.findByIdOrEmail(admin.id);
+  }
+
+  async validate(id: string) {
+    return this.findOne({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        passwordChangedAt: true,
+        role: {
+          id: true,
+          name: true,
+          permissions: {
+            id: true,
+            action: true,
+            subject: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+        photos: false,
+      },
+      relations: {
+        role: { permissions: true },
+        photos: true,
+      },
+    });
   }
 }

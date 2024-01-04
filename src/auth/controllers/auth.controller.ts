@@ -28,10 +28,16 @@ import {
 } from '../dtos';
 import { RolesGuard } from '../../common/guards';
 import { IAuthController } from '../../common/interfaces';
-import { User } from '../../models/users';
 import { AuthUserResponse } from '../interfaces';
 import { Request } from 'express';
 
+/**
+ * @ngdoc controller
+ * @name AuthController
+ *
+ * @description
+ * My controller description.
+ */
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController implements IAuthController<AuthUserResponse> {

@@ -5,11 +5,12 @@ import { CaslAbilityFactory } from '../../../shared/casl/casl-ability.factory';
 import { CreateProductDto, UpdateProductDto } from '../dto';
 import { User } from '../../users';
 import { ForbiddenError } from '@casl/ability';
-import { Action } from '../../../common/enums';
+import { Action, Entities } from '../../../common/enums';
 import { CategoryRepository } from '../../../shared/repositories/category';
 import { StoreRepository } from '../../../shared/repositories/store';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
+import { item_not_found } from '../../../common/constants';
 
 @Injectable()
 export class ProductsService implements ICrud<Product> {
@@ -30,17 +31,17 @@ export class ProductsService implements ICrud<Product> {
 
   async getOne(id: string): Promise<Product> {
     const product = await this.productRepository.findById(id);
-    if (!product)
-      throw new NotFoundException(`Product with ID ${id} not found`);
+    if (!product) throw new NotFoundException(item_not_found(Entities.Product));
 
     return product;
   }
 
   async create(dto: CreateProductDto, user: User): Promise<Product> {
     const category = await this.categoryRepository.findById(dto.categoryId);
-    if (!category) throw new NotFoundException('category not found');
+    if (!category)
+      throw new NotFoundException(item_not_found(Entities.Category));
     const store = await this.storeRepository.findById(dto.storeId);
-    if (!store) throw new NotFoundException('store not found');
+    if (!store) throw new NotFoundException(item_not_found(Entities.Store));
     const product = this.productRepository.createOne(
       dto,
       user,
@@ -62,12 +63,13 @@ export class ProductsService implements ICrud<Product> {
     ForbiddenError.from(ability).throwUnlessCan(Action.Update, product);
     if (dto.storeId) {
       const store = await this.storeRepository.findById(dto.storeId);
-      if (!store) throw new NotFoundException('store not found');
+      if (!store) throw new NotFoundException(item_not_found(Entities.Store));
     }
 
     if (dto.categoryId) {
       const category = await this.categoryRepository.findById(dto.categoryId);
-      if (!category) throw new NotFoundException('category not found');
+      if (!category)
+        throw new NotFoundException(item_not_found(Entities.Category));
     }
 
     await this.productRepository.updateOne(product, dto);

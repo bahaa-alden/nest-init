@@ -54,9 +54,11 @@ export class User extends BasePerson {
   @ManyToMany(() => Product, (product) => product.likedBy)
   likedProducts: Product[];
 
+  @Expose({ groups: [GROUPS.USER] })
   @ManyToMany(() => Category, (category) => category.users)
   favoriteCategories: Category[];
 
+  @Expose({ groups: [GROUPS.USER] })
   @ManyToMany(() => City, (city) => city.users)
   favoriteCities: City[];
 

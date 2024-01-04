@@ -15,13 +15,10 @@ import { AbstractHttpAdapter, HttpAdapterHost } from '@nestjs/core';
 import { Response } from 'express';
 import { AppConfig } from '../../config/app';
 import { ConfigType } from '@nestjs/config';
+import { denied_error } from '../constants';
 
 const handelPassportError = () =>
   new UnauthorizedException({ message: 'الرجاء تسجيل الدخول' });
-const exist = (table: string) => {
-  if (table === 'roles_permissions')
-    return new BadRequestException('permission already exist in role');
-};
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -35,7 +32,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     let error: any =
       exception instanceof ForbiddenError
-        ? new ForbiddenException('you can not perform this action')
+        ? new ForbiddenException(denied_error)
         : exception.code === '23505'
         ? new BadRequestException(exception.detail)
         : exception.code === '23503'

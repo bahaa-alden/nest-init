@@ -78,7 +78,7 @@ export class Product extends GlobalEntity {
   categoryId: string;
 
   @ApiProperty({ type: Store })
-  @ManyToOne((type) => Store, (store) => store.products)
+  @ManyToOne(() => Store, (store) => store.products)
   @JoinColumn({ name: 'storeId', referencedColumnName: 'id' })
   store: Relation<Store>;
 
@@ -103,4 +103,7 @@ export class Product extends GlobalEntity {
     if (this._comments) return this._comments.length;
     return 0;
   }
+
+  @ApiProperty({ default: false })
+  likedByMe: boolean;
 }

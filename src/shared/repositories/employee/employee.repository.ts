@@ -35,9 +35,9 @@ export class EmployeeRepository extends Repository<Employee> {
     });
   }
 
-  async findById(id: string, withDeleted = false) {
+  async findByIdOrEmail(ie: string, withDeleted = false) {
     const options: FindOneOptions<Employee> = {
-      where: { id },
+      where: [{ id: ie }, { email: ie }],
       withDeleted,
       select: {
         id: true,
@@ -53,21 +53,6 @@ export class EmployeeRepository extends Repository<Employee> {
     return await this.findOne(options);
   }
 
-  async findByEmail(email: string) {
-    return await this.findOne({
-      where: { email },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      relations: { photos: true, role: true, store: true },
-    });
-  }
-
   async updateOne(employee: Employee, dto: UpdateEmployeeDto, store: Store) {
     employee.photos.push(
       await this.employeePhotosRepository.uploadPhoto(dto.photo),
@@ -80,6 +65,34 @@ export class EmployeeRepository extends Repository<Employee> {
       store,
     });
     await this.save(employee);
-    return this.findById(employee.id);
+    return this.findByIdOrEmail(employee.id);
+  }
+
+  async validate(id: string) {
+    return this.findOne({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        passwordChangedAt: true,
+        role: {
+          id: true,
+          name: true,
+          permissions: {
+            id: true,
+            action: true,
+            subject: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+        photos: false,
+      },
+      relations: {
+        role: { permissions: true },
+        photos: true,
+      },
+    });
   }
 }

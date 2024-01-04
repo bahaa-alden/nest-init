@@ -13,12 +13,14 @@ import { CreateProductPhotoDto } from '../../../models/product-photos/dto/create
 import { ProductPhoto } from '../../../models/product-photos';
 import { PaginatedResponse } from '../../../common/types';
 import { pagination } from '../../../common/helpers';
+import { RedisStoreService } from '../../redis-store/redis-store.service';
 
 @Injectable()
 export class ProductRepository extends Repository<Product> {
   constructor(
     private readonly dataSource: DataSource,
     private readonly productPhotosRepository: ProductPhotosRepository,
+    private readonly redisStoreService: RedisStoreService,
   ) {
     super(Product, dataSource.createEntityManager());
   }
@@ -30,7 +32,7 @@ export class ProductRepository extends Repository<Product> {
   ): Promise<PaginatedResponse<Product>> {
     const skip = (page - 1) * limit || 0;
     const take = limit || 100;
-    const data = await this.find({
+    let data = await this.find({
       where: { is_paid },
       skip,
       take,
@@ -43,11 +45,11 @@ export class ProductRepository extends Repository<Product> {
       },
     });
     const totalDataCount = await this.count({ where: { is_paid } });
-
+    data = await Promise.all(this.likedByMe(...data));
     return pagination(page, limit, totalDataCount, data);
   }
   async findById(id: string, options?: FindOptionsWhere<Product>) {
-    return this.findOne({
+    let product = await this.findOne({
       where: { id, ...options },
       relations: {
         user: true,
@@ -58,10 +60,12 @@ export class ProductRepository extends Repository<Product> {
         photos: true,
       },
     });
+    product = await Promise.all(this.likedByMe(product))[0];
+    return product;
   }
 
   async findByIdForThings(id: string, options?: FindOptionsWhere<Product>) {
-    return this.findOne({
+    let product = await this.findOne({
       where: { id, ...options, is_paid: false },
       select: {
         id: true,
@@ -76,6 +80,8 @@ export class ProductRepository extends Repository<Product> {
         photos: true,
       },
     });
+    product = await Promise.all(this.likedByMe(product))[0];
+    return product;
   }
 
   async createOne(
@@ -123,5 +129,13 @@ export class ProductRepository extends Repository<Product> {
       .of(product) // you can use just post id as well
       .remove(user);
     return 'OK';
+  }
+
+  likedByMe(...data: Product[]) {
+    return data.map(async (e) => {
+      const id = await this.redisStoreService.getStoredUserId();
+      e.likedByMe = e.likedBy.find((u) => u.id === id) ? true : false;
+      return e;
+    });
   }
 }

@@ -38,11 +38,12 @@ import {
   IGenericController,
   INestedController,
 } from '../../../common/interfaces';
+import { denied_error } from '../../../common/constants';
 
 @ApiTags('Comments')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'products/:productId/comments', version: '1' })

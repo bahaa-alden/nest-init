@@ -1,6 +1,6 @@
 import * as Joi from '@hapi/joi';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, MiddlewareBuilder } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './shared/cloudinary';
@@ -18,7 +18,14 @@ import { RolesModule } from './models/roles/roles.module';
 import { UsersModule } from './models/users/users.module';
 import { DatabaseModule } from './providers/database';
 import { CaslModule } from './shared/casl';
-import { Logger, Module } from '@nestjs/common';
+import {
+  Logger,
+  MiddlewareConsumer,
+  Module,
+  NestMiddleware,
+  RequestMethod,
+  Type,
+} from '@nestjs/common';
 import { CitiesModule } from './models/cities/cities.module';
 import { EmployeesModule } from './models/employees/employees.module';
 import { StoresModule } from './models/stores/stores.module';
@@ -29,7 +36,13 @@ import { RepositoriesModule } from './shared/repositories/repositories.module';
 import { CouponsModule } from './models/coupons/coupons.module';
 import { CommentsModule } from './models/comments/comments.module';
 import { ProductPhotosModule } from './models/product-photos/product-photos.module';
-import { MailModule } from './mail/mail.module';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { RedisStoreModule } from './shared/redis-store/redis-store.module';
+import {
+  MiddlewareConfigProxy,
+  MiddlewareConfiguration,
+} from '@nestjs/common/interfaces';
+import { LoggerMiddleware } from './common/middlewares';
 
 @Module({
   imports: [
@@ -48,6 +61,8 @@ import { MailModule } from './mail/mail.module';
       }),
       // load: [postgresConfig],
     }),
+
+    DevtoolsModule.register({ http: process.env.ENV !== 'production' }),
     AuthModule,
     UsersModule,
     AdminsModule,
@@ -68,8 +83,8 @@ import { MailModule } from './mail/mail.module';
     CaslModule,
     RepositoriesModule,
     CloudinaryModule,
+    RedisStoreModule,
   ],
-  controllers: [],
   providers: [
     IsUniqueConstraint,
     IsExistConstraint,
@@ -81,4 +96,11 @@ import { MailModule } from './mail/mail.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes({
+      path: '*',
+      method: RequestMethod.ALL,
+    });
+  }
+}

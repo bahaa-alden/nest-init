@@ -10,6 +10,7 @@ import { IsPhotoExist, IsUnique } from '../../../common/decorators';
 import { Entities } from '../../../common/enums';
 import { Transform } from 'class-transformer';
 import { getPhotoPath } from '../../../common/helpers';
+import { item_already_exist } from '../../../common/constants';
 
 export class UpdateAdminDto {
   @IsString()
@@ -23,7 +24,7 @@ export class UpdateAdminDto {
   @IsOptional()
   @IsEmail({}, { message: 'Please provide a valid email' })
   @Transform(({ value }) => value.toLowerCase())
-  @IsUnique(Entities.Admin)
+  @IsUnique(Entities.Admin, { message: item_already_exist('email') })
   readonly email?: string;
 
   @ApiProperty({ required: false })
@@ -35,6 +36,7 @@ export class UpdateAdminDto {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   @Length(6, 15)
-  readonly password: string;
+  readonly password?: string;
 }

@@ -4,6 +4,8 @@ import { UpdateCategoryDto } from '../dtos/update-category.dto';
 import { CategoryRepository } from '../../../shared/repositories/category';
 import { ICrud } from '../../../common/interfaces';
 import { Category } from '../entities/category.entity';
+import { item_not_found } from '../../../common/constants';
+import { Entities } from '../../../common/enums';
 
 @Injectable()
 export class CategoriesService implements ICrud<Category> {
@@ -23,7 +25,8 @@ export class CategoriesService implements ICrud<Category> {
       withDeleted,
       relations,
     );
-    if (!category) throw new NotFoundException('Category not found');
+    if (!category)
+      throw new NotFoundException(item_not_found(Entities.Category));
     return category;
   }
 
@@ -34,7 +37,8 @@ export class CategoriesService implements ICrud<Category> {
 
   async remove(id: string) {
     const category = await this.categoryRepository.findCategoryProducts(id);
-    if (!category) throw new NotFoundException('Category not found');
+    if (!category)
+      throw new NotFoundException(item_not_found(Entities.Category));
     await category.softRemove();
     return;
   }

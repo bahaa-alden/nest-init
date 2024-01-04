@@ -5,10 +5,11 @@ import { CaslAbilityFactory } from '../../../shared/casl/casl-ability.factory';
 import { CreateCommentDto, UpdateCommentDto } from '../dtos';
 import { User } from '../../users';
 import { ForbiddenError } from '@casl/ability';
-import { Action } from '../../../common/enums';
+import { Action, Entities } from '../../../common/enums';
 import { ProductRepository } from '../../../shared/repositories/product/product.repository';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
+import { item_not_found } from '../../../common/constants';
 
 @Injectable()
 export class CommentsService implements ICrud<Comment> {
@@ -25,7 +26,7 @@ export class CommentsService implements ICrud<Comment> {
   async getOne(id: string): Promise<Comment> {
     const comment = await this.commentRepository.findById(id);
     if (!comment) {
-      throw new NotFoundException(`Comment with ID ${id} not found`);
+      throw new NotFoundException(item_not_found(Entities.Comment));
     }
     return comment;
   }
@@ -36,7 +37,7 @@ export class CommentsService implements ICrud<Comment> {
     dto: CreateCommentDto,
   ): Promise<Comment> {
     const product = await this.productRepository.findById(productId);
-    if (!product) throw new NotFoundException('Product not found');
+    if (!product) throw new NotFoundException(item_not_found(Entities.Product));
     return this.commentRepository.createOne(product, user, dto);
   }
 

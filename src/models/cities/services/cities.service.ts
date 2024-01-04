@@ -4,6 +4,8 @@ import { UpdateCityDto } from '../dtos';
 import { City } from '../entities/city.entity';
 import { CityRepository } from '../../../shared/repositories/city';
 import { ICrud } from '../../../common/interfaces';
+import { item_not_found } from '../../../common/constants';
+import { Entities } from '../../../common/enums';
 
 @Injectable()
 export class CitiesService implements ICrud<City> {
@@ -18,9 +20,9 @@ export class CitiesService implements ICrud<City> {
     return this.cityRepository.find();
   }
 
-  async getOne(id: string, withDeleted?: boolean, relations?: string[]) {
-    const city = await this.cityRepository.findById(id, withDeleted, relations);
-    if (!city) throw new NotFoundException('city not found');
+  async getOne(id: string, withDeleted?: boolean) {
+    const city = await this.cityRepository.findById(id, withDeleted);
+    if (!city) throw new NotFoundException(item_not_found(Entities.Category));
     return city;
   }
 
@@ -30,12 +32,14 @@ export class CitiesService implements ICrud<City> {
   }
 
   async recover(id: string) {
-    const city = await this.getOne(id, true, ['stores']);
+    const city = await this.cityRepository.findForDeleteById(id, true);
+    if (!city) throw new NotFoundException(item_not_found(Entities.Category));
     return city.recover();
   }
 
   async remove(id: string) {
-    const city = await this.getOne(id, false, ['stores']);
+    const city = await this.cityRepository.findForDeleteById(id);
+    if (!city) throw new NotFoundException(item_not_found(Entities.Category));
     await city.softRemove();
     return;
   }

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
+import { denied_error } from '../constants';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -21,7 +22,7 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) return true;
     const { user }: { user: any } = context.switchToHttp().getRequest();
     if (!requiredRoles.includes(user.role.name))
-      throw new ForbiddenException('You can not perform this action');
+      throw new ForbiddenException(denied_error);
     else return true;
   }
 }

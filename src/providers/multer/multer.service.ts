@@ -16,7 +16,7 @@ export class MulterService implements MulterOptionsFactory {
             false,
           );
       },
-      limits: { fileSize: 10485760 },
+      limits: { fileSize: 14485760 },
     };
   }
 }

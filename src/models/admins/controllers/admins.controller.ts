@@ -31,11 +31,12 @@ import { GROUPS, Entities, Action } from '../../../common/enums';
 import { CaslAbilitiesGuard, JwtGuard } from '../../../common/guards';
 import { ICrud } from '../../../common/interfaces';
 import { AdminAuthResponse } from '../interfaces';
+import { denied_error, item_not_found } from '../../../common/constants';
 
 @ApiTags('Admins')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiForbiddenResponse({ description: denied_error })
+@ApiNotFoundResponse({ description: item_not_found('Data') })
 @Controller({ path: 'admins', version: '1' })
 export class AdminsController implements ICrud<Admin> {
   constructor(private readonly adminsService: AdminsService) {}

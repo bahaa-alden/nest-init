@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import {
   Category,
   CreateCategoryDto,
@@ -10,6 +10,10 @@ import {
 export class CategoryRepository extends Repository<Category> {
   constructor(private readonly dataSource: DataSource) {
     super(Category, dataSource.createEntityManager());
+  }
+
+  async findAll(ids?: string[]) {
+    return this.find({ where: { id: In(ids) } });
   }
 
   async createOne(dto: CreateCategoryDto) {

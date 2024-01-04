@@ -15,7 +15,6 @@ import { Coupon } from '../../models/coupons';
 export class CaslAbilityFactory {
   defineAbility(currentUser: User) {
     const { can, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
-    console.log(currentUser.id);
     currentUser.role.permissions.forEach((p) => {
       can(p.action, p.subject);
     });

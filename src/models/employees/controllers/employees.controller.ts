@@ -28,13 +28,14 @@ import { Public, CheckAbilities } from '../../../common/decorators';
 import { GROUPS, Entities, Action } from '../../../common/enums';
 import { CaslAbilitiesGuard } from '../../../common/guards';
 import { CreateEmployeeDto, UpdateEmployeeDto } from '../dtos';
-import { LoginDto } from '../../../auth';
+import { LoginDto } from '../../../auth/dtos/login.dto';
 import { ICrud } from '../../../common/interfaces';
 import { AuthEmployeeResponse } from '../interfaces';
+import { denied_error } from '../../../common/constants';
 
 @ApiTags('Employees')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @Controller({ path: 'employees', version: '1' })
 export class EmployeesAuthController {
@@ -57,7 +58,7 @@ export class EmployeesAuthController {
 @ApiTags('Employees')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'employees', version: '1' })

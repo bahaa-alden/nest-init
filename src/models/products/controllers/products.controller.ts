@@ -34,11 +34,12 @@ import { Product } from '../entities/product.entity';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
+import { denied_error } from '../../../common/constants';
 
 @ApiTags('Products')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'products', version: '1' })

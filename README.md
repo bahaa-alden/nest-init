@@ -58,16 +58,84 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
-## Support
+## Docker & Redis images Commands
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
 
-## Stay in touch
+# run redisqueue image
+$ yarn redis:queue:up
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# drop redisqueue image
+$ yarn redis:queue:rm
+
+# restart redisqueue image
+$ yarn redis:queue:restart
+
+# run docker postgres image
+$ yarn db:dev:up
+
+# drop docker postgres image
+$ yarn db:dev:rm
+
+# restart docker postgres image
+$ yarn db:dev:restart
+
+# run docker postgres & redisqueue images
+$ yarn db:rq:up
+
+# drop docker postgres & redisqueue images
+$ yarn db:rq:rm
+
+# restart docker postgres & redisqueue images
+$ yarn db:rq:restart
+
+```
+
+## Generate and run the app docs
+
+```bash
+# generate & run docs
+$ yarn doc:generate
+
+# run docs
+$ yarn doc:run
+
+```
+ 
+## Create and drop the database
+
+```bash
+# create db
+$ yarn db:create
+
+# drop db
+$ yarn db:drop
+
+```
+
+## Seeding
+
+```bash
+# seeding fake data
+$ yarn db:seed:fake
+
+# create specific seeder
+$ yarn db:seed:create
+
+# seeding real data like roles
+$ yarn db:seed:real
+
+# create production database and seeding data to it
+$ yarn db:seed:prod
+
+# create  database and seeding data to it
+$ yarn db:seed
+
+```
+
+
 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+

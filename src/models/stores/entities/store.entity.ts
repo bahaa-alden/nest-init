@@ -1,5 +1,5 @@
 import { Product } from './../../products';
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { City } from '../../cities';
 import { Exclude, Transform } from 'class-transformer';

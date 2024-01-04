@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { ROLE } from '../../../common/enums';
+import { Entities, ROLE } from '../../../common/enums';
 import { JwtTokenService } from '../../../shared/jwt';
 import { CreateEmployeeDto } from '../dtos/create-employee.dto';
 import { UpdateEmployeeDto } from '../dtos/update-employee.dto';
@@ -15,6 +15,10 @@ import { RoleRepository } from '../../../shared/repositories/role';
 import { StoreRepository } from '../../../shared/repositories/store/store.repository';
 import { AuthEmployeeResponse } from '../interfaces';
 import { ICrud } from '../../../common/interfaces';
+import {
+  incorrect_credentials,
+  item_not_found,
+} from '../../../common/constants';
 
 @Injectable()
 export class EmployeesService implements ICrud<Employee> {
@@ -26,16 +30,16 @@ export class EmployeesService implements ICrud<Employee> {
   ) {}
 
   async login(dto: LoginDto): Promise<AuthEmployeeResponse> {
-    const employee = await this.employeeRepository.findByEmail(dto.email);
+    const employee = await this.employeeRepository.findByIdOrEmail(dto.email);
     if (
       !employee ||
       !(await employee.verifyHash(employee.password, dto.password))
     ) {
-      throw new UnauthorizedException('Credentials incorrect');
+      throw new UnauthorizedException(incorrect_credentials);
     }
     const token = await this.jwtTokenService.signToken(
       employee.id,
-      ROLE.EMPLOYEE,
+      Employee.name,
     );
     return { token, employee };
   }
@@ -48,9 +52,12 @@ export class EmployeesService implements ICrud<Employee> {
   }
 
   async getOne(id: string, withDeleted?: boolean) {
-    const employee = await this.employeeRepository.findById(id, withDeleted);
+    const employee = await this.employeeRepository.findByIdOrEmail(
+      id,
+      withDeleted,
+    );
     if (!employee) {
-      throw new NotFoundException(`Employee with ID ${id} not found.`);
+      throw new NotFoundException(item_not_found(Entities.Employee));
     }
     return employee;
   }
@@ -64,7 +71,7 @@ export class EmployeesService implements ICrud<Employee> {
   async update(id: string, dto: UpdateEmployeeDto): Promise<Employee> {
     const employee = await this.getOne(id);
     const store = await this.storeRepository.findById(dto.storeId);
-    if (!store) throw new NotFoundException('store not found');
+    if (!store) throw new NotFoundException(item_not_found(Entities.Store));
     return this.employeeRepository.updateOne(employee, dto, store);
   }
 

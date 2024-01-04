@@ -3,6 +3,7 @@ export enum Entities {
   Role = 'Role',
   Permission = 'Permission',
   User = 'User',
+  Photo = 'Photo',
   Admin = 'Admin',
   Employee = 'Employee',
   Comment = 'Comment',

@@ -10,6 +10,7 @@ import { IsPhotoExist, IsUnique } from '../../../common/decorators';
 import { Entities } from '../../../common/enums';
 import { Transform } from 'class-transformer';
 import { getPhotoPath } from '../../../common/helpers';
+import { item_already_exist, item_not_found } from '../../../common/constants';
 
 export class UpdateUserDto {
   @IsString()
@@ -23,13 +24,13 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEmail({}, { message: 'Please provide a valid email' })
   @Transform(({ value }) => value.toLowerCase())
-  @IsUnique(Entities.User, { message: 'Email already taken' })
+  @IsUnique(Entities.User, { message: item_already_exist('email') })
   readonly email?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   @Transform(({ value }: { value: string }) => getPhotoPath(value))
-  @IsPhotoExist()
+  @IsPhotoExist({ message: item_not_found(Entities.Photo) })
   readonly photo?: string;
 }

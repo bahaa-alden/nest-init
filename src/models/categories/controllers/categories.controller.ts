@@ -26,11 +26,12 @@ import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities } from '../../../common/enums';
 import { Category } from '../entities/category.entity';
 import { ICrud } from '../../../common/interfaces';
+import { denied_error } from '../../../common/constants';
 
 @ApiTags('Categories')
 @ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: 'You can not perform this action' })
+@ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'categories', version: '1' })
