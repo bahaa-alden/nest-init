@@ -16,7 +16,6 @@ import { ConfigService, ConfigType } from '@nestjs/config';
 import { AppConfig } from './config/app';
 import * as morgan from 'morgan';
 import helmet from 'helmet';
-import { LoggerMiddleware } from './common/middlewares';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -41,7 +40,7 @@ async function bootstrap() {
     }),
   );
   app.useStaticAssets(join(__dirname, '..', 'public'), {
-    extensions: ['jpg'],
+    extensions: ['jpg', 'css', 'png'],
     index: false,
   });
   app.useGlobalFilters(new HttpExceptionFilter(httpAdapter, appConfig));
@@ -59,7 +58,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableVersioning({ type: VersioningType.URI });
   app.setGlobalPrefix('api');
-  SwaggerModule.setup('api', app, createDocument(app));
+  const { document, setupOptions } = createDocument(app);
+  SwaggerModule.setup('api', app, document, setupOptions);
   await app.listen(appConfig.port, () => {
     logger.debug(`server started at port: ${appConfig.port}`);
     logger.debug(

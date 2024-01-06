@@ -1,6 +1,4 @@
-import { CloudinaryService } from '../shared/cloudinary';
 import {
-  Body,
   Controller,
   ParseFilePipe,
   Post,

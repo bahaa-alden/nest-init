@@ -30,7 +30,7 @@ export class EmployeesService implements ICrud<Employee> {
   ) {}
 
   async login(dto: LoginDto): Promise<AuthEmployeeResponse> {
-    const employee = await this.employeeRepository.findByIdOrEmail(dto.email);
+    const employee = await this.employeeRepository.findByEmail(dto.email);
     if (
       !employee ||
       !(await employee.verifyHash(employee.password, dto.password))
@@ -52,10 +52,7 @@ export class EmployeesService implements ICrud<Employee> {
   }
 
   async getOne(id: string, withDeleted?: boolean) {
-    const employee = await this.employeeRepository.findByIdOrEmail(
-      id,
-      withDeleted,
-    );
+    const employee = await this.employeeRepository.findById(id, withDeleted);
     if (!employee) {
       throw new NotFoundException(item_not_found(Entities.Employee));
     }

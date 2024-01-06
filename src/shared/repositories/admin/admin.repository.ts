@@ -34,12 +34,9 @@ export class AdminRepository extends Repository<Admin> {
     });
   }
 
-  async findByIdOrEmail(ie: string, withDeleted = false) {
+  async findById(id: string, withDeleted = false) {
     const options: FindOneOptions<Admin> = {
-      where: [
-        { id: ie, role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
-        { email: ie, role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
-      ],
+      where: { id, role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
       withDeleted,
       select: {
         id: true,
@@ -55,6 +52,23 @@ export class AdminRepository extends Repository<Admin> {
     return await this.findOne(options);
   }
 
+  async findByEmail(email: string, withDeleted = false) {
+    const options: FindOneOptions<Admin> = {
+      where: { email },
+      withDeleted,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      relations: { photos: true, role: true },
+    };
+
+    return await this.findOne(options);
+  }
   async updateOne(admin: Admin, dto: UpdateAdminDto) {
     admin.photos.push(await this.adminPhotosRepository.uploadPhoto(dto.photo));
     Object.assign(admin, {
@@ -63,7 +77,7 @@ export class AdminRepository extends Repository<Admin> {
       password: dto.password,
     });
     await this.save(admin);
-    return this.findByIdOrEmail(admin.id);
+    return this.findById(admin.id);
   }
 
   async validate(id: string) {

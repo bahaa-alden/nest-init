@@ -35,9 +35,27 @@ export class EmployeeRepository extends Repository<Employee> {
     });
   }
 
-  async findByIdOrEmail(ie: string, withDeleted = false) {
+  async findById(id: string, withDeleted = false) {
     const options: FindOneOptions<Employee> = {
-      where: [{ id: ie }, { email: ie }],
+      where: { id },
+      withDeleted,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      relations: { photos: true, role: true, store: true },
+    };
+
+    return await this.findOne(options);
+  }
+
+  async findByEmail(email: string, withDeleted = false) {
+    const options: FindOneOptions<Employee> = {
+      where: { email },
       withDeleted,
       select: {
         id: true,
@@ -65,7 +83,7 @@ export class EmployeeRepository extends Repository<Employee> {
       store,
     });
     await this.save(employee);
-    return this.findByIdOrEmail(employee.id);
+    return this.findById(employee.id);
   }
 
   async validate(id: string) {

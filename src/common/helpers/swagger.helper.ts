@@ -1,14 +1,22 @@
 import { INestApplication } from '@nestjs/common';
-import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import {
+  DocumentBuilder,
+  OpenAPIObject,
+  SwaggerCustomOptions,
+  SwaggerModule,
+} from '@nestjs/swagger';
 import { SwaggerConfig } from '../types';
 
 export const SWAGGER_CONFIG: SwaggerConfig = {
-  title: 'Nest js Template',
-  description: 'Template',
+  title: 'ubay',
+  description: 'ubay API',
   version: '1.0',
 };
 
-export function createDocument(app: INestApplication): OpenAPIObject {
+export function createDocument(app: INestApplication): {
+  document: OpenAPIObject;
+  setupOptions: SwaggerCustomOptions;
+} {
   const builder = new DocumentBuilder()
     .setTitle(SWAGGER_CONFIG.title)
     .setDescription(SWAGGER_CONFIG.description)
@@ -19,5 +27,23 @@ export function createDocument(app: INestApplication): OpenAPIObject {
     );
 
   const options = builder.build();
-  return SwaggerModule.createDocument(app, options);
+  const document = SwaggerModule.createDocument(app, options);
+  Object.values((document as OpenAPIObject).paths).forEach((path: any) => {
+    Object.values(path).forEach((method: any) => {
+      if (
+        Array.isArray(method.security) &&
+        method.security.includes('isPublic')
+      ) {
+        method.security = [];
+      }
+    });
+  });
+  const setupOptions: SwaggerCustomOptions = {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+    customSiteTitle: 'ubay',
+    customCssUrl: '/assets/swagger.css',
+  };
+  return { document, setupOptions };
 }

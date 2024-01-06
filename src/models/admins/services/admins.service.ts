@@ -26,7 +26,7 @@ export class AdminsService implements ICrud<Admin> {
   ) {}
 
   async login(dto: LoginAdminDto): Promise<AdminAuthResponse> {
-    const admin = await this.adminRepository.findByIdOrEmail(dto.email);
+    const admin = await this.adminRepository.findByEmail(dto.email);
     if (!admin || !(await admin.verifyHash(admin.password, dto.password))) {
       throw new UnauthorizedException(incorrect_credentials);
     }
@@ -41,7 +41,7 @@ export class AdminsService implements ICrud<Admin> {
 
   async getOne(id: string, role: string = ROLE.SUPER_ADMIN) {
     const withDeleted = role === ROLE.SUPER_ADMIN ? true : false;
-    const admin = await this.adminRepository.findByIdOrEmail(id, withDeleted);
+    const admin = await this.adminRepository.findById(id, withDeleted);
     if (!admin) {
       throw new NotFoundException(item_not_found(Entities.Admin));
     }

@@ -59,7 +59,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async login(dto: LoginDto): Promise<AuthUserResponse> {
-    const user = await this.usersRepository.findByIdOrEmail(dto.email);
+    const user = await this.usersRepository.findByEmail(dto.email);
     if (!user || !(await user.verifyHash(user.password, dto.password))) {
       throw new UnauthorizedException(incorrect_credentials);
     }
@@ -67,7 +67,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async updateMyPassword(dto: PasswordChangeDto, email: string) {
-    const user = await this.usersRepository.findByIdOrEmail(email);
+    const user = await this.usersRepository.findByEmail(email);
 
     if (!user) throw new NotFoundException(item_not_found(Entities.User));
 
@@ -82,7 +82,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const user = await this.usersRepository.findByIdOrEmail(dto.email);
+    const user = await this.usersRepository.findByEmail(dto.email);
     const resetToken = user.createPasswordResetToken();
     await user.save();
     await this.mailService.sendPasswordReset(user, resetToken);

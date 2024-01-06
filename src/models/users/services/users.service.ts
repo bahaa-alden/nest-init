@@ -19,15 +19,12 @@ export class UsersService implements ICrud<User> {
   create(...n: any[]): Promise<User> {
     return;
   }
-  get(page: number, limit: number, user: User) {
-    if (user.role.name === ROLE.ADMIN || user.role.name === ROLE.SUPER_ADMIN)
-      return this.userRepository.findAll(page, limit, true);
-
-    return this.userRepository.findAll(page, limit, false);
+  get(page: number, limit: number, withDeleted: boolean) {
+    return this.userRepository.findAll(page, limit, withDeleted);
   }
 
   async getOne(id: string, withDeleted = false) {
-    const user = await this.userRepository.findByIdOrEmail(id, withDeleted);
+    const user = await this.userRepository.findById(id, withDeleted);
     if (!user) throw new NotFoundException(item_not_found(Entities.User));
     return user;
   }

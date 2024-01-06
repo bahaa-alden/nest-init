@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { RedisStoreService } from '../../shared/redis-store/redis-store.service';
+import { RedisStoreService } from '../../shared/redis-store';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
@@ -14,7 +14,7 @@ export class LoggerMiddleware implements NestMiddleware {
       const token = req.headers.authorization.split(' ')[1];
       const storedToken = await this.redisStoreService.getStoredToken();
       if (token !== storedToken)
-        throw new UnauthorizedException('Please login again');
+        throw new UnauthorizedException('Please login again!');
     }
     next();
   }

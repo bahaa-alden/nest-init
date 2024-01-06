@@ -34,13 +34,14 @@ import { AuthEmployeeResponse } from '../interfaces';
 import { denied_error } from '../../../common/constants';
 
 @ApiTags('Employees')
+@ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: 'Data Not found' })
+@UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'employees', version: '1' })
-export class EmployeesAuthController {
+export class EmployeesController implements ICrud<Employee> {
   constructor(private readonly employeesService: EmployeesService) {}
-
   @Public()
   @ApiOperation({ summary: 'Login' })
   @ApiOkResponse({
@@ -53,17 +54,7 @@ export class EmployeesAuthController {
   login(@Body() dto: LoginDto) {
     return this.employeesService.login(dto);
   }
-}
 
-@ApiTags('Employees')
-@ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
-@ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
-@UseGuards(CaslAbilitiesGuard)
-@Controller({ path: 'employees', version: '1' })
-export class EmployeesController implements ICrud<Employee> {
-  constructor(private readonly employeesService: EmployeesService) {}
   @ApiOkResponse({ type: Employee })
   @SerializeOptions({ groups: [GROUPS.ALL_EMPLOYEES] })
   @CheckAbilities({ action: Action.Read, subject: Entities.Employee })

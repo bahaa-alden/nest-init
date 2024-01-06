@@ -13,6 +13,8 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  ParamData,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,6 +26,7 @@ import {
   ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 
 import { FavoritesDto, UpdateUserDto } from '../dtos';
@@ -32,10 +35,18 @@ import { UsersService } from '../services/users.service';
 import { GetUser, Roles, CheckAbilities } from '../../../common/decorators';
 import { GROUPS, ROLE, Entities, Action } from '../../../common/enums';
 import { CaslAbilitiesGuard, RolesGuard } from '../../../common/guards';
-import { LoggingInterceptor } from '../../../common/interceptors';
+import {
+  LoggingInterceptor,
+  WithDeletedInterceptor,
+} from '../../../common/interceptors';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
 import { denied_error } from '../../../common/constants';
+import {
+  ParameterObject,
+  ParameterStyle,
+} from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import { Request } from 'express';
 
 @ApiTags('users')
 @ApiBearerAuth('token')
@@ -48,6 +59,7 @@ import { denied_error } from '../../../common/constants';
 export class UsersController implements ICrud<User> {
   constructor(private usersService: UsersService) {}
 
+  @UseInterceptors(WithDeletedInterceptor)
   @SerializeOptions({ groups: [GROUPS.ALL_USERS] })
   @ApiOkResponse({ type: PaginatedResponse<User> })
   @ApiQuery({
@@ -66,9 +78,10 @@ export class UsersController implements ICrud<User> {
   async get(
     @Query('page') page: number,
     @Query('limit') limit: number,
-    @GetUser() user: User,
+    @Req() req: Request,
   ) {
-    return this.usersService.get(page, limit, user);
+    const withDeleted = Boolean(req.query.withDeleted);
+    return this.usersService.get(page, limit, withDeleted);
   }
 
   @ApiOkResponse({ type: User })

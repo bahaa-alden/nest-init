@@ -23,6 +23,7 @@ import {
   ApiBadRequestResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
+  ApiNoContentResponse,
 } from '@nestjs/swagger';
 
 import { CreateRoleDto, UpdateRoleDto } from '../dtos';
@@ -101,6 +102,7 @@ export class RolesController implements ICrud<Role> {
     return this.rolesService.deletePermissions(id, dto);
   }
 
+  @ApiOkResponse({ type: Role })
   @ApiOperation({ summary: 'recover deleted role' })
   @SerializeOptions({
     groups: [GROUPS.ROLE],
@@ -111,6 +113,7 @@ export class RolesController implements ICrud<Role> {
     return this.rolesService.recover(id);
   }
 
+  @ApiNoContentResponse({ description: 'No Content' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {

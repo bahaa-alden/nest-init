@@ -32,7 +32,7 @@ export class CouponsService implements ICrud<Coupon> {
   async create(dto: CreateCouponDto, proOwner: User, productId?: string) {
     const prodId = dto.productId || productId;
     const product = await this.isProductOwner(prodId, proOwner);
-    const user = await this.userRepository.findByIdOrEmailForThings(dto.userId);
+    const user = await this.userRepository.findByIdForThings(dto.userId);
     if (!user) throw new NotFoundException(item_not_found(Entities.User));
     const exist = await this.couponRepository.existedCoupon(prodId, dto.userId);
     if (exist) throw new ConflictException(item_already_exist(Entities.Coupon));

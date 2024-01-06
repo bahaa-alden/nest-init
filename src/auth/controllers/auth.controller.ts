@@ -39,6 +39,7 @@ import { Request } from 'express';
  * My controller description.
  */
 @ApiTags('auth')
+@ApiBearerAuth('token')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController implements IAuthController<AuthUserResponse> {
   constructor(private authService: AuthService) {}
@@ -97,7 +98,6 @@ export class AuthController implements IAuthController<AuthUserResponse> {
     return this.authService.resetPassword(dto, dynamicOrigin);
   }
 
-  @ApiBearerAuth('token')
   @SerializeOptions({ groups: [GROUPS.USER] })
   @UseGuards(RolesGuard)
   @Roles(ROLE.USER)

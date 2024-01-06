@@ -48,9 +48,9 @@ export class UserRepository extends Repository<User> {
     return pagination(page, limit, totalDataCount, data);
   }
 
-  async findByIdOrEmail(ie: string, withDeleted = false): Promise<User> {
+  async findById(id: string, withDeleted = false): Promise<User> {
     return await this.findOne({
-      where: [{ id: ie }, { email: ie }],
+      where: { id },
       select: {
         id: true,
         name: true,
@@ -58,18 +58,40 @@ export class UserRepository extends Repository<User> {
         password: true,
         createdAt: true,
         updatedAt: true,
-        favoriteCategories: { id: true, name: true },
+        // favoriteCategories: { id: true, name: true },
       },
       relations: {
         role: { permissions: true },
         photos: true,
-        favoriteCategories: true,
-        favoriteCities: true,
+        // favoriteCategories: true,
+        // favoriteCities: true,
       },
+      withDeleted,
     });
   }
 
-  async findByIdOrEmailForThings(id: string): Promise<User> {
+  async findByEmail(email: string, withDeleted = false): Promise<User> {
+    return await this.findOne({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        createdAt: true,
+        updatedAt: true,
+        // favoriteCategories: { id: true, name: true },
+      },
+      relations: {
+        role: { permissions: true },
+        photos: true,
+        // favoriteCategories: true,
+        // favoriteCities: true,
+      },
+      withDeleted,
+    });
+  }
+  async findByIdForThings(id: string): Promise<User> {
     return await this.findOne({
       where: { id },
       select: {
@@ -84,7 +106,7 @@ export class UserRepository extends Repository<User> {
     user.photos.push(await this.userPhotosRepository.uploadPhoto(dto.photo));
     Object.assign(user, { email: dto.email, name: dto.name });
     await this.save(user);
-    return this.findByIdOrEmail(user.id);
+    return this.findById(user.id);
   }
 
   async updateFavorites(
@@ -95,7 +117,7 @@ export class UserRepository extends Repository<User> {
     user.favoriteCategories.push(...favoriteCategories);
     user.favoriteCities.push(...favoriteCities);
     await this.save(user);
-    return this.findByIdOrEmail(user.id);
+    return this.findById(user.id);
   }
 
   async resetPassword(
@@ -107,7 +129,7 @@ export class UserRepository extends Repository<User> {
     user.passwordResetExpires = null;
     user.passwordChangedAt = new Date(Date.now() - 1000);
     await this.save(user);
-    return this.findByIdOrEmail(user.id);
+    return this.findById(user.id);
   }
 
   async getMyPhotos(userId: string): Promise<UserPhoto[]> {
@@ -134,13 +156,13 @@ export class UserRepository extends Repository<User> {
         createdAt: true,
         updatedAt: true,
         photos: false,
-        favoriteCategories: { id: true, name: true },
+        // favoriteCategories: { id: true, name: true },
       },
       relations: {
         role: { permissions: true },
         photos: true,
-        favoriteCategories: true,
-        favoriteCities: true,
+        // favoriteCategories: true,
+        // favoriteCities: true,
       },
     });
   }

@@ -34,6 +34,7 @@ import { AdminAuthResponse } from '../interfaces';
 import { denied_error, item_not_found } from '../../../common/constants';
 
 @ApiTags('Admins')
+@ApiBearerAuth('token')
 @ApiBadRequestResponse({ description: 'Bad request' })
 @ApiForbiddenResponse({ description: denied_error })
 @ApiNotFoundResponse({ description: item_not_found('Data') })
@@ -54,7 +55,6 @@ export class AdminsController implements ICrud<Admin> {
     return this.adminsService.login(dto);
   }
 
-  @ApiBearerAuth('token')
   @ApiOkResponse({ type: Admin })
   @UseGuards(CaslAbilitiesGuard)
   @CheckAbilities({ action: Action.Create, subject: Entities.Admin })
@@ -64,7 +64,6 @@ export class AdminsController implements ICrud<Admin> {
     return this.adminsService.create(createAdminDto);
   }
 
-  @ApiBearerAuth('token')
   @ApiOkResponse({ type: Admin })
   @UseGuards(CaslAbilitiesGuard)
   @CheckAbilities({ action: Action.Read, subject: Entities.Admin })
@@ -74,7 +73,6 @@ export class AdminsController implements ICrud<Admin> {
     return this.adminsService.get(role.name);
   }
 
-  @ApiBearerAuth('token')
   @ApiOkResponse({ type: Admin })
   @UseGuards(CaslAbilitiesGuard)
   @SerializeOptions({ groups: [GROUPS.ADMIN] })
@@ -84,7 +82,6 @@ export class AdminsController implements ICrud<Admin> {
     return this.adminsService.getOne(id, role.name);
   }
 
-  @ApiBearerAuth('token')
   @ApiOkResponse({ type: Admin })
   @UseGuards(JwtGuard, CaslAbilitiesGuard)
   @SerializeOptions({ groups: [GROUPS.ADMIN] })
@@ -94,7 +91,6 @@ export class AdminsController implements ICrud<Admin> {
     return this.adminsService.update(id, dto);
   }
 
-  @ApiBearerAuth('token')
   @UseGuards(JwtGuard, CaslAbilitiesGuard)
   @CheckAbilities({ action: Action.Delete, subject: Entities.Admin })
   @HttpCode(HttpStatus.NO_CONTENT)
