@@ -6,9 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateCouponDto } from '../dtos/create-coupon.dto';
 import { UpdateCouponDto } from '../dtos/update-coupon.dto';
-import { UserRepository } from '../../../shared/repositories/user/user.repository';
-import { ProductRepository } from '../../../shared/repositories/product/product.repository';
-import { CouponRepository } from '../../../shared/repositories/coupon/coupon.repository';
+
 import { User } from '../../users';
 import { CaslAbilityFactory } from '../../../shared/casl';
 import { ForbiddenError } from '@casl/ability';
@@ -20,6 +18,9 @@ import {
   item_already_exist,
   item_not_found,
 } from '../../../common/constants';
+import { ProductRepository } from '../../products/repositories';
+import { UserRepository } from '../../users/epositories';
+import { CouponRepository } from '../coupon/coupon.repository';
 
 @Injectable()
 export class CouponsService implements ICrud<Coupon> {

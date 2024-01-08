@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CommentsRepository } from '../../../shared/repositories/comment';
+import { CommentsRepository } from './../repositories';
 import { Comment } from '../entities/comment.entity';
 import { CaslAbilityFactory } from '../../../shared/casl/casl-ability.factory';
 import { CreateCommentDto, UpdateCommentDto } from '../dtos';
 import { User } from '../../users';
 import { ForbiddenError } from '@casl/ability';
 import { Action, Entities } from '../../../common/enums';
-import { ProductRepository } from '../../../shared/repositories/product/product.repository';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
 import { item_not_found } from '../../../common/constants';
+import { ProductRepository } from '../../products/repositories';
 
 @Injectable()
 export class CommentsService implements ICrud<Comment> {

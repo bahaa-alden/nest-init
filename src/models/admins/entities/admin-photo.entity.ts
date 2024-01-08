@@ -4,7 +4,7 @@ import { Admin } from './admin.entity';
 import { Exclude } from 'class-transformer';
 import { BasePhoto } from '../../../common/entities';
 
-@Entity({ name: 'admin_photos' })
+@Entity({ name: 'admins_photos' })
 export class AdminPhoto extends BasePhoto {
   @ManyToOne(() => Admin, (admin) => admin.photos)
   @JoinColumn({ name: 'adminId' })

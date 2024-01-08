@@ -9,16 +9,16 @@ import { JwtTokenService } from '../../../shared/jwt';
 import { CreateEmployeeDto } from '../dtos/create-employee.dto';
 import { UpdateEmployeeDto } from '../dtos/update-employee.dto';
 import { Employee } from '../entities/employee.entity';
-import { EmployeeRepository } from '../../../shared/repositories/employee';
 import { LoginDto } from '../../../auth';
-import { RoleRepository } from '../../../shared/repositories/role';
-import { StoreRepository } from '../../../shared/repositories/store/store.repository';
 import { AuthEmployeeResponse } from '../interfaces';
 import { ICrud } from '../../../common/interfaces';
 import {
   incorrect_credentials,
   item_not_found,
 } from '../../../common/constants';
+import { RoleRepository } from '../../roles/repositories';
+import { StoreRepository } from '../../stores/repositories';
+import { EmployeeRepository } from '../repositories';
 
 @Injectable()
 export class EmployeesService implements ICrud<Employee> {

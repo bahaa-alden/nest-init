@@ -32,16 +32,11 @@ import { StoresModule } from './models/stores/stores.module';
 import { CategoriesModule } from './models/categories/categories.module';
 import { ProductsModule } from './models/products/products.module';
 import { JwtTokenModule } from './shared/jwt';
-import { RepositoriesModule } from './shared/repositories/repositories.module';
 import { CouponsModule } from './models/coupons/coupons.module';
 import { CommentsModule } from './models/comments/comments.module';
 import { ProductPhotosModule } from './models/product-photos/product-photos.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { RedisStoreModule } from './shared/redis-store/redis-store.module';
-import {
-  MiddlewareConfigProxy,
-  MiddlewareConfiguration,
-} from '@nestjs/common/interfaces';
 import { LoggerMiddleware } from './common/middlewares';
 
 @Module({
@@ -81,7 +76,6 @@ import { LoggerMiddleware } from './common/middlewares';
     JwtTokenModule,
     PhotoCleanupModule,
     CaslModule,
-    RepositoriesModule,
     CloudinaryModule,
     RedisStoreModule,
   ],

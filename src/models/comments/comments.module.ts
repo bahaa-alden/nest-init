@@ -4,9 +4,13 @@ import {
   CommentsController,
   GenericCommentsController,
 } from './controllers/comments.controller';
+import { CommentsRepository } from './repositories';
+import { ProductsModule } from '../products/products.module';
 
 @Module({
+  imports: [ProductsModule],
   controllers: [CommentsController, GenericCommentsController],
-  providers: [CommentsService],
+  providers: [CommentsService, CommentsRepository],
+  exports: [CommentsRepository],
 })
 export class CommentsModule {}

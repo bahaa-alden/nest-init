@@ -3,7 +3,7 @@ import { User } from './user.entity';
 import { BasePhoto } from '../../../common/entities';
 import { Exclude } from 'class-transformer';
 
-@Entity({ name: 'user_photos' })
+@Entity({ name: 'users_photos' })
 export class UserPhoto extends BasePhoto {
   @ManyToOne(() => User, (user) => user.photos)
   @JoinColumn({ name: 'userId' })

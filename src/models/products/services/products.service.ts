@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Product } from '../entities/product.entity';
-import { ProductRepository } from '../../../shared/repositories/product';
 import { CaslAbilityFactory } from '../../../shared/casl/casl-ability.factory';
 import { CreateProductDto, UpdateProductDto } from '../dto';
 import { User } from '../../users';
 import { ForbiddenError } from '@casl/ability';
 import { Action, Entities } from '../../../common/enums';
-import { CategoryRepository } from '../../../shared/repositories/category';
-import { StoreRepository } from '../../../shared/repositories/store';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
 import { item_not_found } from '../../../common/constants';
+import { CategoryRepository } from '../../categories/repositories';
+import { StoreRepository } from '../../stores/repositories';
+import { ProductRepository } from '../repositories';
 
 @Injectable()
 export class ProductsService implements ICrud<Product> {

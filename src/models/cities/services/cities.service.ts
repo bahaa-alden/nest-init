@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCityDto } from '../dtos';
 import { UpdateCityDto } from '../dtos';
 import { City } from '../entities/city.entity';
-import { CityRepository } from '../../../shared/repositories/city';
+import { CityRepository } from './../repositories';
 import { ICrud } from '../../../common/interfaces';
 import { item_not_found } from '../../../common/constants';
 import { Entities } from '../../../common/enums';
@@ -16,8 +16,12 @@ export class CitiesService implements ICrud<City> {
     return city;
   }
 
-  get() {
-    return this.cityRepository.find();
+  async get(ids?: string[]) {
+    const cities = await this.cityRepository.findAll(ids);
+    if (ids && ids.length !== cities.length)
+      throw new NotFoundException('some of cities not found');
+
+    return cities;
   }
 
   async getOne(id: string, withDeleted?: boolean) {
@@ -40,7 +44,7 @@ export class CitiesService implements ICrud<City> {
   async remove(id: string) {
     const city = await this.cityRepository.findForDeleteById(id);
     if (!city) throw new NotFoundException(item_not_found(Entities.Category));
-    await city.softRemove();
-    return;
+    // await city.softRemove();
+    return city;
   }
 }

@@ -2,9 +2,11 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { BasePerson, BasePhoto } from '../../../common/entities';
 import { Exclude, Expose, Transform } from 'class-transformer';
@@ -18,6 +20,7 @@ import { Category } from '../../categories';
 import { City } from '../../cities';
 import { Comment } from '../../comments/entities/comment.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Wallet } from './wallet.entity';
 
 @Entity({ name: 'users' })
 export class User extends BasePerson {
@@ -30,6 +33,14 @@ export class User extends BasePerson {
   @Exclude()
   @Column()
   roleId: string;
+
+  @ApiProperty({ type: Wallet })
+  @Expose({ groups: [GROUPS.USER] })
+  @OneToOne(() => Wallet, (wallet) => wallet.user, {
+    onDelete: 'CASCADE',
+    cascade: true,
+  })
+  wallet: Wallet;
 
   @Exclude()
   @OneToMany(() => UserPhoto, (userPhoto) => userPhoto.user, {
@@ -54,12 +65,27 @@ export class User extends BasePerson {
   @ManyToMany(() => Product, (product) => product.likedBy)
   likedProducts: Product[];
 
+  @ApiProperty({
+    type: Category,
+    isArray: true,
+  })
   @Expose({ groups: [GROUPS.USER] })
   @ManyToMany(() => Category, (category) => category.users)
+  @JoinTable({
+    name: 'users_categories',
+    joinColumn: { name: 'userId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'categoryId', referencedColumnName: 'id' },
+  })
   favoriteCategories: Category[];
 
+  @ApiProperty({ type: City, isArray: true })
   @Expose({ groups: [GROUPS.USER] })
   @ManyToMany(() => City, (city) => city.users)
+  @JoinTable({
+    name: 'users_cities',
+    joinColumn: { name: 'userId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'cityId', referencedColumnName: 'id' },
+  })
   favoriteCities: City[];
 
   @Exclude()

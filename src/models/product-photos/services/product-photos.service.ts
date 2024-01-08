@@ -1,14 +1,12 @@
 import { CaslAbilityFactory } from '../../../shared/casl/casl-ability.factory';
 import { User } from '../../users';
 import { CreateProductPhotoDto } from '../dto/create-product-photo.dto';
-import {
-  ProductRepository,
-  ProductPhotosRepository,
-} from '../../../shared/repositories/product';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ForbiddenError } from '@casl/ability';
 import { Action, Entities } from '../../../common/enums';
 import { item_not_found } from '../../../common/constants';
+import { ProductRepository } from '../../products/repositories';
+import { ProductPhotosRepository } from '../repositories/product-photos-repository';
 
 @Injectable()
 export class ProductPhotosService {

@@ -2,10 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleDto, UpdateRoleDto } from '../dtos';
 import { PermissionsService } from '../../permissions/services/permissions.service';
 import { Role } from '../entities/role.entity';
-import { RoleRepository } from '../../../shared/repositories/role';
 import { ICrud } from '../../../common/interfaces';
 import { item_not_found } from '../../../common/constants';
 import { Entities } from '../../../common/enums';
+import { permissions } from '../../../database/seeders/permissions/data';
+import { RoleRepository } from '../repositories';
 
 @Injectable()
 export class RolesService implements ICrud<Role> {
@@ -56,7 +57,9 @@ export class RolesService implements ICrud<Role> {
 
     if (!role) throw new NotFoundException(item_not_found(Entities.Role));
 
-    const permissions = await this.permissionsService.get(dto.permissionsIds);
+    let permissions;
+    if (dto.permissionsIds)
+      permissions = await this.permissionsService.get(dto.permissionsIds);
 
     return this.roleRepository.addPermissions(role, permissions);
   }

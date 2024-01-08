@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStoreDto, UpdateStoreDto } from '../dtos';
-import { StoreRepository } from '../../../shared/repositories/store';
-import { CityRepository } from '../../../shared/repositories/city';
+import { StoreRepository } from './../repositories';
 import { item_not_found } from '../../../common/constants';
 import { Entities } from '../../../common/enums';
+import { CityRepository } from '../../cities/repositories';
 
 @Injectable()
 export class StoresService {

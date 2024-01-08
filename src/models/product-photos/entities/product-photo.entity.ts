@@ -3,7 +3,7 @@ import { BasePhoto } from '../../../common/entities';
 import { Product } from '../../products/entities/product.entity';
 import { Exclude } from 'class-transformer';
 
-@Entity({ name: 'product_photos' })
+@Entity({ name: 'products_photos' })
 export class ProductPhoto extends BasePhoto {
   @Exclude()
   @ManyToOne(() => Product, (product) => product.photos)

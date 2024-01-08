@@ -31,7 +31,7 @@ export class BasePerson extends GlobalEntity {
       GROUPS.EMPLOYEE,
     ],
   })
-  @ApiProperty()
+  @ApiProperty({ uniqueItems: true })
   @Column({ unique: true })
   email: string;
 

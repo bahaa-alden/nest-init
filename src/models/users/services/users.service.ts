@@ -2,18 +2,18 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { FavoritesDto, UpdateUserDto } from '../dtos';
 import { User } from '../entities/user.entity';
 import { Entities, ROLE } from './../../../common/enums';
-import { UserRepository } from '../../../shared/repositories/user';
+import { UserRepository } from '../epositories';
 import { ICrud } from '../../../common/interfaces';
 import { item_not_found } from '../../../common/constants';
-import { CityRepository } from '../../../shared/repositories/city/city.repository';
-import { CategoryRepository } from '../../../shared/repositories/category/category.repository';
+import { CategoriesService } from '../../categories/services/categories.service';
+import { CitiesService } from '../../cities/services/cities.service';
 
 @Injectable()
 export class UsersService implements ICrud<User> {
   constructor(
     private userRepository: UserRepository,
-    private cityRepository: CityRepository,
-    private categoryRepository: CategoryRepository,
+    private categoriesService: CategoriesService,
+    private citiesService: CitiesService,
   ) {}
 
   create(...n: any[]): Promise<User> {
@@ -49,20 +49,16 @@ export class UsersService implements ICrud<User> {
   }
 
   async favorites(dto: FavoritesDto, user: User) {
-    const favoriteCities = await this.cityRepository.findAll(
-      dto.favoriteCities,
-    );
+    let favoriteCities = [];
+    let favoriteCategories = [];
 
-    if (dto.favoriteCities.length !== favoriteCities.length)
-      throw new NotFoundException(item_not_found(Entities.City));
+    if (dto.favoriteCities)
+      favoriteCities = await this.citiesService.get(dto.favoriteCities);
 
-    const favoriteCategories = await this.categoryRepository.findAll(
-      dto.favoriteCategories,
-    );
-
-    if (dto.favoriteCategories.length !== favoriteCategories.length)
-      throw new NotFoundException(item_not_found(Entities.Category));
-
+    if (dto.favoriteCategories)
+      favoriteCategories = await this.categoriesService.get(
+        dto.favoriteCategories,
+      );
     return this.userRepository.updateFavorites(
       user,
       favoriteCities,

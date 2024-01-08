@@ -8,14 +8,14 @@ import { JwtTokenService } from '../../../shared/jwt';
 import { Role } from '../../roles';
 import { CreateAdminDto, LoginAdminDto, UpdateAdminDto } from '../dtos';
 import { Admin } from '../entities/admin.entity';
-import { RoleRepository } from '../../../shared/repositories/role';
-import { AdminRepository } from '../../../shared/repositories/admin';
 import { AdminAuthResponse } from '../interfaces';
 import { ICrud } from '../../../common/interfaces';
 import {
   incorrect_credentials,
   item_not_found,
 } from '../../../common/constants';
+import { RoleRepository } from '../../roles/repositories';
+import { AdminRepository } from '../repositories';
 
 @Injectable()
 export class AdminsService implements ICrud<Admin> {

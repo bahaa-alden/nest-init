@@ -21,10 +21,7 @@ import {
 } from '../dtos';
 import { AuthUserResponse, jwtPayload } from '../interfaces';
 import { Admin } from './../../models/admins';
-import { AdminRepository } from '../../shared/repositories/admin';
-import { UserRepository } from '../../shared/repositories/user';
-import { RoleRepository } from '../../shared/repositories/role/role.repository';
-import { MailService } from '../../mail/mail.service';
+
 import { IAuthController } from '../../common/interfaces';
 import * as crypto from 'crypto';
 import {
@@ -36,7 +33,11 @@ import {
   password_changed_recently,
 } from '../../common/constants';
 import { Employee } from '../../models/employees';
-import { EmployeeRepository } from '../../shared/repositories/employee/employee.repository';
+import { AdminRepository } from '../../models/admins/repositories';
+import { EmployeeRepository } from '../../models/employees/repositories';
+import { RoleRepository } from '../../models/roles/repositories';
+import { UserRepository } from '../../models/users/epositories';
+import { MailService } from '../../shared/mail/mail.service';
 
 @Injectable()
 export class AuthService implements IAuthController<AuthUserResponse> {

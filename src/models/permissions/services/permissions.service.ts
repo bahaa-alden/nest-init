@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common';
 import { CreatePermissionDto } from '../dtos';
 import { UpdatePermissionDto } from '../dtos';
-import { PermissionRepository } from '../../../shared/repositories/permission';
 import { Permission } from '../entities/permission.entity';
 import { ICrud } from '../../../common/interfaces';
 import { item_already_exist, item_not_found } from '../../../common/constants';
 import { Entities } from '../../../common/enums';
+import { PermissionRepository } from '../repositories';
 
 @Injectable()
 export class PermissionsService implements ICrud<Permission> {
