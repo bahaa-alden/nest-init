@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
+  Inject,
 } from '@nestjs/common';
 import {
   FindOptionsRelations,
@@ -33,19 +34,26 @@ import {
   password_changed_recently,
 } from '../../common/constants';
 import { Employee } from '../../models/employees';
-import { AdminRepository } from '../../models/admins/repositories';
-import { EmployeeRepository } from '../../models/employees/repositories';
-import { RoleRepository } from '../../models/roles/repositories';
-import { UserRepository } from '../../models/users/epositories';
+import { RoleRepository } from '../../models/roles/repositories/role.repository';
+import { UserRepository } from '../../models/users/repositories/user.repository';
 import { MailService } from '../../shared/mail/mail.service';
+import { IAdminRepository } from '../../models/admins/interfaces/repositories/admin.repository.interface';
+import { ADMIN_TYPES } from '../../models/admins/interfaces/type';
+import { IEmployeeRepository } from '../../models/employees/interfaces/repositories/employee.repository.interface';
+import { EMPLOYEE_TYPES } from '../../models/employees/interfaces/type';
+import { USER_TYPES } from '../../models/users/interfaces/type';
+import { IUserRepository } from '../../models/users/interfaces/repositories/user.repository.interface';
 
 @Injectable()
 export class AuthService implements IAuthController<AuthUserResponse> {
   constructor(
     private readonly jwtTokenService: JwtTokenService,
-    private readonly usersRepository: UserRepository,
-    private readonly adminsRepository: AdminRepository,
-    private employeeRepository: EmployeeRepository,
+    @Inject(USER_TYPES.repository.user)
+    private readonly userRepository: IUserRepository,
+    @Inject(ADMIN_TYPES.repository.admin)
+    private readonly adminRepository: IAdminRepository,
+    @Inject(EMPLOYEE_TYPES.repository.employee)
+    private readonly employeeRepository: IEmployeeRepository,
     private readonly roleRepository: RoleRepository,
     private readonly mailService: MailService,
   ) {}
@@ -53,14 +61,14 @@ export class AuthService implements IAuthController<AuthUserResponse> {
     dto: SignUpDto,
     dynamicOrigin: string,
   ): Promise<AuthUserResponse> {
-    const role = await this.roleRepository.findOneBy({ name: ROLE.USER });
-    const user = await this.usersRepository.createOne(dto, role);
+    const role = await this.roleRepository.findByName(ROLE.USER);
+    const user = await this.userRepository.create(dto, role);
     await this.mailService.sendWelcomeEmail(user, dynamicOrigin);
     return this.sendAuthResponse(user);
   }
 
   async login(dto: LoginDto): Promise<AuthUserResponse> {
-    const user = await this.usersRepository.findByEmail(dto.email);
+    const user = await this.userRepository.findByEmail(dto.email);
     if (!user || !(await user.verifyHash(user.password, dto.password))) {
       throw new UnauthorizedException(incorrect_credentials);
     }
@@ -68,7 +76,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async updateMyPassword(dto: PasswordChangeDto, email: string) {
-    const user = await this.usersRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
 
     if (!user) throw new NotFoundException(item_not_found(Entities.User));
 
@@ -76,14 +84,14 @@ export class AuthService implements IAuthController<AuthUserResponse> {
     if (!(await user.verifyHash(user.password, dto.passwordCurrent))) {
       throw new UnauthorizedException(incorrect_current_password);
     }
-    await this.usersRepository.resetPassword(user, dto);
+    await this.userRepository.resetPassword(user, dto);
     const token = await this.jwtTokenService.signToken(user.id, User.name);
 
     return { token, user };
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const user = await this.usersRepository.findByEmail(dto.email);
+    const user = await this.userRepository.findByEmail(dto.email);
     const resetToken = user.createPasswordResetToken();
     await user.save();
     await this.mailService.sendPasswordReset(user, resetToken);
@@ -98,14 +106,11 @@ export class AuthService implements IAuthController<AuthUserResponse> {
       .createHash('sha256')
       .update(dto.resetToken)
       .digest('hex');
-    let user = await this.usersRepository.findOneBy({
-      passwordResetToken: hashToken,
-      passwordResetExpires: MoreThan(new Date()),
-    });
+    let user = await this.userRepository.findOneByResetToken(hashToken);
     if (!user) {
       throw new NotFoundException(reset_token_expired);
     }
-    user = await this.usersRepository.resetPassword(user, dto);
+    user = await this.userRepository.resetPassword(user, dto);
     await this.mailService.sendPasswordChanged(user, dynamicOrigin);
     return this.sendAuthResponse(user);
   }
@@ -119,9 +124,9 @@ export class AuthService implements IAuthController<AuthUserResponse> {
     let user: User | Admin | Employee;
 
     if (payload.entity === Admin.name) {
-      user = await this.adminsRepository.validate(payload.sub);
+      user = await this.adminRepository.validate(payload.sub);
     } else if (payload.entity === User.name) {
-      user = await this.usersRepository.validate(payload.sub);
+      user = await this.userRepository.validate(payload.sub);
     } else {
       user = await this.employeeRepository.validate(payload.sub);
     }

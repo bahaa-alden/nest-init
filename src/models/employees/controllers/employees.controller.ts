@@ -16,14 +16,16 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Req,
   SerializeOptions,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { EmployeesService } from '../services/employees.service';
 import { Public, CheckAbilities } from '../../../common/decorators';
 import { GROUPS, Entities, Action } from '../../../common/enums';
 import { CaslAbilitiesGuard } from '../../../common/guards';
@@ -31,17 +33,28 @@ import { CreateEmployeeDto, UpdateEmployeeDto } from '../dtos';
 import { LoginDto } from '../../../auth/dtos/login.dto';
 import { ICrud } from '../../../common/interfaces';
 import { AuthEmployeeResponse } from '../interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
+import { WithDeletedInterceptor } from '../../../common/interceptors';
+import { Request } from 'express';
+import { EMPLOYEE_TYPES } from '../interfaces/type';
+import { IEmployeeService } from '../interfaces/employee-services.interface';
 
 @ApiTags('Employees')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'employees', version: '1' })
 export class EmployeesController implements ICrud<Employee> {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(
+    @Inject(EMPLOYEE_TYPES.service)
+    private readonly employeesService: IEmployeeService,
+  ) {}
   @Public()
   @ApiOperation({ summary: 'Login' })
   @ApiOkResponse({
@@ -55,12 +68,14 @@ export class EmployeesController implements ICrud<Employee> {
     return this.employeesService.login(dto);
   }
 
+  @UseInterceptors(WithDeletedInterceptor)
   @ApiOkResponse({ type: Employee })
   @SerializeOptions({ groups: [GROUPS.ALL_EMPLOYEES] })
   @CheckAbilities({ action: Action.Read, subject: Entities.Employee })
   @Get()
-  get() {
-    return this.employeesService.get();
+  find(@Req() req: Request) {
+    const withDeleted = Boolean(req.query.withDeleted);
+    return this.employeesService.find(withDeleted);
   }
 
   @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })
@@ -75,8 +90,8 @@ export class EmployeesController implements ICrud<Employee> {
   @ApiOkResponse({ type: Employee })
   @CheckAbilities({ action: Action.Read, subject: Entities.Employee })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.employeesService.getOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.employeesService.findOne(id);
   }
 
   @SerializeOptions({ groups: [GROUPS.EMPLOYEE] })

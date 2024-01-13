@@ -2,19 +2,19 @@ import { PaginatedResponse } from '../types';
 
 export interface ICrud<T> {
   create(...n): Promise<T>;
-  get(...n): Promise<T[] | PaginatedResponse<T>>;
-  getOne(...n): Promise<T>;
+  find(...n): Promise<T[] | PaginatedResponse<T>>;
+  findOne(...n): Promise<T>;
   update(...n): Promise<T>;
   remove(...n): Promise<any>;
 }
 
 export interface INestedController<T> {
   create(...n): Promise<T>;
-  get(...n): Promise<T[] | PaginatedResponse<T>>;
+  find(...n): Promise<T[] | PaginatedResponse<T>>;
 }
 
 export interface IGenericController<T> {
-  getOne(...n): Promise<T>;
+  findOne(...n): Promise<T>;
   update(...n): Promise<T>;
   remove(...n): Promise<void>;
 }

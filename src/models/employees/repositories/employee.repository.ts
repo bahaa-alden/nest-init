@@ -1,30 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ROLE } from '../../../common/enums';
-import { Employee, CreateEmployeeDto, UpdateEmployeeDto } from '..';
 import { Role } from '../../roles';
-import { Repository, DataSource, Equal, FindOneOptions } from 'typeorm';
-import { EmployeePhotosRepository } from './employee-photos.repository';
+import { Repository, Equal, FindOneOptions } from 'typeorm';
 import { defaultPhoto } from '../../../common/constants';
 import { Store } from '../../stores';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateEmployeeDto, UpdateEmployeeDto } from '../dtos';
+import { Employee } from '../entities/employee.entity';
+import { IEmployeeRepository } from '../interfaces/repositories/employee.repository.interface';
+import { IEmployeePhotosRepository } from '../interfaces/repositories/employee-photos.repository.interface';
+import { EMPLOYEE_TYPES } from '../interfaces/type';
 
 @Injectable()
-export class EmployeeRepository extends Repository<Employee> {
+export class EmployeeRepository implements IEmployeeRepository {
   constructor(
-    private readonly dataSource: DataSource,
-    private readonly employeePhotosRepository: EmployeePhotosRepository,
-  ) {
-    super(Employee, dataSource.createEntityManager());
-  }
+    @InjectRepository(Employee)
+    private readonly employeeRepository: Repository<Employee>,
+    @Inject(EMPLOYEE_TYPES.repository.employee_photos)
+    private readonly employeePhotosRepository: IEmployeePhotosRepository,
+  ) {}
 
-  async createOne(dto: CreateEmployeeDto, store: Store, role: Role) {
-    const employee = this.create({ ...dto, role, photos: [], store });
+  async create(dto: CreateEmployeeDto, store: Store, role: Role) {
+    const employee = this.employeeRepository.create({
+      ...dto,
+      role,
+      photos: [],
+      store,
+    });
     employee.photos.push(this.employeePhotosRepository.create(defaultPhoto));
     await employee.save();
     return employee;
   }
 
-  async findAll(withDeleted = false) {
-    return this.find({
+  async find(withDeleted = false) {
+    return this.employeeRepository.find({
       where: { role: withDeleted ? {} : { name: Equal(ROLE.EMPLOYEE) } },
       withDeleted,
       relations: { photos: true, role: true },
@@ -46,7 +55,7 @@ export class EmployeeRepository extends Repository<Employee> {
       relations: { photos: true, role: true, store: true },
     };
 
-    return await this.findOne(options);
+    return await this.employeeRepository.findOne(options);
   }
 
   async findByEmail(email: string, withDeleted = false) {
@@ -64,10 +73,14 @@ export class EmployeeRepository extends Repository<Employee> {
       relations: { photos: true, role: true, store: true },
     };
 
-    return await this.findOne(options);
+    return await this.employeeRepository.findOne(options);
   }
 
-  async updateOne(employee: Employee, dto: UpdateEmployeeDto, store: Store) {
+  async update(
+    employee: Employee,
+    dto: UpdateEmployeeDto,
+    store: Store,
+  ): Promise<Employee> {
     employee.photos.push(
       await this.employeePhotosRepository.uploadPhoto(dto.photo),
     );
@@ -78,12 +91,20 @@ export class EmployeeRepository extends Repository<Employee> {
       address: dto.address,
       store,
     });
-    await this.save(employee);
+    await this.employeeRepository.save(employee);
     return this.findById(employee.id);
   }
 
-  async validate(id: string) {
-    return this.findOne({
+  async recover(employee: Employee): Promise<Employee> {
+    return this.employeeRepository.recover(employee);
+  }
+
+  async remove(employee: Employee): Promise<void> {
+    await this.employeeRepository.softRemove(employee);
+  }
+
+  async validate(id: string): Promise<Employee> {
+    return this.employeeRepository.findOne({
       where: { id },
       select: {
         id: true,

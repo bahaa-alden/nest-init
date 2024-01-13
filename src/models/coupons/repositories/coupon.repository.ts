@@ -1,24 +1,19 @@
-import {
-  DataSource,
-  FindOptionsWhere,
-  IsNull,
-  MoreThan,
-  Repository,
-} from 'typeorm';
-import { Coupon, UpdateCouponDto } from '..';
+import { FindOptionsWhere, IsNull, MoreThan, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from '../../users';
 import { Product } from '../../products/entities/product.entity';
 import { CreateCouponDto } from '../dtos/create-coupon.dto';
-import { Action } from '../../../common/enums';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateCouponDto } from '../dtos';
+import { Coupon } from '../entities/coupon.entity';
 
 @Injectable()
-export class CouponRepository extends Repository<Coupon> {
-  constructor(private readonly dataSource: DataSource) {
-    super(Coupon, dataSource.createEntityManager());
-  }
+export class CouponRepository {
+  constructor(
+    @InjectRepository(Coupon) private readonly couponRepo: Repository<Coupon>,
+  ) {}
 
-  async findAll(options?: FindOptionsWhere<Coupon>) {
+  async find(options?: FindOptionsWhere<Coupon>) {
     const currentDate = new Date();
     const where: FindOptionsWhere<Coupon> | FindOptionsWhere<Coupon>[] =
       options.productId
@@ -38,7 +33,7 @@ export class CouponRepository extends Repository<Coupon> {
             },
           ];
 
-    return this.find({
+    return this.couponRepo.find({
       where,
       select: {
         id: true,
@@ -62,8 +57,8 @@ export class CouponRepository extends Repository<Coupon> {
     });
   }
 
-  async findById(id: string) {
-    return this.findOne({
+  async findOne(id: string) {
+    return this.couponRepo.findOne({
       where: { id, active: true, product: { is_paid: false } },
       select: {
         id: true,
@@ -90,28 +85,31 @@ export class CouponRepository extends Repository<Coupon> {
     });
   }
   async existedCoupon(productId: string, userId: string) {
-    return this.findOne({ where: { productId, userId }, withDeleted: true });
+    return this.couponRepo.findOne({
+      where: { productId, userId },
+      withDeleted: true,
+    });
   }
-  async createOne(
+  async create(
     dto: CreateCouponDto,
     proOwner: User,
     user: User,
     product: Product,
   ) {
-    const coupon = this.create({
+    const coupon = this.couponRepo.create({
       proOwner,
       user,
       product,
       discount: dto.discount,
       expire: dto.expire,
     });
-    await this.save(coupon);
+    await this.couponRepo.save(coupon);
     return coupon;
   }
 
-  async updateOne(coupon: Coupon, dto: UpdateCouponDto) {
+  async update(coupon: Coupon, dto: UpdateCouponDto) {
     Object.assign(coupon, dto);
-    await this.update(coupon.id, coupon);
-    return this.findById(coupon.id);
+    await this.couponRepo.update(coupon.id, coupon);
+    return this.findOne(coupon.id);
   }
 }

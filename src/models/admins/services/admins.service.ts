@@ -2,30 +2,32 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
+  Inject,
 } from '@nestjs/common';
 import { Entities, ROLE } from '../../../common/enums';
 import { JwtTokenService } from '../../../shared/jwt';
-import { Role } from '../../roles';
 import { CreateAdminDto, LoginAdminDto, UpdateAdminDto } from '../dtos';
 import { Admin } from '../entities/admin.entity';
-import { AdminAuthResponse } from '../interfaces';
-import { ICrud } from '../../../common/interfaces';
+import { AuthAdminResponse } from '../interfaces';
 import {
   incorrect_credentials,
   item_not_found,
 } from '../../../common/constants';
-import { RoleRepository } from '../../roles/repositories';
-import { AdminRepository } from '../repositories';
+import { RoleRepository } from '../../roles/repositories/role.repository';
+import { IAdminsService } from '../interfaces/services/admins.service.interface';
+import { ADMIN_TYPES } from '../interfaces/type';
+import { IAdminRepository } from '../interfaces/repositories/admin.repository.interface';
 
 @Injectable()
-export class AdminsService implements ICrud<Admin> {
+export class AdminsService implements IAdminsService {
   constructor(
     private jwtTokenService: JwtTokenService,
     private roleRepository: RoleRepository,
-    private adminRepository: AdminRepository,
+    @Inject(ADMIN_TYPES.repository.admin)
+    private adminRepository: IAdminRepository,
   ) {}
 
-  async login(dto: LoginAdminDto): Promise<AdminAuthResponse> {
+  async login(dto: LoginAdminDto): Promise<AuthAdminResponse> {
     const admin = await this.adminRepository.findByEmail(dto.email);
     if (!admin || !(await admin.verifyHash(admin.password, dto.password))) {
       throw new UnauthorizedException(incorrect_credentials);
@@ -34,12 +36,12 @@ export class AdminsService implements ICrud<Admin> {
     return { token, admin };
   }
 
-  get(role: string) {
+  async find(role: string): Promise<Admin[]> {
     const withDeleted = role === ROLE.SUPER_ADMIN ? true : false;
     return this.adminRepository.findAll(withDeleted);
   }
 
-  async getOne(id: string, role: string = ROLE.SUPER_ADMIN) {
+  async findOne(id: string, role?: string): Promise<Admin> {
     const withDeleted = role === ROLE.SUPER_ADMIN ? true : false;
     const admin = await this.adminRepository.findById(id, withDeleted);
     if (!admin) {
@@ -48,28 +50,27 @@ export class AdminsService implements ICrud<Admin> {
     return admin;
   }
 
-  async create(dto: CreateAdminDto) {
-    const role = await Role.findOneBy({ name: ROLE.ADMIN });
+  async create(dto: CreateAdminDto): Promise<Admin> {
+    const role = await this.roleRepository.findByName(ROLE.ADMIN);
 
-    const admin = await this.adminRepository.createOne(dto, role);
+    const admin = await this.adminRepository.create(dto, role);
 
     return admin;
   }
 
   async update(id: string, dto: UpdateAdminDto): Promise<Admin> {
-    const admin = await this.getOne(id);
+    const admin = await this.findOne(id);
 
-    return this.adminRepository.updateOne(admin, dto);
+    return this.adminRepository.update(admin, dto);
   }
 
-  async recover(id: string) {
-    const admin = await this.getOne(id);
-    await admin.recover();
-    return admin;
+  async recover(id: string): Promise<Admin> {
+    const admin = await this.findOne(id);
+    return this.adminRepository.recover(admin);
   }
 
   async remove(id: string): Promise<void> {
-    const admin = await this.getOne(id);
-    await admin.softRemove();
+    const admin = await this.findOne(id);
+    await this.adminRepository.remove(admin);
   }
 }

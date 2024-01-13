@@ -7,13 +7,14 @@ import {
   Process,
   Processor,
 } from '@nestjs/bull';
-import { Inject, Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Job } from 'bull';
 import { QUEUE_NAME, mailLive } from '../../common/constants';
 import { AppConfig } from '../../config/app';
 import MailConfig from '../../config/mail';
 import { User } from '../../models/users';
+import { LoggerService } from '../logger/logger.service';
 
 // Import utility functions and configurations
 
@@ -28,18 +29,19 @@ export class MailProcessor {
     @Inject(AppConfig.KEY) private appConfig: ConfigType<typeof AppConfig>,
     @Inject(MailConfig.KEY) private mailConfig: ConfigType<typeof MailConfig>,
     private readonly mailerService: MailerService,
+    private loggerService: LoggerService,
   ) {
     this.from = this.mailConfig.from;
     this.appName = this.appConfig.name;
   }
 
   // Logger instance for logging messages
-  private readonly logger = new Logger(this.constructor.name);
 
   // Event handler for when a job in the queue becomes active
   @OnQueueActive()
   onActive(job: Job) {
-    this.logger.debug(
+    this.loggerService.debug(
+      this.constructor.name,
       `Processing job ${job.id} of type ${job.name}. Data: ${JSON.stringify(
         job.data,
       )}`,
@@ -49,7 +51,9 @@ export class MailProcessor {
   // Event handler for when a job in the queue is completed
   @OnQueueCompleted()
   onComplete(job: Job, result: any) {
-    this.logger.debug(
+    this.loggerService.debug(
+      this.constructor.name,
+
       `Completed job ${job.id} of type ${job.name}. Result: ${JSON.stringify(
         result,
       )}`,
@@ -59,7 +63,9 @@ export class MailProcessor {
   // Event handler for when a job in the queue fails
   @OnQueueFailed()
   onError(job: Job<any>, error: any) {
-    this.logger.error(
+    this.loggerService.error(
+      this.constructor.name,
+
       `Failed job ${job.id} of type ${job.name}: ${error.message}`,
       error.stack,
     );
@@ -71,7 +77,10 @@ export class MailProcessor {
     job: Job<{ user: User; dynamicOrigin: string }>,
   ): Promise<any> {
     // Log the initiation of sending a welcome email
-    this.logger.log(`Sending welcome email to '${job.data.user.email}'`);
+    this.loggerService.log(
+      this.constructor.name,
+      `Sending welcome email to '${job.data.user.email}'`,
+    );
 
     // Construct the URL for the email content
     const url = `${job.data.dynamicOrigin}`;
@@ -97,7 +106,9 @@ export class MailProcessor {
       return result;
     } catch (error) {
       // Log an error if the email sending fails and propagate the error
-      this.logger.error(
+      this.loggerService.error(
+        this.constructor.name,
+
         `Failed to send welcome email to '${job.data.user.email}'`,
         error.stack,
       );
@@ -111,7 +122,10 @@ export class MailProcessor {
     job: Job<{ user: User; resetToken: string }>,
   ): Promise<any> {
     // Log the initiation of sending a reset password email
-    this.logger.log(`Sending password reset token to '${job.data.user.email}'`);
+    this.loggerService.log(
+      this.constructor.name,
+      `Sending password reset token to '${job.data.user.email}'`,
+    );
 
     // If in a live environment, return a mock confirmation message
     if (mailLive) {
@@ -133,7 +147,9 @@ export class MailProcessor {
       return result;
     } catch (error) {
       // Log an error if the email sending fails and propagate the error
-      this.logger.error(
+      this.loggerService.error(
+        this.constructor.name,
+
         `Failed to send password reset token to '${job.data.user.email}'`,
         error.stack,
       );
@@ -146,7 +162,9 @@ export class MailProcessor {
     job: Job<{ user: User; dynamicOrigin: string }>,
   ): Promise<any> {
     // Log the initiation of sending a password changed email
-    this.logger.log(
+    this.loggerService.log(
+      this.constructor.name,
+
       `Sending password changed message to '${job.data.user.email}'`,
     );
 
@@ -171,7 +189,9 @@ export class MailProcessor {
       return result;
     } catch (error) {
       // Log an error if the email sending fails and propagate the error
-      this.logger.error(
+      this.loggerService.error(
+        this.constructor.name,
+
         `Failed to send password changed message to '${job.data.user.email}'`,
         error.stack,
       );

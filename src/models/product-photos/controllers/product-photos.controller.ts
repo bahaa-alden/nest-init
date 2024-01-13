@@ -33,13 +33,17 @@ import {
   IGenericController,
   INestedController,
 } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
 
 @ApiTags('Product-Photos')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Update, subject: Entities.Product })
 @Controller({ path: 'products/:productId/product-photos', version: '1' })
@@ -67,16 +71,16 @@ export class ProductPhotosController
     description: 'Get all the product photos by productId',
   })
   @Get()
-  async get(@Param('productId', ParseUUIDPipe) productId: string) {
+  async find(@Param('productId', ParseUUIDPipe) productId: string) {
     return this.productPhotosService.find(productId);
   }
 }
 
 @ApiTags('Product-Photos')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Read, subject: Entities.Product })
 @Controller({ path: 'product-photos', version: '1' })
@@ -85,7 +89,7 @@ export class GenericProductPhotosController
 {
   constructor(private readonly productPhotosService: ProductPhotosService) {}
 
-  getOne(...n: any[]): Promise<ProductPhoto> {
+  findOne(...n: any[]): Promise<ProductPhoto> {
     return;
   }
   update(...n: any[]): Promise<ProductPhoto> {

@@ -1,29 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Admin, CreateAdminDto, UpdateAdminDto } from '../../../models/admins';
 import { Role } from '../../../models/roles';
-import { Repository, DataSource, Equal, FindOneOptions } from 'typeorm';
-import { AdminPhotosRepository } from './admin-photos.repository';
+import { Repository, Equal, FindOneOptions } from 'typeorm';
 import { defaultPhoto } from '../../../common/constants/default-image.constant';
 import { ROLE } from '../../../common/enums';
+import { InjectRepository } from '@nestjs/typeorm';
+import { IAdminRepository } from '../interfaces/repositories/admin.repository.interface';
+import { IAdminPhotosRepository } from '../interfaces/repositories/admin-photos.repository.interface';
+import { ADMIN_TYPES } from '../interfaces/type';
 
 @Injectable()
-export class AdminRepository extends Repository<Admin> {
+export class AdminRepository implements IAdminRepository {
   constructor(
-    private readonly dataSource: DataSource,
-    private readonly adminPhotosRepository: AdminPhotosRepository,
-  ) {
-    super(Admin, dataSource.createEntityManager());
-  }
+    @InjectRepository(Admin)
+    private readonly adminRepository: Repository<Admin>,
+    @Inject(ADMIN_TYPES.repository.admin_photos)
+    private readonly adminPhotosRepository: IAdminPhotosRepository,
+  ) {}
 
-  async createOne(dto: CreateAdminDto, role: Role) {
-    const admin = this.create({ ...dto, role, photos: [] });
+  async create(dto: CreateAdminDto, role: Role) {
+    const admin = this.adminRepository.create({ ...dto, role, photos: [] });
     admin.photos.push(this.adminPhotosRepository.create(defaultPhoto));
     await admin.save();
     return admin;
   }
 
   async findAll(withDeleted = false) {
-    return this.find({
+    return this.adminRepository.find({
       where: { role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
       withDeleted,
       relations: { photos: true, role: true },
@@ -45,7 +48,7 @@ export class AdminRepository extends Repository<Admin> {
       relations: { photos: true, role: true },
     };
 
-    return await this.findOne(options);
+    return await this.adminRepository.findOne(options);
   }
 
   async findByEmail(email: string, withDeleted = false) {
@@ -63,21 +66,29 @@ export class AdminRepository extends Repository<Admin> {
       relations: { photos: true, role: true },
     };
 
-    return await this.findOne(options);
+    return await this.adminRepository.findOne(options);
   }
-  async updateOne(admin: Admin, dto: UpdateAdminDto) {
+  async update(admin: Admin, dto: UpdateAdminDto) {
     admin.photos.push(await this.adminPhotosRepository.uploadPhoto(dto.photo));
     Object.assign(admin, {
       email: dto.email,
       name: dto.name,
       password: dto.password,
     });
-    await this.save(admin);
+    await this.adminRepository.save(admin);
     return this.findById(admin.id);
   }
 
+  async recover(admin: Admin): Promise<Admin> {
+    return this.adminRepository.recover(admin);
+  }
+
+  async remove(admin: Admin): Promise<void> {
+    await this.adminRepository.softRemove(admin);
+  }
+
   async validate(id: string) {
-    return this.findOne({
+    return this.adminRepository.findOne({
       where: { id },
       select: {
         id: true,

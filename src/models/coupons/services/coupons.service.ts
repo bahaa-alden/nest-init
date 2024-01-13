@@ -1,6 +1,7 @@
 import {
   ConflictException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -18,14 +19,16 @@ import {
   item_already_exist,
   item_not_found,
 } from '../../../common/constants';
-import { ProductRepository } from '../../products/repositories';
-import { UserRepository } from '../../users/epositories';
-import { CouponRepository } from '../coupon/coupon.repository';
+import { ProductRepository } from '../../products/repositories/product.repository';
+import { CouponRepository } from '../repositories/coupon.repository';
+import { USER_TYPES } from '../../users/interfaces/type';
+import { IUserRepository } from '../../users/interfaces/repositories/user.repository.interface';
 
 @Injectable()
 export class CouponsService implements ICrud<Coupon> {
   constructor(
-    private readonly userRepository: UserRepository,
+    @Inject(USER_TYPES.repository.user)
+    private readonly userRepository: IUserRepository,
     private readonly productRepository: ProductRepository,
     private readonly couponRepository: CouponRepository,
     private readonly caslAbilityFactory: CaslAbilityFactory,
@@ -37,7 +40,7 @@ export class CouponsService implements ICrud<Coupon> {
     if (!user) throw new NotFoundException(item_not_found(Entities.User));
     const exist = await this.couponRepository.existedCoupon(prodId, dto.userId);
     if (exist) throw new ConflictException(item_already_exist(Entities.Coupon));
-    const coupon = await this.couponRepository.createOne(
+    const coupon = await this.couponRepository.create(
       dto,
       proOwner,
       user,
@@ -46,32 +49,32 @@ export class CouponsService implements ICrud<Coupon> {
     return coupon;
   }
 
-  async get(productId: string, user: User) {
+  async find(productId: string, user: User) {
     await this.isProductOwner(productId, user);
-    const coupons = await this.couponRepository.findAll({ productId });
+    const coupons = await this.couponRepository.find({ productId });
     return coupons;
   }
 
-  async getOne(id: string, user?: User) {
-    const coupon = await this.couponRepository.findById(id);
+  async findOne(id: string, user?: User) {
+    const coupon = await this.couponRepository.findOne(id);
     if (!coupon) throw new NotFoundException(item_not_found(Entities.Coupon));
     if (user) await this.couponCasl(coupon, user, Action.Read);
     return coupon;
   }
 
   async findMyCoupons(userId: string) {
-    const coupons = await this.couponRepository.findAll({ userId });
+    const coupons = await this.couponRepository.find({ userId });
     return coupons;
   }
 
   async update(id: string, dto: UpdateCouponDto, user: User) {
-    const coupon = await this.getOne(id, user);
+    const coupon = await this.findOne(id, user);
     await this.couponCasl(coupon, user, Action.Update);
-    return this.couponRepository.updateOne(coupon, dto);
+    return this.couponRepository.update(coupon, dto);
   }
 
   async remove(id: string, user: User) {
-    const coupon = await this.getOne(id, user);
+    const coupon = await this.findOne(id, user);
     await this.couponCasl(coupon, user, Action.Delete);
     await coupon.remove();
     return;

@@ -33,13 +33,17 @@ import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { CaslAbilitiesGuard } from '../../../common/guards';
 import { ICrud } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
 
 @ApiTags('Roles')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseGuards(CaslAbilitiesGuard)
 @CheckAbilities({ action: Action.Manage, subject: Entities.Role })
 @Controller({ path: 'roles', version: '1' })
@@ -49,8 +53,8 @@ export class RolesController implements ICrud<Role> {
   @ApiOkResponse({ type: OmitType(Role, ['permissions']), isArray: true })
   @SerializeOptions({ groups: [GROUPS.ALL_ROLES] })
   @Get()
-  async get(): Promise<Role[]> {
-    return this.rolesService.get();
+  async find(): Promise<Role[]> {
+    return this.rolesService.find();
   }
 
   @ApiCreatedResponse({ type: Role })
@@ -66,8 +70,8 @@ export class RolesController implements ICrud<Role> {
   })
   @ApiParam({ name: 'id' })
   @Get(':id')
-  async getOne(@Param('id') id: string): Promise<Role | undefined> {
-    return this.rolesService.getOne(id);
+  async findOne(@Param('id') id: string): Promise<Role | undefined> {
+    return this.rolesService.findOne(id);
   }
 
   @ApiOkResponse({ type: Role })

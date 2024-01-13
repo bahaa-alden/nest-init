@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { PermissionsSeederModule } from './permissions';
 import { DatabaseModule } from '../../providers/database';
 import { InitialDatabaseSeeder } from './seeder';
@@ -28,6 +28,6 @@ import { RolesSeederModule } from './roles';
     SuperadminModule,
     RolesSeederModule,
   ],
-  providers: [Logger, InitialDatabaseSeeder],
+  providers: [InitialDatabaseSeeder],
 })
 export class SeederModule {}

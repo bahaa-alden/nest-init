@@ -32,13 +32,17 @@ import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { UpdatePermissionDto } from '../dtos';
 import { ICrud } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
 
 @ApiTags('Permissions')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @CheckAbilities({ action: Action.Manage, subject: Entities.Permission })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'permissions', version: '1' })
@@ -50,8 +54,8 @@ export class PermissionsController implements ICrud<Permission> {
   })
   @SerializeOptions({ groups: [GROUPS.ALL_PERMISSIONS] })
   @Get('')
-  get() {
-    return this.permissionsService.get();
+  find() {
+    return this.permissionsService.find();
   }
 
   @ApiCreatedResponse({ type: Permission })
@@ -64,8 +68,8 @@ export class PermissionsController implements ICrud<Permission> {
   @ApiOkResponse({ type: Permission })
   @SerializeOptions({ groups: [GROUPS.PERMISSION] })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.permissionsService.getOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.permissionsService.findOne(id);
   }
 
   @ApiOkResponse({ type: Permission })

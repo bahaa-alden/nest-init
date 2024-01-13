@@ -11,8 +11,8 @@ import {
   HttpCode,
   HttpStatus,
   SerializeOptions,
+  Inject,
 } from '@nestjs/common';
-import { AdminsService } from '../services/admins.service';
 import { UpdateAdminDto, CreateAdminDto, LoginAdminDto } from '../dtos';
 
 import {
@@ -30,8 +30,10 @@ import { Public, CheckAbilities, GetUser } from '../../../common/decorators';
 import { GROUPS, Entities, Action } from '../../../common/enums';
 import { CaslAbilitiesGuard, JwtGuard } from '../../../common/guards';
 import { ICrud } from '../../../common/interfaces';
-import { AdminAuthResponse } from '../interfaces';
+import { AuthAdminResponse } from '../interfaces';
 import { denied_error, item_not_found } from '../../../common/constants';
+import { IAdminsService } from '../interfaces/services/admins.service.interface';
+import { ADMIN_TYPES } from '../interfaces/type';
 
 @ApiTags('Admins')
 @ApiBearerAuth('token')
@@ -40,13 +42,15 @@ import { denied_error, item_not_found } from '../../../common/constants';
 @ApiNotFoundResponse({ description: item_not_found('Data') })
 @Controller({ path: 'admins', version: '1' })
 export class AdminsController implements ICrud<Admin> {
-  constructor(private readonly adminsService: AdminsService) {}
+  constructor(
+    @Inject(ADMIN_TYPES.service) private readonly adminsService: IAdminsService,
+  ) {}
 
   @Public()
   @ApiOperation({ summary: 'Login' })
   @ApiOkResponse({
     description: 'User logged in successfully',
-    type: AdminAuthResponse,
+    type: AuthAdminResponse,
   })
   @SerializeOptions({ groups: [GROUPS.ADMIN] })
   @HttpCode(HttpStatus.OK)
@@ -69,8 +73,8 @@ export class AdminsController implements ICrud<Admin> {
   @CheckAbilities({ action: Action.Read, subject: Entities.Admin })
   @SerializeOptions({ groups: [GROUPS.ALL_ADMINS] })
   @Get()
-  get(@GetUser('role') role: Role) {
-    return this.adminsService.get(role.name);
+  find(@GetUser('role') role: Role) {
+    return this.adminsService.find(role.name);
   }
 
   @ApiOkResponse({ type: Admin })
@@ -78,8 +82,8 @@ export class AdminsController implements ICrud<Admin> {
   @SerializeOptions({ groups: [GROUPS.ADMIN] })
   @CheckAbilities({ action: Action.Read, subject: Entities.Admin })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string, @GetUser('role') role: Role) {
-    return this.adminsService.getOne(id, role.name);
+  findOne(@Param('id', ParseUUIDPipe) id: string, @GetUser('role') role: Role) {
+    return this.adminsService.findOne(id, role.name);
   }
 
   @ApiOkResponse({ type: Admin })

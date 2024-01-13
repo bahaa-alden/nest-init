@@ -13,8 +13,8 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
-  ParamData,
   Req,
+  Inject,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,12 +26,10 @@ import {
   ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
-  ApiParam,
 } from '@nestjs/swagger';
 
 import { FavoritesDto, UpdateUserDto } from '../dtos';
 import { User } from '../entities/user.entity';
-import { UsersService } from '../services/users.service';
 import { GetUser, Roles, CheckAbilities } from '../../../common/decorators';
 import { GROUPS, ROLE, Entities, Action } from '../../../common/enums';
 import { CaslAbilitiesGuard, RolesGuard } from '../../../common/guards';
@@ -41,23 +39,27 @@ import {
 } from '../../../common/interceptors';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
 import {
-  ParameterObject,
-  ParameterStyle,
-} from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
 import { Request } from 'express';
+import { IUsersService } from '../interfaces/services/users.service.interface';
+import { USER_TYPES } from '../interfaces/type';
 
 @ApiTags('users')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseInterceptors(new LoggingInterceptor())
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'users', version: '1' })
 export class UsersController implements ICrud<User> {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    @Inject(USER_TYPES.service) private usersService: IUsersService,
+  ) {}
 
   @UseInterceptors(WithDeletedInterceptor)
   @SerializeOptions({ groups: [GROUPS.ALL_USERS] })
@@ -75,13 +77,13 @@ export class UsersController implements ICrud<User> {
     required: false,
   })
   @Get()
-  async get(
+  async find(
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Req() req: Request,
   ) {
     const withDeleted = Boolean(req.query.withDeleted);
-    return this.usersService.get(page, limit, withDeleted);
+    return this.usersService.find(page, limit, withDeleted);
   }
 
   @ApiOkResponse({ type: User })
@@ -91,7 +93,6 @@ export class UsersController implements ICrud<User> {
   async getMyPhotos(@GetUser() user: User) {
     return this.usersService.getMyPhotos(user);
   }
-
   create(...n: any[]): Promise<User> {
     return;
   }
@@ -134,8 +135,8 @@ export class UsersController implements ICrud<User> {
   @ApiOkResponse({ type: User })
   @SerializeOptions({ groups: [GROUPS.USER] })
   @Get(':id')
-  async getOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.getOne(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.findOne(id);
   }
 
   @ApiOkResponse({ type: User })

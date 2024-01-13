@@ -12,6 +12,7 @@ import {
   HttpStatus,
   Query,
   SerializeOptions,
+  Inject,
 } from '@nestjs/common';
 import { CreateCommentDto } from '../dtos/create-comment.dto';
 import { UpdateCommentDto } from '../dtos/update-comment.dto';
@@ -32,23 +33,31 @@ import { User } from '../../users';
 import { CheckAbilities, GetUser } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { CaslAbilitiesGuard } from '../../../common/guards';
-import { CommentsService } from '../services/comments.service';
 import { PaginatedResponse } from '../../../common/types/paginated-response.type';
 import {
   IGenericController,
   INestedController,
 } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
+import { ICommentsService } from '../interfaces/services/comments.service.interface';
+import { COMMENT_TYPES } from '../interfaces/type';
 
 @ApiTags('Comments')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'products/:productId/comments', version: '1' })
 export class CommentsController implements INestedController<Comment> {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    @Inject(COMMENT_TYPES.service)
+    private readonly commentsService: ICommentsService,
+  ) {}
 
   @ApiCreatedResponse({ type: Comment })
   @CheckAbilities({ action: Action.Create, subject: Entities.Comment })
@@ -78,12 +87,12 @@ export class CommentsController implements INestedController<Comment> {
   @CheckAbilities({ action: Action.Read, subject: Entities.Comment })
   @SerializeOptions({ groups: [GROUPS.ALL_COMMENTS] })
   @Get()
-  get(
+  find(
     @Param('productId', ParseUUIDPipe) productId: string,
     @Query('page') page: number,
     @Query('limit') limit: number,
   ) {
-    return this.commentsService.get(productId, page, limit);
+    return this.commentsService.find(productId, page, limit);
   }
 }
 
@@ -92,14 +101,17 @@ export class CommentsController implements INestedController<Comment> {
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'comments', version: '1' })
 export class GenericCommentsController implements IGenericController<Comment> {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    @Inject(COMMENT_TYPES.service)
+    private readonly commentsService: ICommentsService,
+  ) {}
 
   @ApiOkResponse({ type: Comment })
   @CheckAbilities({ action: Action.Read, subject: Entities.Comment })
   @SerializeOptions({ groups: [GROUPS.COMMENT] })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.commentsService.getOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.commentsService.findOne(id);
   }
 
   @ApiOkResponse({ type: Comment })

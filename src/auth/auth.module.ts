@@ -5,8 +5,8 @@ import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategy';
 import { MailModule } from '../shared/mail/mail.module';
 import { UsersModule } from '../models/users/users.module';
-import { AdminsModule } from '../models/admins/admins.module';
 import { EmployeesModule } from '../models/employees/employees.module';
+import { AdminsModule } from '../models/admins/admins.module';
 import { RolesModule } from '../models/roles/roles.module';
 
 @Module({
@@ -14,8 +14,8 @@ import { RolesModule } from '../models/roles/roles.module';
     PassportModule.register({}),
     MailModule,
     UsersModule,
-    AdminsModule,
     EmployeesModule,
+    AdminsModule,
     RolesModule,
   ],
   controllers: [AuthController],

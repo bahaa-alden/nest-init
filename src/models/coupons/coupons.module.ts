@@ -4,16 +4,16 @@ import {
   CouponsController,
   GenericCouponsController,
 } from './controllers/coupons.controller';
-import { CouponRepository } from './coupon/coupon.repository';
-import { UserRepository } from '../users/epositories';
-import { ProductRepository } from '../products/repositories';
-import { UsersModule } from '../users/users.module';
+import { Coupon } from './entities/coupon.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CouponRepository } from './repositories/coupon.repository';
 import { ProductsModule } from '../products/products.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [UsersModule, ProductsModule],
+  imports: [TypeOrmModule.forFeature([Coupon]), ProductsModule, UsersModule],
   controllers: [CouponsController, GenericCouponsController],
   providers: [CouponsService, CouponRepository],
-  exports: [CouponRepository],
+  exports: [CouponRepository, CouponsService],
 })
 export class CouponsModule {}

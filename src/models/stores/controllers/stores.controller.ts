@@ -29,13 +29,17 @@ import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities } from '../../../common/enums';
 import { Store } from '../entities/store.entity';
 import { ICrud } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
 
 @ApiTags('Stores')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'stores', version: '1' })
 export class StoresController implements ICrud<Store> {
@@ -51,15 +55,15 @@ export class StoresController implements ICrud<Store> {
   @ApiOkResponse({ type: Store, isArray: true, description: 'get all Stores' })
   @CheckAbilities({ action: Action.Read, subject: Entities.Store })
   @Get()
-  get() {
-    return this.storesService.get();
+  find() {
+    return this.storesService.find();
   }
 
   @ApiOkResponse({ type: Store, description: 'get one Store' })
   @CheckAbilities({ action: Action.Read, subject: Entities.Store })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.storesService.getOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.storesService.findOne(id);
   }
 
   @ApiOkResponse({ type: Store, description: 'update Store' })

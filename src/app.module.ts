@@ -1,6 +1,6 @@
 import * as Joi from '@hapi/joi';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD, MiddlewareBuilder } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './shared/cloudinary';
@@ -10,7 +10,7 @@ import {
   IsUniqueConstraint,
 } from './common/decorators';
 import { JwtGuard } from './common/guards';
-import { PhotosModule } from './photos';
+import { PhotosModule } from './photos/photos.module';
 import { PhotoCleanupModule } from './jobs/photo-cleanup';
 import { AdminsModule } from './models/admins/admins.module';
 import { PermissionsModule } from './models/permissions/permissions.module';
@@ -18,14 +18,7 @@ import { RolesModule } from './models/roles/roles.module';
 import { UsersModule } from './models/users/users.module';
 import { DatabaseModule } from './providers/database';
 import { CaslModule } from './shared/casl';
-import {
-  Logger,
-  MiddlewareConsumer,
-  Module,
-  NestMiddleware,
-  RequestMethod,
-  Type,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { CitiesModule } from './models/cities/cities.module';
 import { EmployeesModule } from './models/employees/employees.module';
 import { StoresModule } from './models/stores/stores.module';
@@ -38,6 +31,7 @@ import { ProductPhotosModule } from './models/product-photos/product-photos.modu
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { RedisStoreModule } from './shared/redis-store/redis-store.module';
 import { LoggerMiddleware } from './common/middlewares';
+import { LoggerModule } from './shared/logger/logger.module';
 
 @Module({
   imports: [
@@ -59,8 +53,8 @@ import { LoggerMiddleware } from './common/middlewares';
 
     DevtoolsModule.register({ http: process.env.ENV !== 'production' }),
     AuthModule,
-    UsersModule,
     AdminsModule,
+    UsersModule,
     EmployeesModule,
     ProductsModule,
     ProductPhotosModule,
@@ -78,12 +72,12 @@ import { LoggerMiddleware } from './common/middlewares';
     CaslModule,
     CloudinaryModule,
     RedisStoreModule,
+    LoggerModule,
   ],
   providers: [
     IsUniqueConstraint,
     IsExistConstraint,
     IsPhotoExistConstraint,
-    Logger,
     {
       provide: APP_GUARD,
       useClass: JwtGuard,

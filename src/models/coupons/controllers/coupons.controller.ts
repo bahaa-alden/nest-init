@@ -33,13 +33,17 @@ import {
   IGenericController,
   INestedController,
 } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
 
 @ApiTags('Coupons')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @Roles(ROLE.USER)
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'coupons', version: '1' })
@@ -61,8 +65,8 @@ export class GenericCouponsController implements IGenericController<Coupon> {
 
   @ApiOkResponse({ type: Coupon })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
-    return this.couponsService.getOne(id, user);
+  findOne(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
+    return this.couponsService.findOne(id, user);
   }
 
   @ApiOkResponse({ type: Coupon })
@@ -85,9 +89,9 @@ export class GenericCouponsController implements IGenericController<Coupon> {
 
 @ApiTags('Coupons')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @Roles(ROLE.USER)
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'products/:productId/coupons', version: '1' })
@@ -106,10 +110,10 @@ export class CouponsController implements INestedController<Coupon> {
 
   @ApiOkResponse({ type: Coupon })
   @Get()
-  get(
+  find(
     @Param('productId', ParseUUIDPipe) productId: string,
     @GetUser() user: User,
   ) {
-    return this.couponsService.get(productId, user);
+    return this.couponsService.find(productId, user);
   }
 }

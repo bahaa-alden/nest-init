@@ -7,5 +7,5 @@ export type IUser = {
 
   password: string;
 
-  role?: ROLE;
+  role?: ROLE.USER;
 };

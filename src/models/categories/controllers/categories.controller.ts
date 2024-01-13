@@ -26,13 +26,17 @@ import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities } from '../../../common/enums';
 import { Category } from '../entities/category.entity';
 import { ICrud } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
 
 @ApiTags('Categories')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'categories', version: '1' })
 export class CategoriesController implements ICrud<Category> {
@@ -48,15 +52,15 @@ export class CategoriesController implements ICrud<Category> {
   @ApiOkResponse({ type: Category, isArray: true })
   @CheckAbilities({ action: Action.Read, subject: Entities.Category })
   @Get()
-  get() {
-    return this.categoriesService.get();
+  find() {
+    return this.categoriesService.find();
   }
 
   @ApiOkResponse({ type: Category })
   @CheckAbilities({ action: Action.Read, subject: Entities.Category })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.categoriesService.getOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.categoriesService.findOne(id);
   }
 
   @ApiOkResponse({ type: Category })

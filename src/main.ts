@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import {
   ClassSerializerInterceptor,
-  Logger,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
@@ -16,13 +15,14 @@ import { ConfigService, ConfigType } from '@nestjs/config';
 import { AppConfig } from './config/app';
 import * as morgan from 'morgan';
 import helmet from 'helmet';
+import { LoggerService } from './shared/logger/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     snapshot: true,
   });
   const httpAdapter = app.get(HttpAdapterHost);
-  const logger = app.get(Logger);
+  const logger = app.get(LoggerService);
   const appConfig: ConfigType<typeof AppConfig> = app
     .get(ConfigService)
     .get('application');
@@ -61,8 +61,9 @@ async function bootstrap() {
   const { document, setupOptions } = createDocument(app);
   SwaggerModule.setup('api', app, document, setupOptions);
   await app.listen(appConfig.port, () => {
-    logger.debug(`server started at port: ${appConfig.port}`);
+    logger.debug('APP', `server started at port: ${appConfig.port}`);
     logger.debug(
+      'APP',
       `swagger docs started at http://localhost:${appConfig.port}/api`,
     );
   });

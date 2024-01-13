@@ -1,32 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { Repository, DataSource, In } from 'typeorm';
-import {
-  Category,
-  CreateCategoryDto,
-  UpdateCategoryDto,
-} from '../../../models/categories';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
+import { Category } from '../entities/category.entity';
 
 @Injectable()
-export class CategoryRepository extends Repository<Category> {
-  constructor(private readonly dataSource: DataSource) {
-    super(Category, dataSource.createEntityManager());
-  }
+export class CategoryRepository {
+  constructor(
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+  ) {}
 
-  async findAll(ids?: string[]) {
-    let categories = this.createQueryBuilder('category');
+  async find(ids?: string[]) {
+    let categories = this.categoryRepository.createQueryBuilder('category');
     categories = ids ? categories.andWhereInIds(ids) : categories;
 
     return categories.getMany();
   }
 
-  async createOne(dto: CreateCategoryDto) {
+  async create(dto: CreateCategoryDto) {
     const category = this.create(dto);
-    await this.insert(category);
+    await this.categoryRepository.insert(category);
     return category;
   }
 
-  async findById(id: string, withDeleted = false, relations = []) {
-    return this.findOne({
+  async findOne(id: string, withDeleted = false, relations = []) {
+    return this.categoryRepository.findOne({
       where: { id },
       withDeleted,
       relations,
@@ -34,16 +33,16 @@ export class CategoryRepository extends Repository<Category> {
   }
 
   async findCategoryWithProducts(id: string, withDeleted = false) {
-    return this.findOne({
+    return this.categoryRepository.findOne({
       where: { id, products: { is_paid: false } },
       withDeleted,
       relations: { products: true },
     });
   }
 
-  async updateOne(category: Category, dto: UpdateCategoryDto) {
+  async update(category: Category, dto: UpdateCategoryDto) {
     Object.assign<Category, UpdateCategoryDto>(category, dto);
-    await category.save();
-    return this.findById(category.id);
+    await this.categoryRepository.save(category);
+    return this.findOne(category.id);
   }
 }

@@ -12,42 +12,45 @@ import { Category } from '../../categories';
 import { WalletRepository } from './wallet.repository';
 
 @Injectable()
-export class UserRepository extends Repository<User> {
+export class UserRepository {
   constructor(
-    private readonly dataSource: DataSource,
+    private readonly userRepository: Repository<User>,
     private readonly userPhotosRepository: UserPhotosRepository,
     private readonly walletRepository: WalletRepository,
-  ) {
-    super(User, dataSource.createEntityManager());
-  }
+  ) {}
 
-  async createOne(dto: CreateUserDto, role: Role): Promise<User> {
+  async create(dto: CreateUserDto, role: Role): Promise<User> {
     const wallet = this.walletRepository.create({});
-    const user = this.create({ ...dto, role, photos: [], wallet });
+    const user = this.userRepository.create({
+      ...dto,
+      role,
+      photos: [],
+      wallet,
+    });
     user.photos.push(this.userPhotosRepository.create(defaultPhoto));
     await user.save();
     return user;
   }
 
-  async findAll(
+  async find(
     page: number,
     limit: number,
     withDeleted: boolean,
   ): Promise<PaginatedResponse<User>> {
     const skip = (page - 1) * limit || 0;
     const take = limit || 100;
-    const data = await this.find({
+    const data = await this.userRepository.find({
       relations: { photos: true, role: true },
       skip,
       take,
       withDeleted,
     });
-    const totalDataCount = await this.count({ withDeleted });
+    const totalDataCount = await this.userRepository.count({ withDeleted });
     return pagination(page, limit, totalDataCount, data);
   }
 
-  async findById(id: string, withDeleted = false): Promise<User> {
-    return await this.findOne({
+  async findOne(id: string, withDeleted = false): Promise<User> {
+    return await this.userRepository.findOne({
       where: { id },
       select: {
         id: true,
@@ -72,7 +75,7 @@ export class UserRepository extends Repository<User> {
   }
 
   async findByEmail(email: string, withDeleted = false): Promise<User> {
-    return await this.findOne({
+    return await this.userRepository.findOne({
       where: { email },
       select: {
         id: true,
@@ -96,7 +99,7 @@ export class UserRepository extends Repository<User> {
     });
   }
   async findByIdForThings(id: string): Promise<User> {
-    return await this.findOne({
+    return await this.userRepository.findOne({
       where: { id },
       select: {
         id: true,
@@ -106,11 +109,11 @@ export class UserRepository extends Repository<User> {
     });
   }
 
-  async updateOne(user: User, dto: UpdateUserDto): Promise<User> {
+  async update(user: User, dto: UpdateUserDto): Promise<User> {
     user.photos.push(await this.userPhotosRepository.uploadPhoto(dto.photo));
     Object.assign(user, { email: dto.email, name: dto.name });
-    await this.save(user);
-    return this.findById(user.id);
+    await this.userRepository.save(user);
+    return this.findOne(user.id);
   }
 
   async updateFavorites(
@@ -120,8 +123,8 @@ export class UserRepository extends Repository<User> {
   ): Promise<User> {
     user.favoriteCategories.push(...favoriteCategories);
     user.favoriteCities.push(...favoriteCities);
-    await this.save(user);
-    return this.findById(user.id);
+    await this.userRepository.save(user);
+    return this.findOne(user.id);
   }
 
   async resetPassword(
@@ -132,8 +135,8 @@ export class UserRepository extends Repository<User> {
     user.passwordResetToken = null;
     user.passwordResetExpires = null;
     user.passwordChangedAt = new Date(Date.now() - 1000);
-    await this.save(user);
-    return this.findById(user.id);
+    await this.userRepository.save(user);
+    return this.findOne(user.id);
   }
 
   async getMyPhotos(userId: string): Promise<UserPhoto[]> {
@@ -141,7 +144,7 @@ export class UserRepository extends Repository<User> {
   }
 
   async validate(id: string) {
-    return this.findOne({
+    return this.userRepository.findOne({
       where: { id },
       select: {
         id: true,

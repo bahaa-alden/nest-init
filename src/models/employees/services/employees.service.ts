@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
+  Inject,
 } from '@nestjs/common';
 
 import { Entities, ROLE } from '../../../common/enums';
@@ -11,20 +12,23 @@ import { UpdateEmployeeDto } from '../dtos/update-employee.dto';
 import { Employee } from '../entities/employee.entity';
 import { LoginDto } from '../../../auth';
 import { AuthEmployeeResponse } from '../interfaces';
-import { ICrud } from '../../../common/interfaces';
 import {
   incorrect_credentials,
   item_not_found,
 } from '../../../common/constants';
-import { RoleRepository } from '../../roles/repositories';
-import { StoreRepository } from '../../stores/repositories';
-import { EmployeeRepository } from '../repositories';
+import { RoleRepository } from '../../roles/repositories/role.repository';
+import { StoreRepository } from '../../stores/repositories/store.repository';
+import { IEmployeeService } from '../interfaces/employee-services.interface';
+import { PaginatedResponse } from '../../../common/types';
+import { IEmployeeRepository } from '../interfaces/repositories/employee.repository.interface';
+import { EMPLOYEE_TYPES } from '../interfaces/type';
 
 @Injectable()
-export class EmployeesService implements ICrud<Employee> {
+export class EmployeesService implements IEmployeeService {
   constructor(
     private jwtTokenService: JwtTokenService,
-    private employeeRepository: EmployeeRepository,
+    @Inject(EMPLOYEE_TYPES.repository.employee)
+    private employeeRepository: IEmployeeRepository,
     private roleRepository: RoleRepository,
     private storeRepository: StoreRepository,
   ) {}
@@ -44,14 +48,13 @@ export class EmployeesService implements ICrud<Employee> {
     return { token, employee };
   }
 
-  get() {
-    return this.employeeRepository.find({
-      withDeleted: true,
-      relations: ['store'],
-    });
+  async find(
+    withDeleted: boolean,
+  ): Promise<Employee[] | PaginatedResponse<Employee>> {
+    return this.employeeRepository.find(withDeleted);
   }
 
-  async getOne(id: string, withDeleted?: boolean) {
+  async findOne(id: string, withDeleted?: boolean): Promise<Employee> {
     const employee = await this.employeeRepository.findById(id, withDeleted);
     if (!employee) {
       throw new NotFoundException(item_not_found(Entities.Employee));
@@ -59,28 +62,28 @@ export class EmployeesService implements ICrud<Employee> {
     return employee;
   }
 
-  async create(dto: CreateEmployeeDto) {
-    const role = await this.roleRepository.findOneBy({ name: ROLE.EMPLOYEE });
-    const store = await this.storeRepository.findById(dto.storeId);
-    return this.employeeRepository.createOne(dto, store, role);
+  async create(dto: CreateEmployeeDto): Promise<Employee> {
+    const role = await this.roleRepository.findByName(ROLE.EMPLOYEE);
+    const store = await this.storeRepository.findOne(dto.storeId);
+    return this.employeeRepository.create(dto, store, role);
   }
 
   async update(id: string, dto: UpdateEmployeeDto): Promise<Employee> {
-    const employee = await this.getOne(id);
-    const store = await this.storeRepository.findById(dto.storeId);
+    const employee = await this.findOne(id);
+    const store = await this.storeRepository.findOne(dto.storeId);
     if (!store) throw new NotFoundException(item_not_found(Entities.Store));
-    return this.employeeRepository.updateOne(employee, dto, store);
+    return this.employeeRepository.update(employee, dto, store);
   }
 
-  async recover(id: string) {
-    const employee = await this.getOne(id, true);
+  async recover(id: string): Promise<Employee> {
+    const employee = await this.findOne(id, true);
     await this.employeeRepository.recover(employee);
     return employee;
   }
 
   async remove(id: string): Promise<void> {
-    await this.getOne(id);
-    await this.employeeRepository.softDelete(id);
+    const emp = await this.findOne(id);
+    await this.employeeRepository.remove(emp);
     return;
   }
 }

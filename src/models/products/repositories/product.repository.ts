@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, DataSource, FindOptionsWhere } from 'typeorm';
-import {
-  CreateProductDto,
-  Product,
-  UpdateProductDto,
-} from '../../../models/products';
 import { User } from '../../../models/users';
 import { Category } from '../../../models/categories';
 import { ProductPhotosRepository } from '../../product-photos/repositories/product-photos-repository';
@@ -14,25 +9,27 @@ import { ProductPhoto } from '../../../models/product-photos';
 import { PaginatedResponse } from '../../../common/types';
 import { pagination } from '../../../common/helpers';
 import { RedisStoreService } from '../../../shared/redis-store';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateProductDto, UpdateProductDto } from '../dto';
+import { Product } from '../entities/product.entity';
 
 @Injectable()
-export class ProductRepository extends Repository<Product> {
+export class ProductRepository {
   constructor(
-    private readonly dataSource: DataSource,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
     private readonly productPhotosRepository: ProductPhotosRepository,
     private readonly redisStoreService: RedisStoreService,
-  ) {
-    super(Product, dataSource.createEntityManager());
-  }
+  ) {}
 
-  async findAll(
+  async find(
     page: number,
     limit: number,
     is_paid = false,
   ): Promise<PaginatedResponse<Product>> {
     const skip = (page - 1) * limit || 0;
     const take = limit || 100;
-    let data = await this.find({
+    let data = await this.productRepository.find({
       where: { is_paid },
       skip,
       take,
@@ -44,12 +41,14 @@ export class ProductRepository extends Repository<Product> {
         photos: true,
       },
     });
-    const totalDataCount = await this.count({ where: { is_paid } });
+    const totalDataCount = await this.productRepository.count({
+      where: { is_paid },
+    });
     data = await Promise.all(this.likedByMe(...data));
     return pagination(page, limit, totalDataCount, data);
   }
-  async findById(id: string, options?: FindOptionsWhere<Product>) {
-    let product = await this.findOne({
+  async findOne(id: string, options?: FindOptionsWhere<Product>) {
+    let product = await this.productRepository.findOne({
       where: { id, ...options },
       relations: {
         user: true,
@@ -65,7 +64,7 @@ export class ProductRepository extends Repository<Product> {
   }
 
   async findByIdForThings(id: string, options?: FindOptionsWhere<Product>) {
-    let product = await this.findOne({
+    let product = await this.productRepository.findOne({
       where: { id, ...options, is_paid: false },
       select: {
         id: true,
@@ -84,13 +83,19 @@ export class ProductRepository extends Repository<Product> {
     return product;
   }
 
-  async createOne(
+  async create(
     dto: CreateProductDto,
     user: User,
     category: Category,
     store: Store,
   ) {
-    const product = this.create({ ...dto, user, photos: [], category, store });
+    const product = this.productRepository.create({
+      ...dto,
+      user,
+      photos: [],
+      category,
+      store,
+    });
     product.photos = await this.productPhotosRepository.uploadPhotos(
       dto.photos,
     );
@@ -98,33 +103,34 @@ export class ProductRepository extends Repository<Product> {
     return product;
   }
 
-  async updateOne(product: Product, dto: UpdateProductDto) {
+  async update(product: Product, dto: UpdateProductDto) {
     product.store.id = dto.storeId;
     product.category.id = dto.categoryId;
     product.title = dto.title;
     product.content = dto.content;
     product.price = dto.price;
     await product.save();
-    return this.findById(product.id);
+    return this.findOne(product.id);
   }
 
   async updatePhotos(productId: string, dto: CreateProductPhotoDto) {
     await this.productPhotosRepository.uploadPhotos(dto.photos);
-    return await this.findById(productId);
+    return await this.findOne(productId);
   }
   async removePhoto(photo: ProductPhoto) {
-    await this.productPhotosRepository.removeOne(photo);
-    await this.findById(photo.productId);
+    await this.productPhotosRepository.remove(photo);
+    await this.findOne(photo.productId);
   }
 
   async like(product: Product, user: User) {
     product.likedBy.push(user);
-    await this.save(product);
+    await this.productRepository.save(product);
     return 'OK';
   }
 
   async dislike(product: Product, user: User) {
-    await this.createQueryBuilder()
+    await this.productRepository
+      .createQueryBuilder()
       .relation(Product, 'likedBy')
       .of(product) // you can use just post id as well
       .remove(user);

@@ -17,7 +17,7 @@ import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { CheckAbilities, GetUser } from '../../../common/decorators';
 import { User } from '../../users';
-import { ProductsService } from '../services';
+import { ProductsService } from '../services/products.service';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -34,13 +34,17 @@ import { Product } from '../entities/product.entity';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
-import { denied_error } from '../../../common/constants';
+import {
+  bad_req,
+  data_not_found,
+  denied_error,
+} from '../../../common/constants';
 
 @ApiTags('Products')
 @ApiBearerAuth('token')
-@ApiBadRequestResponse({ description: 'Bad request' })
+@ApiBadRequestResponse({ description: bad_req })
 @ApiForbiddenResponse({ description: denied_error })
-@ApiNotFoundResponse({ description: 'Data Not found' })
+@ApiNotFoundResponse({ description: data_not_found })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'products', version: '1' })
 export class ProductsController implements ICrud<Product> {
@@ -75,12 +79,12 @@ export class ProductsController implements ICrud<Product> {
   @CheckAbilities({ action: Action.Read, subject: Entities.Product })
   @SerializeOptions({ groups: [GROUPS.ALL_PRODUCTS] })
   @Get()
-  get(
+  find(
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('is_paid') is_paid: boolean,
   ) {
-    return this.productsService.get(page, limit, is_paid);
+    return this.productsService.find(page, limit, is_paid);
   }
 
   @ApiOkResponse({ description: 'ok' })
@@ -103,8 +107,8 @@ export class ProductsController implements ICrud<Product> {
   @CheckAbilities({ action: Action.Read, subject: Entities.Product })
   @SerializeOptions({ groups: [GROUPS.PRODUCT] })
   @Get(':id')
-  getOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.productsService.getOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.productsService.findOne(id);
   }
 
   @ApiOkResponse({ type: Product })

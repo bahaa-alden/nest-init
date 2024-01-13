@@ -8,9 +8,9 @@ import { Action, Entities } from '../../../common/enums';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
 import { item_not_found } from '../../../common/constants';
-import { CategoryRepository } from '../../categories/repositories';
-import { StoreRepository } from '../../stores/repositories';
-import { ProductRepository } from '../repositories';
+import { CategoryRepository } from '../../categories/repositories/category.repository';
+import { StoreRepository } from '../../stores/repositories/store.repository';
+import { ProductRepository } from '../repositories/product.repository';
 
 @Injectable()
 export class ProductsService implements ICrud<Product> {
@@ -21,33 +21,28 @@ export class ProductsService implements ICrud<Product> {
     private readonly storeRepository: StoreRepository,
   ) {}
 
-  async get(
+  async find(
     page: number,
     limit: number,
     is_paid: boolean,
   ): Promise<PaginatedResponse<Product>> {
-    return this.productRepository.findAll(page, limit, is_paid);
+    return this.productRepository.find(page, limit, is_paid);
   }
 
-  async getOne(id: string): Promise<Product> {
-    const product = await this.productRepository.findById(id);
+  async findOne(id: string): Promise<Product> {
+    const product = await this.productRepository.findOne(id);
     if (!product) throw new NotFoundException(item_not_found(Entities.Product));
 
     return product;
   }
 
   async create(dto: CreateProductDto, user: User): Promise<Product> {
-    const category = await this.categoryRepository.findById(dto.categoryId);
+    const category = await this.categoryRepository.findOne(dto.categoryId);
     if (!category)
       throw new NotFoundException(item_not_found(Entities.Category));
-    const store = await this.storeRepository.findById(dto.storeId);
+    const store = await this.storeRepository.findOne(dto.storeId);
     if (!store) throw new NotFoundException(item_not_found(Entities.Store));
-    const product = this.productRepository.createOne(
-      dto,
-      user,
-      category,
-      store,
-    );
+    const product = this.productRepository.create(dto, user, category, store);
     return product;
   }
 
@@ -56,38 +51,38 @@ export class ProductsService implements ICrud<Product> {
     dto: UpdateProductDto,
     user: User,
   ): Promise<Product> {
-    const product = await this.getOne(id); // Check if the product exists
+    const product = await this.findOne(id); // Check if the product exists
 
     const ability = this.caslAbilityFactory.defineAbility(user);
 
     ForbiddenError.from(ability).throwUnlessCan(Action.Update, product);
     if (dto.storeId) {
-      const store = await this.storeRepository.findById(dto.storeId);
+      const store = await this.storeRepository.findOne(dto.storeId);
       if (!store) throw new NotFoundException(item_not_found(Entities.Store));
     }
 
     if (dto.categoryId) {
-      const category = await this.categoryRepository.findById(dto.categoryId);
+      const category = await this.categoryRepository.findOne(dto.categoryId);
       if (!category)
         throw new NotFoundException(item_not_found(Entities.Category));
     }
 
-    await this.productRepository.updateOne(product, dto);
-    return this.getOne(id); // Return the updated product
+    await this.productRepository.update(product, dto);
+    return this.findOne(id); // Return the updated product
   }
 
   async like(id: string, user: User) {
-    const product = await this.getOne(id);
+    const product = await this.findOne(id);
     return await this.productRepository.like(product, user);
   }
 
   async dislike(id: string, user: User) {
-    const product = await this.getOne(id);
+    const product = await this.findOne(id);
     return await this.productRepository.dislike(product, user);
   }
 
   async remove(id: string, user: User): Promise<void> {
-    const product = await this.getOne(id); // Check if the product exists
+    const product = await this.findOne(id); // Check if the product exists
     const ability = this.caslAbilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(Action.Delete, product);
     await product.softRemove();

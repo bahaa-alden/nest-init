@@ -1,44 +1,63 @@
 import { Injectable } from '@nestjs/common';
-import { Comment, CreateCommentDto, UpdateCommentDto } from '..';
-import { DataSource, Repository } from 'typeorm';
-import { Product } from '../../products/entities/product.entity';
+import { Repository } from 'typeorm';
 import { User } from '../../users';
 import { pagination } from '../../../common/helpers';
 import { PaginatedResponse } from '../../../common/types';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateCommentDto, UpdateCommentDto } from '../dtos';
+import { Comment } from '../entities/comment.entity';
+import { ICommentRepository } from '../interfaces/repositories/comment.repository.interface';
 
 @Injectable()
-export class CommentsRepository extends Repository<Comment> {
-  constructor(private readonly dataSource: DataSource) {
-    super(Comment, dataSource.createEntityManager());
-  }
+export class CommentRepository implements ICommentRepository {
+  constructor(
+    @InjectRepository(Comment)
+    private readonly commentsRepo: Repository<Comment>,
+  ) {}
 
-  async createOne(product: Product, user: User, dto: CreateCommentDto) {
-    const comment = this.create({ product, user, ...dto });
+  async create(
+    productId: string,
+    user: User,
+    dto: CreateCommentDto,
+  ): Promise<Comment> {
+    const comment = this.commentsRepo.create({
+      product: { id: productId },
+      user,
+      ...dto,
+    });
     await comment.save();
     return comment;
   }
 
-  async findAll(
+  async find(
     productId: string,
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<Comment>> {
     const skip = (page - 1) * limit || 0;
     const take = limit || 100;
-    const data = await this.find({
+    const data = await this.commentsRepo.find({
       where: { productId },
       skip,
       take,
     });
-    const totalDataCount = await this.count({ where: { productId } });
+    const totalDataCount = await this.commentsRepo.count({
+      where: { productId },
+    });
     return pagination(page, limit, totalDataCount, data);
   }
-  async findById(id: string) {
-    return this.findOne({ where: { id } });
+
+  async findOne(id: string): Promise<Comment> {
+    return this.commentsRepo.findOne({ where: { id } });
   }
 
-  async updateOne(id: string, dto: UpdateCommentDto) {
-    await this.update(id, dto);
-    return this.findById(id);
+  async update(id: string, dto: UpdateCommentDto): Promise<Comment> {
+    await this.commentsRepo.update(id, dto);
+    return this.findOne(id);
+  }
+
+  async remove(id: string): Promise<void> {
+    this.commentsRepo.delete(id);
+    return;
   }
 }

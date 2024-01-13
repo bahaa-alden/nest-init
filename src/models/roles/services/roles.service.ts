@@ -5,8 +5,7 @@ import { Role } from '../entities/role.entity';
 import { ICrud } from '../../../common/interfaces';
 import { item_not_found } from '../../../common/constants';
 import { Entities } from '../../../common/enums';
-import { permissions } from '../../../database/seeders/permissions/data';
-import { RoleRepository } from '../repositories';
+import { RoleRepository } from '../repositories/role.repository';
 
 @Injectable()
 export class RolesService implements ICrud<Role> {
@@ -15,16 +14,16 @@ export class RolesService implements ICrud<Role> {
     private roleRepository: RoleRepository,
   ) {}
 
-  async get(): Promise<Role[]> {
-    return this.roleRepository.findAll();
+  async find(): Promise<Role[]> {
+    return this.roleRepository.find();
   }
 
-  async getOne(
+  async findOne(
     id: string,
     withDeleted?: boolean,
     relations?: string[],
   ): Promise<Role | undefined> {
-    const role = await this.roleRepository.findById(id, withDeleted, relations);
+    const role = await this.roleRepository.findOne(id, withDeleted, relations);
     if (!role) throw new NotFoundException(item_not_found(Entities.Role));
     return role;
   }
@@ -33,33 +32,33 @@ export class RolesService implements ICrud<Role> {
     return this.roleRepository.findByName(name);
   }
   async create(dto: CreateRoleDto): Promise<Role> {
-    const permissions = await this.permissionsService.get(dto.permissionsIds);
+    const permissions = await this.permissionsService.find(dto.permissionsIds);
 
-    const role = await this.roleRepository.createOne(dto, permissions);
+    const role = await this.roleRepository.create(dto, permissions);
     return role;
   }
 
   async update(id: string, dto: UpdateRoleDto): Promise<Role | undefined> {
-    const role = await this.getOne(id);
+    const role = await this.findOne(id);
 
     if (!role) throw new NotFoundException(item_not_found(Entities.Role));
 
-    const permissions = await this.permissionsService.get(dto.permissionsIds);
+    const permissions = await this.permissionsService.find(dto.permissionsIds);
 
-    return this.roleRepository.updateOne(role, permissions);
+    return this.roleRepository.update(role, permissions);
   }
 
   async addPermissions(
     id: string,
     dto: UpdateRoleDto,
   ): Promise<Role | undefined> {
-    const role = await this.getOne(id);
+    const role = await this.findOne(id);
 
     if (!role) throw new NotFoundException(item_not_found(Entities.Role));
 
     let permissions;
     if (dto.permissionsIds)
-      permissions = await this.permissionsService.get(dto.permissionsIds);
+      permissions = await this.permissionsService.find(dto.permissionsIds);
 
     return this.roleRepository.addPermissions(role, permissions);
   }
@@ -68,21 +67,21 @@ export class RolesService implements ICrud<Role> {
     id: string,
     dto: UpdateRoleDto,
   ): Promise<Role | undefined> {
-    const role = await this.getOne(id);
+    const role = await this.findOne(id);
 
-    const permissions = await this.permissionsService.get(dto.permissionsIds);
+    const permissions = await this.permissionsService.find(dto.permissionsIds);
 
     return this.roleRepository.deletePermissions(role, permissions);
   }
 
   async recover(id: string): Promise<Role> {
-    const role = await this.getOne(id, true, ['users', 'admins']);
+    const role = await this.findOne(id, true, ['users', 'admins']);
     await role.recover();
     return role;
   }
 
   async remove(id: string) {
-    const role = await this.getOne(id, false, ['users', 'admins']);
+    const role = await this.findOne(id, false, ['users', 'admins']);
     if (!role) throw new NotFoundException(item_not_found(Entities.Role));
     await role.softRemove();
     return;

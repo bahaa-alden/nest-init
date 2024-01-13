@@ -1,50 +1,52 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCityDto } from '../dtos';
 import { UpdateCityDto } from '../dtos';
 import { City } from '../entities/city.entity';
-import { CityRepository } from './../repositories';
-import { ICrud } from '../../../common/interfaces';
 import { item_not_found } from '../../../common/constants';
 import { Entities } from '../../../common/enums';
+import { ICitiesService } from '../interfaces/services/cities.service.interface';
+import { ICityRepository } from '../interfaces/repositories/city.repository.interface';
+import { CITY_TYPES } from '../interfaces/type';
+import { PaginatedResponse } from '../../../common/types';
 
 @Injectable()
-export class CitiesService implements ICrud<City> {
-  constructor(private cityRepository: CityRepository) {}
+export class CitiesService implements ICitiesService {
+  constructor(
+    @Inject(CITY_TYPES.repository) private cityRepository: ICityRepository,
+  ) {}
   async create(dto: CreateCityDto) {
     const city = this.cityRepository.create(dto);
-    await this.cityRepository.insert(city);
     return city;
   }
 
-  async get(ids?: string[]) {
-    const cities = await this.cityRepository.findAll(ids);
+  async find(ids?: string[]): Promise<PaginatedResponse<City> | City[]> {
+    const cities = await this.cityRepository.find(ids);
     if (ids && ids.length !== cities.length)
       throw new NotFoundException('some of cities not found');
 
     return cities;
   }
 
-  async getOne(id: string, withDeleted?: boolean) {
-    const city = await this.cityRepository.findById(id, withDeleted);
+  async findOne(id: string, withDeleted?: boolean): Promise<City> {
+    const city = await this.cityRepository.findOne(id, withDeleted);
     if (!city) throw new NotFoundException(item_not_found(Entities.Category));
     return city;
   }
 
-  async update(id: string, dto: UpdateCityDto) {
-    const city = await this.getOne(id);
-    return this.cityRepository.updateOne(city, dto);
+  async update(id: string, dto: UpdateCityDto): Promise<City> {
+    const city = await this.findOne(id);
+    return this.cityRepository.update(city, dto);
   }
 
-  async recover(id: string) {
+  async recover(id: string): Promise<City> {
     const city = await this.cityRepository.findForDeleteById(id, true);
     if (!city) throw new NotFoundException(item_not_found(Entities.Category));
     return city.recover();
   }
 
-  async remove(id: string) {
-    const city = await this.cityRepository.findForDeleteById(id);
-    if (!city) throw new NotFoundException(item_not_found(Entities.Category));
-    // await city.softRemove();
-    return city;
+  async remove(id: string): Promise<void> {
+    const city = await this.findOne(id);
+    this.cityRepository.remove(city);
+    return;
   }
 }

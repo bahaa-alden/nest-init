@@ -1,43 +1,56 @@
 import { Injectable } from '@nestjs/common';
-import { City, UpdateCityDto } from '..';
-import { Repository, DataSource, FindOptionsRelations, In } from 'typeorm';
+import { Repository, FindOptionsRelations } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ICityRepository } from '../interfaces/repositories/city.repository.interface';
+import { CreateCityDto, UpdateCityDto } from '../dtos';
+import { City } from '../entities/city.entity';
 
 @Injectable()
-export class CityRepository extends Repository<City> {
-  constructor(private readonly dataSource: DataSource) {
-    super(City, dataSource.createEntityManager());
-  }
+export class CityRepository implements ICityRepository {
+  constructor(@InjectRepository(City) private cityRepo: Repository<City>) {}
 
-  async findAll(ids?: string[]) {
-    let cities = this.createQueryBuilder('city');
+  async create(dto: CreateCityDto): Promise<City> {
+    const city = this.cityRepo.create(dto);
+    await this.cityRepo.insert(dto);
+    return city;
+  }
+  async find(ids?: string[]): Promise<City[]> {
+    let cities = this.cityRepo.createQueryBuilder('city');
     cities = ids ? cities.andWhereInIds(ids) : cities;
 
     return cities.getMany();
   }
 
-  async findById(
+  async findOne(
     id: string,
-    withDeleted = false,
+    withDeleted?: boolean,
     relations?: FindOptionsRelations<City>,
-  ) {
-    return this.findOne({
+  ): Promise<City> {
+    return this.cityRepo.findOne({
       where: { id },
       withDeleted,
       relations,
     });
   }
-  async findForDeleteById(id: string, withDeleted = false) {
-    return this.findOne({
-      where: { id, stores: { products: { is_paid: false } } },
+
+  async findForDeleteById(id: string, withDeleted: boolean): Promise<City> {
+    return this.cityRepo.findOne({
+      where: { id },
       relations: {
         stores: { products: true },
       },
       withDeleted,
     });
   }
-  async updateOne(city: City, dto: UpdateCityDto) {
+
+  async update(city: City, dto: UpdateCityDto) {
     Object.assign(city, dto);
     await city.save();
-    return this.findById(city.id);
+    return this.findOne(city.id);
+  }
+
+  async remove(city: City): Promise<void> {
+    this.cityRepo.softRemove(city);
+    return;
   }
 }

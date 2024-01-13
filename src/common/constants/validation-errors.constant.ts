@@ -9,3 +9,5 @@ export const reset_token_message =
 export const reset_token_expired = 'الرمز غير صحيح او منتهي الصلاحية';
 export const password_changed_recently =
   'User recently changed the password!, please login again.';
+export const bad_req = 'Bad request';
+export const data_not_found = 'Data Not found';

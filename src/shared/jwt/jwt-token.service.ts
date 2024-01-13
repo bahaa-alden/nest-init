@@ -16,7 +16,7 @@ export class JwtTokenService {
     const payload = { sub: id, entity };
     const token = await this.jwt.signAsync(payload, {
       secret: this.jwtConfig.jwt_secret,
-      expiresIn: this.jwtConfig.jwt_expires_in,
+      expiresIn: this.jwtConfig.jwt_expires_in + 'd',
     });
     await this.redisStoreService.storeToken(token);
     await this.redisStoreService.storeUserId(id);
