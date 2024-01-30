@@ -4,12 +4,6 @@ import {
   NotFoundException,
   Inject,
 } from '@nestjs/common';
-import {
-  FindOptionsRelations,
-  FindOptionsSelect,
-  FindOptionsWhere,
-  MoreThan,
-} from 'typeorm';
 import { Entities, ROLE } from '../../common/enums';
 import { User } from '../../models/users';
 import { JwtTokenService } from '../../shared/jwt';
@@ -34,8 +28,6 @@ import {
   password_changed_recently,
 } from '../../common/constants';
 import { Employee } from '../../models/employees';
-import { RoleRepository } from '../../models/roles/repositories/role.repository';
-import { UserRepository } from '../../models/users/repositories/user.repository';
 import { MailService } from '../../shared/mail/mail.service';
 import { IAdminRepository } from '../../models/admins/interfaces/repositories/admin.repository.interface';
 import { ADMIN_TYPES } from '../../models/admins/interfaces/type';
@@ -43,6 +35,8 @@ import { IEmployeeRepository } from '../../models/employees/interfaces/repositor
 import { EMPLOYEE_TYPES } from '../../models/employees/interfaces/type';
 import { USER_TYPES } from '../../models/users/interfaces/type';
 import { IUserRepository } from '../../models/users/interfaces/repositories/user.repository.interface';
+import { ROLE_TYPES } from '../../models/roles/interfaces/type';
+import { IRoleRepository } from '../../models/roles/interfaces/repositories/role.repository.interface';
 
 @Injectable()
 export class AuthService implements IAuthController<AuthUserResponse> {
@@ -54,7 +48,8 @@ export class AuthService implements IAuthController<AuthUserResponse> {
     private readonly adminRepository: IAdminRepository,
     @Inject(EMPLOYEE_TYPES.repository.employee)
     private readonly employeeRepository: IEmployeeRepository,
-    private readonly roleRepository: RoleRepository,
+    @Inject(ROLE_TYPES.repository)
+    private readonly roleRepository: IRoleRepository,
     private readonly mailService: MailService,
   ) {}
   async signup(
@@ -68,7 +63,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async login(dto: LoginDto): Promise<AuthUserResponse> {
-    const user = await this.userRepository.findByEmail(dto.email);
+    const user = await this.userRepository.findOneByEmail(dto.email);
     if (!user || !(await user.verifyHash(user.password, dto.password))) {
       throw new UnauthorizedException(incorrect_credentials);
     }
@@ -76,7 +71,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async updateMyPassword(dto: PasswordChangeDto, email: string) {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findOneByEmail(email);
 
     if (!user) throw new NotFoundException(item_not_found(Entities.User));
 
@@ -91,7 +86,7 @@ export class AuthService implements IAuthController<AuthUserResponse> {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const user = await this.userRepository.findByEmail(dto.email);
+    const user = await this.userRepository.findOneByEmail(dto.email);
     const resetToken = user.createPasswordResetToken();
     await user.save();
     await this.mailService.sendPasswordReset(user, resetToken);

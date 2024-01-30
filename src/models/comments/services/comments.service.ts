@@ -25,7 +25,7 @@ export class CommentsService implements ICommentsService {
   }
 
   async findOne(id: string): Promise<Comment> {
-    const comment = await this.commentRepository.findOne(id);
+    const comment = await this.commentRepository.findOneById(id);
     if (!comment) {
       throw new NotFoundException(item_not_found(Entities.Comment));
     }
@@ -37,7 +37,7 @@ export class CommentsService implements ICommentsService {
     user: User,
     dto: CreateCommentDto,
   ): Promise<Comment> {
-    const product = await this.productRepository.findOne(productId);
+    const product = await this.productRepository.findOneById(productId);
     if (!product) throw new NotFoundException(item_not_found(Entities.Product));
     return this.commentRepository.create(productId, user, dto);
   }

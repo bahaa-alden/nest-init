@@ -26,7 +26,7 @@ export class MailerOptionService implements MailerOptionsFactory {
         from: this.mailConfig.from,
       },
       template: {
-        dir: path.join(__dirname, '..', '..', 'mail/templates'),
+        dir: path.join(__dirname, '..', '..', 'shared', 'mail/templates'),
         adapter: new PugAdapter(),
         options: {
           strict: true,

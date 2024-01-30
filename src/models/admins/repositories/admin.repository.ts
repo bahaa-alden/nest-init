@@ -8,15 +8,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IAdminRepository } from '../interfaces/repositories/admin.repository.interface';
 import { IAdminPhotosRepository } from '../interfaces/repositories/admin-photos.repository.interface';
 import { ADMIN_TYPES } from '../interfaces/type';
+import { BaseAuthRepo } from '../../../common/entities';
 
 @Injectable()
-export class AdminRepository implements IAdminRepository {
+export class AdminRepository
+  extends BaseAuthRepo<Admin>
+  implements IAdminRepository
+{
   constructor(
     @InjectRepository(Admin)
     private readonly adminRepository: Repository<Admin>,
     @Inject(ADMIN_TYPES.repository.admin_photos)
     private readonly adminPhotosRepository: IAdminPhotosRepository,
-  ) {}
+  ) {
+    super(adminRepository);
+  }
 
   async create(dto: CreateAdminDto, role: Role) {
     const admin = this.adminRepository.create({ ...dto, role, photos: [] });
@@ -33,7 +39,7 @@ export class AdminRepository implements IAdminRepository {
     });
   }
 
-  async findById(id: string, withDeleted = false) {
+  async findOneById(id: string, withDeleted = false) {
     const options: FindOneOptions<Admin> = {
       where: { id, role: withDeleted ? {} : { name: Equal(ROLE.ADMIN) } },
       withDeleted,
@@ -51,7 +57,7 @@ export class AdminRepository implements IAdminRepository {
     return await this.adminRepository.findOne(options);
   }
 
-  async findByEmail(email: string, withDeleted = false) {
+  async findOneByEmail(email: string, withDeleted = false) {
     const options: FindOneOptions<Admin> = {
       where: { email },
       withDeleted,
@@ -76,7 +82,7 @@ export class AdminRepository implements IAdminRepository {
       password: dto.password,
     });
     await this.adminRepository.save(admin);
-    return this.findById(admin.id);
+    return this.findOneById(admin.id);
   }
 
   async recover(admin: Admin): Promise<Admin> {
@@ -85,33 +91,5 @@ export class AdminRepository implements IAdminRepository {
 
   async remove(admin: Admin): Promise<void> {
     await this.adminRepository.softRemove(admin);
-  }
-
-  async validate(id: string) {
-    return this.adminRepository.findOne({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        passwordChangedAt: true,
-        role: {
-          id: true,
-          name: true,
-          permissions: {
-            id: true,
-            action: true,
-            subject: true,
-          },
-        },
-        createdAt: true,
-        updatedAt: true,
-        photos: false,
-      },
-      relations: {
-        role: { permissions: true },
-        photos: true,
-      },
-    });
   }
 }

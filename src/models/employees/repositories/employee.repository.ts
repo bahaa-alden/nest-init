@@ -10,18 +10,24 @@ import { Employee } from '../entities/employee.entity';
 import { IEmployeeRepository } from '../interfaces/repositories/employee.repository.interface';
 import { IEmployeePhotosRepository } from '../interfaces/repositories/employee-photos.repository.interface';
 import { EMPLOYEE_TYPES } from '../interfaces/type';
+import { BaseAuthRepo } from '../../../common/entities';
 
 @Injectable()
-export class EmployeeRepository implements IEmployeeRepository {
+export class EmployeeRepository
+  extends BaseAuthRepo<Employee>
+  implements IEmployeeRepository
+{
   constructor(
     @InjectRepository(Employee)
-    private readonly employeeRepository: Repository<Employee>,
+    private readonly employeeRepo: Repository<Employee>,
     @Inject(EMPLOYEE_TYPES.repository.employee_photos)
     private readonly employeePhotosRepository: IEmployeePhotosRepository,
-  ) {}
+  ) {
+    super(employeeRepo);
+  }
 
   async create(dto: CreateEmployeeDto, store: Store, role: Role) {
-    const employee = this.employeeRepository.create({
+    const employee = this.employeeRepo.create({
       ...dto,
       role,
       photos: [],
@@ -33,14 +39,14 @@ export class EmployeeRepository implements IEmployeeRepository {
   }
 
   async find(withDeleted = false) {
-    return this.employeeRepository.find({
+    return this.employeeRepo.find({
       where: { role: withDeleted ? {} : { name: Equal(ROLE.EMPLOYEE) } },
       withDeleted,
       relations: { photos: true, role: true },
     });
   }
 
-  async findById(id: string, withDeleted = false) {
+  async findOneById(id: string, withDeleted = false) {
     const options: FindOneOptions<Employee> = {
       where: { id },
       withDeleted,
@@ -55,10 +61,10 @@ export class EmployeeRepository implements IEmployeeRepository {
       relations: { photos: true, role: true, store: true },
     };
 
-    return await this.employeeRepository.findOne(options);
+    return await this.employeeRepo.findOne(options);
   }
 
-  async findByEmail(email: string, withDeleted = false) {
+  async findOneByEmail(email: string, withDeleted = false) {
     const options: FindOneOptions<Employee> = {
       where: { email },
       withDeleted,
@@ -73,7 +79,7 @@ export class EmployeeRepository implements IEmployeeRepository {
       relations: { photos: true, role: true, store: true },
     };
 
-    return await this.employeeRepository.findOne(options);
+    return await this.employeeRepo.findOne(options);
   }
 
   async update(
@@ -91,43 +97,15 @@ export class EmployeeRepository implements IEmployeeRepository {
       address: dto.address,
       store,
     });
-    await this.employeeRepository.save(employee);
-    return this.findById(employee.id);
+    await this.employeeRepo.save(employee);
+    return this.findOneById(employee.id);
   }
 
   async recover(employee: Employee): Promise<Employee> {
-    return this.employeeRepository.recover(employee);
+    return this.employeeRepo.recover(employee);
   }
 
   async remove(employee: Employee): Promise<void> {
-    await this.employeeRepository.softRemove(employee);
-  }
-
-  async validate(id: string): Promise<Employee> {
-    return this.employeeRepository.findOne({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        passwordChangedAt: true,
-        role: {
-          id: true,
-          name: true,
-          permissions: {
-            id: true,
-            action: true,
-            subject: true,
-          },
-        },
-        createdAt: true,
-        updatedAt: true,
-        photos: false,
-      },
-      relations: {
-        role: { permissions: true },
-        photos: true,
-      },
-    });
+    await this.employeeRepo.softRemove(employee);
   }
 }

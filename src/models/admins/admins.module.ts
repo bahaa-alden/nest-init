@@ -1,7 +1,6 @@
 import { Module, Provider } from '@nestjs/common';
 import { AdminsController } from './controllers/admins.controller';
 import { AdminsService } from './services/admins.service';
-import { RoleRepository } from '../roles/repositories/role.repository';
 import { AdminPhotosRepository } from './repositories/admin-photos.repository';
 import { AdminRepository } from './repositories/admin.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,6 +8,7 @@ import { Role } from '../roles';
 import { Admin } from './entities/admin.entity';
 import { AdminPhoto } from './entities/admin-photo.entity';
 import { ADMIN_TYPES } from './interfaces/type';
+import { RoleRepositoryProvider } from '../roles/roles.module';
 
 export const AdminsServiceProvider: Provider = {
   provide: ADMIN_TYPES.service,
@@ -30,7 +30,7 @@ export const AdminPhotosRepositoryProvider: Provider = {
     AdminsServiceProvider,
     AdminRepositoryProvider,
     AdminPhotosRepositoryProvider,
-    RoleRepository,
+    RoleRepositoryProvider,
   ],
   exports: [
     AdminsServiceProvider,

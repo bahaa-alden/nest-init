@@ -1,16 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Exclude, Transform } from 'class-transformer';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  BaseEntity,
-  BeforeInsert,
-  DeleteDateColumn,
-  UpdateDateColumn,
-  CreateDateColumn,
-  BeforeUpdate,
-} from 'typeorm';
+import { Expose, Exclude } from 'class-transformer';
+import { Entity, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { GROUPS } from '../enums';
 import * as argon from 'argon2';
 import { GlobalEntity } from './global-entity.entity';
@@ -40,15 +30,15 @@ export class BasePerson extends GlobalEntity {
   password: string;
 
   @Exclude()
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   passwordChangedAt: Date;
 
   @Exclude()
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true, select: false })
   passwordResetToken: string;
 
   @Exclude()
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   passwordResetExpires: Date;
 
   @BeforeInsert()

@@ -5,14 +5,15 @@ import { Repository, Not, And, Equal } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateRoleDto } from '../dtos';
 import { Role } from '../entities/role.entity';
+import { IRoleRepository } from '../interfaces/repositories/role.repository.interface';
 
 @Injectable()
-export class RoleRepository {
+export class RoleRepository implements IRoleRepository {
   constructor(
     @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
   ) {}
 
-  async create(dto: CreateRoleDto, permissions: Permission[]) {
+  async create(dto: CreateRoleDto, permissions: Permission[]): Promise<Role> {
     const role = this.roleRepo.create({
       name: dto.name,
       permissions,
@@ -21,11 +22,15 @@ export class RoleRepository {
     return role;
   }
 
-  async find() {
+  async find(): Promise<Role[]> {
     return this.roleRepo.find({ where: { name: Not(ROLE.SUPER_ADMIN) } });
   }
 
-  async findOne(id: string, withDeleted = false, relations?: string[]) {
+  async findOne(
+    id: string,
+    withDeleted = false,
+    relations?: string[],
+  ): Promise<Role> {
     const role = await this.roleRepo.findOne({
       where: { id, name: Not(ROLE.SUPER_ADMIN) },
       select: {
@@ -45,7 +50,7 @@ export class RoleRepository {
     return role;
   }
 
-  async findByName(name: string) {
+  async findByName(name: string): Promise<Role> {
     const role = await this.roleRepo.findOne({
       where: { name: And(Not(ROLE.SUPER_ADMIN), Equal(name)) },
       select: {
@@ -63,28 +68,22 @@ export class RoleRepository {
     return role;
   }
 
-  async findPermissionsByRoleName(roleName: string) {
-    const { permissions } = await this.roleRepo
-      .createQueryBuilder('role')
-      .select(['permission.action', 'permission.subject', 'role.name'])
-      .leftJoin('role.permissions', 'permission')
-      .where('role.name = :roleName', { roleName })
-      .getOne();
-    return permissions;
-  }
-  async update(role: Role, permissions: Permission[]) {
+  async update(role: Role, permissions: Permission[]): Promise<Role> {
     role.permissions = permissions;
     await role.save();
     return role;
   }
 
-  async addPermissions(role: Role, permissions: Permission[]) {
+  async addPermissions(role: Role, permissions: Permission[]): Promise<Role> {
     role.permissions.push(...permissions);
     await role.save();
     return this.findOne(role.id);
   }
 
-  async deletePermissions(role: Role, permissions: Permission[]) {
+  async deletePermissions(
+    role: Role,
+    permissions: Permission[],
+  ): Promise<Role> {
     await this.roleRepo
       .createQueryBuilder()
       .relation(Role, 'permissions')

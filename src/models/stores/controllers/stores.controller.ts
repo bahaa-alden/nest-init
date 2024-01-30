@@ -10,8 +10,8 @@ import {
   ParseUUIDPipe,
   HttpStatus,
   HttpCode,
+  Inject,
 } from '@nestjs/common';
-import { StoresService } from '../services/stores.service';
 import { CreateStoreDto } from '../dtos';
 import { UpdateStoreDto } from '../dtos';
 import {
@@ -34,6 +34,8 @@ import {
   data_not_found,
   denied_error,
 } from '../../../common/constants';
+import { IStoresService } from '../interfaces/services/stores.service.interface';
+import { STORE_TYPES } from '../interfaces/type';
 
 @ApiTags('Stores')
 @ApiBearerAuth('token')
@@ -43,7 +45,9 @@ import {
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'stores', version: '1' })
 export class StoresController implements ICrud<Store> {
-  constructor(private readonly storesService: StoresService) {}
+  constructor(
+    @Inject(STORE_TYPES.service) private readonly storesService: IStoresService,
+  ) {}
 
   @ApiCreatedResponse({ description: 'Store has created', type: Store })
   @CheckAbilities({ action: Action.Create, subject: Entities.Store })

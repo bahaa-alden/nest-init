@@ -15,13 +15,13 @@ export class CityRepository implements ICityRepository {
     return city;
   }
   async find(ids?: string[]): Promise<City[]> {
-    let cities = this.cityRepo.createQueryBuilder('city');
-    cities = ids ? cities.andWhereInIds(ids) : cities;
+    const cities = this.cityRepo.createQueryBuilder('city');
+    if (ids) cities.andWhereInIds(ids);
 
     return cities.getMany();
   }
 
-  async findOne(
+  async findOneById(
     id: string,
     withDeleted?: boolean,
     relations?: FindOptionsRelations<City>,
@@ -46,7 +46,7 @@ export class CityRepository implements ICityRepository {
   async update(city: City, dto: UpdateCityDto) {
     Object.assign(city, dto);
     await city.save();
-    return this.findOne(city.id);
+    return this.findOneById(city.id);
   }
 
   async remove(city: City): Promise<void> {

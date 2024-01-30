@@ -4,7 +4,6 @@ import {
   NotFoundException,
   Inject,
 } from '@nestjs/common';
-
 import { Entities, ROLE } from '../../../common/enums';
 import { JwtTokenService } from '../../../shared/jwt';
 import { CreateEmployeeDto } from '../dtos/create-employee.dto';
@@ -16,12 +15,14 @@ import {
   incorrect_credentials,
   item_not_found,
 } from '../../../common/constants';
-import { RoleRepository } from '../../roles/repositories/role.repository';
-import { StoreRepository } from '../../stores/repositories/store.repository';
 import { IEmployeeService } from '../interfaces/employee-services.interface';
 import { PaginatedResponse } from '../../../common/types';
 import { IEmployeeRepository } from '../interfaces/repositories/employee.repository.interface';
 import { EMPLOYEE_TYPES } from '../interfaces/type';
+import { STORE_TYPES } from '../../stores/interfaces/type';
+import { IStoreRepository } from '../../stores/interfaces/repositories/store.repository.interface';
+import { IRoleRepository } from '../../roles/interfaces/repositories/role.repository.interface';
+import { ROLE_TYPES } from '../../roles/interfaces/type';
 
 @Injectable()
 export class EmployeesService implements IEmployeeService {
@@ -29,12 +30,14 @@ export class EmployeesService implements IEmployeeService {
     private jwtTokenService: JwtTokenService,
     @Inject(EMPLOYEE_TYPES.repository.employee)
     private employeeRepository: IEmployeeRepository,
-    private roleRepository: RoleRepository,
-    private storeRepository: StoreRepository,
+    @Inject(ROLE_TYPES.repository)
+    private roleRepository: IRoleRepository,
+    @Inject(STORE_TYPES.repository)
+    private storeRepository: IStoreRepository,
   ) {}
 
   async login(dto: LoginDto): Promise<AuthEmployeeResponse> {
-    const employee = await this.employeeRepository.findByEmail(dto.email);
+    const employee = await this.employeeRepository.findOneByEmail(dto.email);
     if (
       !employee ||
       !(await employee.verifyHash(employee.password, dto.password))
@@ -55,7 +58,7 @@ export class EmployeesService implements IEmployeeService {
   }
 
   async findOne(id: string, withDeleted?: boolean): Promise<Employee> {
-    const employee = await this.employeeRepository.findById(id, withDeleted);
+    const employee = await this.employeeRepository.findOneById(id, withDeleted);
     if (!employee) {
       throw new NotFoundException(item_not_found(Entities.Employee));
     }
@@ -64,13 +67,13 @@ export class EmployeesService implements IEmployeeService {
 
   async create(dto: CreateEmployeeDto): Promise<Employee> {
     const role = await this.roleRepository.findByName(ROLE.EMPLOYEE);
-    const store = await this.storeRepository.findOne(dto.storeId);
+    const store = await this.storeRepository.findOneById(dto.storeId);
     return this.employeeRepository.create(dto, store, role);
   }
 
   async update(id: string, dto: UpdateEmployeeDto): Promise<Employee> {
     const employee = await this.findOne(id);
-    const store = await this.storeRepository.findOne(dto.storeId);
+    const store = await this.storeRepository.findOneById(dto.storeId);
     if (!store) throw new NotFoundException(item_not_found(Entities.Store));
     return this.employeeRepository.update(employee, dto, store);
   }

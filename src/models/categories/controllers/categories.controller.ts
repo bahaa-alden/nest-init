@@ -8,8 +8,8 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
-import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import {
   ApiBadRequestResponse,
@@ -31,6 +31,8 @@ import {
   data_not_found,
   denied_error,
 } from '../../../common/constants';
+import { ICategoriesService } from '../interfaces/services/categories.service.interface';
+import { CATEGORY_TYPES } from '../interfaces/type';
 
 @ApiTags('Categories')
 @ApiBearerAuth('token')
@@ -40,7 +42,10 @@ import {
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'categories', version: '1' })
 export class CategoriesController implements ICrud<Category> {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(
+    @Inject(CATEGORY_TYPES.service)
+    private readonly categoriesService: ICategoriesService,
+  ) {}
 
   @ApiCreatedResponse({ type: Category })
   @CheckAbilities({ action: Action.Create, subject: Entities.Category })

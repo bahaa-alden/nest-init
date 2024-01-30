@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { Action, Entities } from '../../../common/enums';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreatePermissionDto, UpdatePermissionDto } from '../dtos';
 import { Permission } from '../entities/permission.entity';
+import { IPermissionRepository } from '../interfaces/repositories/permission.repository.interface';
 
 @Injectable()
-export class PermissionRepository {
+export class PermissionRepository implements IPermissionRepository {
   constructor(
     @InjectRepository(Permission)
     private readonly permissionRepo: Repository<Permission>,
   ) {}
-  async find(permissionsIds?: string[]) {
+  async find(permissionsIds?: string[]): Promise<Permission[]> {
     let permissions = this.permissionRepo
       .createQueryBuilder('permission')
       .where(
@@ -27,7 +27,7 @@ export class PermissionRepository {
 
     return permissions.getMany();
   }
-  async findOne(id: string, withDeleted = false) {
+  async findOne(id: string, withDeleted = false): Promise<Permission> {
     let permission = this.permissionRepo
       .createQueryBuilder('permission')
       .where(
@@ -40,23 +40,5 @@ export class PermissionRepository {
       .andWhere('permission.id = :id', { id });
     permission = withDeleted ? permission.withDeleted() : permission;
     return permission.getOne();
-  }
-
-  async findUnique(action: Action, subject: Entities) {
-    return this.permissionRepo.findOne({
-      where: { action, subject },
-    });
-  }
-
-  async create(dto: CreatePermissionDto) {
-    const permission = this.permissionRepo.create(dto);
-    await this.permissionRepo.insert(permission);
-    return permission;
-  }
-
-  async update(permission: Permission, dto: UpdatePermissionDto) {
-    Object.assign<Permission, UpdatePermissionDto>(permission, dto);
-    await permission.save();
-    return this.findOne(permission.id);
   }
 }

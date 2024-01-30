@@ -1,42 +1,32 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
   UseGuards,
   SerializeOptions,
   ParseUUIDPipe,
-  HttpCode,
-  HttpStatus,
+  Inject,
 } from '@nestjs/common';
-import { PermissionsService } from '../services/permissions.service';
 import { Permission } from '../entities/permission.entity';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiForbiddenResponse,
-  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
-  ApiOperation,
   ApiTags,
   OmitType,
 } from '@nestjs/swagger';
 import { CaslAbilitiesGuard } from '../../../common/guards';
-import { CreatePermissionDto } from '../dtos';
 import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
-import { UpdatePermissionDto } from '../dtos';
-import { ICrud } from '../../../common/interfaces';
 import {
   bad_req,
   data_not_found,
   denied_error,
 } from '../../../common/constants';
+import { IPermissionsService } from '../interfaces/services/permissions.service.interface';
+import { PERMISSION_TYPES } from '../interfaces/type';
 
 @ApiTags('Permissions')
 @ApiBearerAuth('token')
@@ -46,8 +36,11 @@ import {
 @CheckAbilities({ action: Action.Manage, subject: Entities.Permission })
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'permissions', version: '1' })
-export class PermissionsController implements ICrud<Permission> {
-  constructor(public permissionsService: PermissionsService) {}
+export class PermissionsController {
+  constructor(
+    @Inject(PERMISSION_TYPES.service)
+    public permissionsService: IPermissionsService,
+  ) {}
   @ApiOkResponse({
     type: OmitType(Permission, ['createdAt', 'updatedAt']),
     isArray: true,
@@ -58,43 +51,10 @@ export class PermissionsController implements ICrud<Permission> {
     return this.permissionsService.find();
   }
 
-  @ApiCreatedResponse({ type: Permission })
-  @SerializeOptions({ groups: [GROUPS.PERMISSION] })
-  @Post()
-  async create(@Body() dto: CreatePermissionDto): Promise<Permission> {
-    return this.permissionsService.create(dto);
-  }
-
   @ApiOkResponse({ type: Permission })
   @SerializeOptions({ groups: [GROUPS.PERMISSION] })
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.permissionsService.findOne(id);
-  }
-
-  @ApiOkResponse({ type: Permission })
-  @SerializeOptions({ groups: [GROUPS.PERMISSION] })
-  @Patch(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdatePermissionDto,
-  ) {
-    return this.permissionsService.update(id, dto);
-  }
-
-  @ApiNoContentResponse({ type: Permission })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.permissionsService.remove(id);
-  }
-
-  @ApiOkResponse({ type: Permission })
-  @ApiOperation({ summary: 'recover deleted permission' })
-  @SerializeOptions({ groups: [GROUPS.PERMISSION] })
-  @HttpCode(HttpStatus.OK)
-  @Post(':id/recover')
-  recover(@Param('id', ParseUUIDPipe) id: string) {
-    return this.permissionsService.recover(id);
   }
 }

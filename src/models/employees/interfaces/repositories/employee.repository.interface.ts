@@ -6,9 +6,9 @@ import { Employee } from '../../entities/employee.entity';
 export interface IEmployeeRepository {
   find(withDeleted: boolean): Promise<Employee[]>;
 
-  findById(id: string, withDeleted: boolean): Promise<Employee>;
+  findOneById(id: string, withDeleted: boolean): Promise<Employee>;
 
-  findByEmail(email: string, withDeleted?: boolean): Promise<Employee>;
+  findOneByEmail(email: string, withDeleted?: boolean): Promise<Employee>;
 
   create(dto: CreateEmployeeDto, store: Store, role: Role): Promise<Employee>;
 

@@ -10,8 +10,8 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
-import { CouponsService } from '../services/coupons.service';
 import { CreateCouponDto } from '../dtos/create-coupon.dto';
 import { UpdateCouponDto } from '../dtos/update-coupon.dto';
 import {
@@ -38,6 +38,8 @@ import {
   data_not_found,
   denied_error,
 } from '../../../common/constants';
+import { COUPON_TYPES } from '../interfaces/type';
+import { ICouponsService } from '../interfaces/services/coupons.service.interface';
 
 @ApiTags('Coupons')
 @ApiBearerAuth('token')
@@ -48,7 +50,10 @@ import {
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'coupons', version: '1' })
 export class GenericCouponsController implements IGenericController<Coupon> {
-  constructor(private readonly couponsService: CouponsService) {}
+  constructor(
+    @Inject(COUPON_TYPES.service)
+    private readonly couponsService: ICouponsService,
+  ) {}
 
   @ApiCreatedResponse({ type: Coupon })
   @CheckAbilities({ action: Action.Create, subject: Entities.Coupon })
@@ -96,7 +101,10 @@ export class GenericCouponsController implements IGenericController<Coupon> {
 @UseGuards(CaslAbilitiesGuard, RolesGuard)
 @Controller({ path: 'products/:productId/coupons', version: '1' })
 export class CouponsController implements INestedController<Coupon> {
-  constructor(private readonly couponsService: CouponsService) {}
+  constructor(
+    @Inject(COUPON_TYPES.service)
+    private readonly couponsService: ICouponsService,
+  ) {}
 
   @ApiCreatedResponse({ type: Coupon })
   @Post()

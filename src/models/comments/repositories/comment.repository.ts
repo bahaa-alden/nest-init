@@ -47,13 +47,13 @@ export class CommentRepository implements ICommentRepository {
     return pagination(page, limit, totalDataCount, data);
   }
 
-  async findOne(id: string): Promise<Comment> {
+  async findOneById(id: string): Promise<Comment> {
     return this.commentsRepo.findOne({ where: { id } });
   }
 
   async update(id: string, dto: UpdateCommentDto): Promise<Comment> {
     await this.commentsRepo.update(id, dto);
-    return this.findOne(id);
+    return this.findOneById(id);
   }
 
   async remove(id: string): Promise<void> {

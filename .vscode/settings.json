@@ -1,3 +1,15 @@
 {
-  "cSpell.words": ["Ubay"]
+  "cSpell.words": ["favcat", "favcit", "likedby", "Ubay"],
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5434,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "nest",
+      "database": "nest",
+      "username": "postgres"
+    }
+  ]
 }

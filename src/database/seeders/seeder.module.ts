@@ -4,8 +4,9 @@ import { DatabaseModule } from '../../providers/database';
 import { InitialDatabaseSeeder } from './seeder';
 import { ConfigModule } from '@nestjs/config';
 import { SuperadminModule } from './superadmin';
-import Joi = require('@hapi/joi');
 import { RolesSeederModule } from './roles';
+import { LoggerModule } from '../../shared/logger/logger.module';
+import Joi = require('@hapi/joi');
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { RolesSeederModule } from './roles';
     PermissionsSeederModule,
     SuperadminModule,
     RolesSeederModule,
+    LoggerModule,
   ],
   providers: [InitialDatabaseSeeder],
 })

@@ -5,7 +5,7 @@ import { City } from '../../entities/city.entity';
 export interface ICityRepository {
   create(dto: CreateCityDto): Promise<City>;
   find(ids?: string[]): Promise<City[]>;
-  findOne(
+  findOneById(
     id: string,
     withDeleted?: boolean,
     relations?: FindOptionsRelations<City>,

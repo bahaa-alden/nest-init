@@ -8,9 +8,8 @@ import {
   Param,
   Patch,
   ParseUUIDPipe,
-  HttpCode,
-  HttpStatus,
   Delete,
+  Inject,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -23,12 +22,10 @@ import {
   ApiBadRequestResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
-  ApiNoContentResponse,
 } from '@nestjs/swagger';
 
 import { CreateRoleDto, UpdateRoleDto } from '../dtos';
 import { Role } from '../entities/role.entity';
-import { RolesService } from '../services/roles.service';
 import { CheckAbilities } from '../../../common/decorators';
 import { Action, Entities, GROUPS } from '../../../common/enums';
 import { CaslAbilitiesGuard } from '../../../common/guards';
@@ -38,6 +35,8 @@ import {
   data_not_found,
   denied_error,
 } from '../../../common/constants';
+import { ROLE_TYPES } from '../interfaces/type';
+import { IRolesService } from '../interfaces/services/roles.service.interface';
 
 @ApiTags('Roles')
 @ApiBearerAuth('token')
@@ -48,7 +47,10 @@ import {
 @CheckAbilities({ action: Action.Manage, subject: Entities.Role })
 @Controller({ path: 'roles', version: '1' })
 export class RolesController implements ICrud<Role> {
-  constructor(private readonly rolesService: RolesService) {}
+  constructor(
+    @Inject(ROLE_TYPES.service)
+    private rolesService: IRolesService,
+  ) {}
 
   @ApiOkResponse({ type: OmitType(Role, ['permissions']), isArray: true })
   @SerializeOptions({ groups: [GROUPS.ALL_ROLES] })
@@ -106,21 +108,7 @@ export class RolesController implements ICrud<Role> {
     return this.rolesService.deletePermissions(id, dto);
   }
 
-  @ApiOkResponse({ type: Role })
-  @ApiOperation({ summary: 'recover deleted role' })
-  @SerializeOptions({
-    groups: [GROUPS.ROLE],
-  })
-  @HttpCode(HttpStatus.OK)
-  @Post(':id/recover')
-  async recover(@Param('id', ParseUUIDPipe) id: string): Promise<Role> {
-    return this.rolesService.recover(id);
-  }
-
-  @ApiNoContentResponse({ description: 'No Content' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    return this.rolesService.remove(id);
+  remove(...n: any[]): Promise<any> {
+    return;
   }
 }

@@ -21,6 +21,8 @@ export abstract class GlobalEntity extends BaseEntity {
       GROUPS.EMPLOYEE,
       GROUPS.PERMISSION,
       GROUPS.ROLE,
+      GROUPS.ALL_PRODUCTS,
+      GROUPS.PRODUCT,
     ],
   })
   @ApiProperty()
@@ -34,6 +36,8 @@ export abstract class GlobalEntity extends BaseEntity {
       GROUPS.EMPLOYEE,
       GROUPS.PERMISSION,
       GROUPS.ROLE,
+      GROUPS.ALL_PRODUCTS,
+      GROUPS.PRODUCT,
     ],
   })
   @ApiProperty()

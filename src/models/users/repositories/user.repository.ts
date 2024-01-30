@@ -1,7 +1,6 @@
 import { Role } from '../../roles';
 import { Inject, Injectable } from '@nestjs/common';
 import { MoreThan, Repository } from 'typeorm';
-import { UserPhotosRepository } from './user-photos.repository';
 import { CreateUserDto, UpdateUserDto, User, UserPhoto } from '..';
 import { defaultPhoto } from '../../../common/constants';
 import { pagination } from '../../../common/helpers';
@@ -11,23 +10,29 @@ import { City } from '../../cities';
 import { Category } from '../../categories';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IUserRepository } from '../interfaces/repositories/user.repository.interface';
-import { IUserPhotosRepository } from '../interfaces/repositories/user-photos.resopsitory.interface';
+import { IUserPhotosRepository } from '../interfaces/repositories/user-photos.repository.interface';
 import { USER_TYPES } from '../interfaces/type';
 import { IWalletRepository } from '../interfaces/repositories/wallet.repository.interface';
+import { BaseAuthRepo } from '../../../common/entities';
 
 @Injectable()
-export class UserRepository implements IUserRepository {
+export class UserRepository
+  extends BaseAuthRepo<User>
+  implements IUserRepository
+{
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @Inject(USER_TYPES.repository.user_photos)
     private readonly userPhotosRepository: IUserPhotosRepository,
     @Inject(USER_TYPES.repository.wallet)
     private readonly walletRepository: IWalletRepository,
-  ) {}
+  ) {
+    super(userRepo);
+  }
 
   async create(dto: CreateUserDto, role: Role): Promise<User> {
     const wallet = this.walletRepository.create();
-    const user = this.userRepo.create({ ...dto, role, wallet });
+    const user = this.userRepo.create({ ...dto, role, wallet, photos: [] });
     user.photos.push(this.userPhotosRepository.create(defaultPhoto));
     await user.save();
     return user;
@@ -50,7 +55,7 @@ export class UserRepository implements IUserRepository {
     return pagination(page, limit, totalDataCount, data);
   }
 
-  async findById(id: string, withDeleted = false): Promise<User> {
+  async findOneById(id: string, withDeleted = false): Promise<User> {
     return await this.userRepo.findOne({
       where: { id },
       select: {
@@ -81,9 +86,17 @@ export class UserRepository implements IUserRepository {
         passwordResetToken: hashToken,
         passwordResetExpires: MoreThan(new Date()),
       },
+      select: {
+        passwordChangedAt: true,
+        passwordResetExpires: true,
+        passwordResetToken: true,
+        password: true,
+        id: true,
+        name: true,
+      },
     });
   }
-  async findByEmail(email: string, withDeleted = false): Promise<User> {
+  async findOneByEmail(email: string, withDeleted = false): Promise<User> {
     return await this.userRepo.findOne({
       where: { email },
       select: {
@@ -107,7 +120,7 @@ export class UserRepository implements IUserRepository {
       withDeleted,
     });
   }
-  async findByIdForThings(id: string): Promise<User> {
+  async findOneByIdForThings(id: string): Promise<User> {
     return await this.userRepo.findOne({
       where: { id },
       select: {
@@ -122,7 +135,7 @@ export class UserRepository implements IUserRepository {
     user.photos.push(await this.userPhotosRepository.uploadPhoto(dto.photo));
     Object.assign(user, { email: dto.email, name: dto.name });
     await this.userRepo.save(user);
-    return this.findById(user.id);
+    return this.findOneById(user.id);
   }
 
   async updateFavorites(
@@ -130,10 +143,11 @@ export class UserRepository implements IUserRepository {
     favoriteCities: City[],
     favoriteCategories: Category[],
   ): Promise<User> {
+    console.log(user);
     user.favoriteCategories.push(...favoriteCategories);
     user.favoriteCities.push(...favoriteCities);
     await this.userRepo.save(user);
-    return this.findById(user.id);
+    return this.findOneById(user.id);
   }
 
   async resetPassword(
@@ -145,7 +159,7 @@ export class UserRepository implements IUserRepository {
     user.passwordResetExpires = null;
     user.passwordChangedAt = new Date(Date.now() - 1000);
     await this.userRepo.save(user);
-    return this.findById(user.id);
+    return this.findOneById(user.id);
   }
 
   async getMyPhotos(userId: string): Promise<UserPhoto[]> {
@@ -157,37 +171,5 @@ export class UserRepository implements IUserRepository {
   }
   async remove(user: User): Promise<void> {
     this.userRepo.softRemove(user);
-  }
-
-  async validate(id: string) {
-    return this.userRepo.findOne({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        passwordChangedAt: true,
-        role: {
-          id: true,
-          name: true,
-          permissions: {
-            id: true,
-            action: true,
-            subject: true,
-          },
-        },
-        createdAt: true,
-        updatedAt: true,
-        photos: false,
-        favoriteCategories: { id: true, name: true },
-        favoriteCities: { id: true, name: true },
-      },
-      relations: {
-        role: { permissions: true },
-        photos: true,
-        favoriteCategories: true,
-        favoriteCities: true,
-      },
-    });
   }
 }

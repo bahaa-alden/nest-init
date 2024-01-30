@@ -80,9 +80,9 @@ export class UsersController implements ICrud<User> {
   async find(
     @Query('page') page: number,
     @Query('limit') limit: number,
-    @Req() req: Request,
+    @Req() req: Request & { query: { withDeleted: string } },
   ) {
-    const withDeleted = Boolean(req.query.withDeleted);
+    const withDeleted = JSON.parse(req.query.withDeleted);
     return this.usersService.find(page, limit, withDeleted);
   }
 

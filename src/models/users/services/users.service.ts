@@ -3,7 +3,6 @@ import { FavoritesDto, UpdateUserDto } from '../dtos';
 import { User } from '../entities/user.entity';
 import { Entities } from './../../../common/enums';
 import { item_not_found } from '../../../common/constants';
-import { CategoriesService } from '../../categories/services/categories.service';
 import { ICitiesService } from '../../cities/interfaces/services/cities.service.interface';
 import { CITY_TYPES } from '../../cities/interfaces/type';
 import { IUsersService } from '../interfaces/services/users.service.interface';
@@ -11,13 +10,16 @@ import { PaginatedResponse } from '../../../common/types';
 import { UserPhoto } from '../entities/user-photo.entity';
 import { IUserRepository } from '../interfaces/repositories/user.repository.interface';
 import { USER_TYPES } from '../interfaces/type';
+import { ICategoriesService } from '../../categories/interfaces/services/categories.service.interface';
+import { CATEGORY_TYPES } from '../../categories/interfaces/type';
 
 @Injectable()
 export class UsersService implements IUsersService {
   constructor(
     @Inject(USER_TYPES.repository.user)
     private userRepository: IUserRepository,
-    private categoriesService: CategoriesService,
+    @Inject(CATEGORY_TYPES.service)
+    private categoriesService: ICategoriesService,
     @Inject(CITY_TYPES.service) private citiesService: ICitiesService,
   ) {}
 
@@ -30,7 +32,7 @@ export class UsersService implements IUsersService {
   }
 
   async findOne(id: string, withDeleted = false): Promise<User> {
-    const user = await this.userRepository.findById(id, withDeleted);
+    const user = await this.userRepository.findOneById(id, withDeleted);
     if (!user) throw new NotFoundException(item_not_found(Entities.User));
     return user;
   }
@@ -41,7 +43,7 @@ export class UsersService implements IUsersService {
   }
 
   async deleteMe(user: User): Promise<void> {
-    await user.softRemove();
+    await this.userRepository.remove(user);
   }
   async getMyPhotos(user: User): Promise<UserPhoto[]> {
     return this.userRepository.getMyPhotos(user.id);

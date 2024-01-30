@@ -6,11 +6,11 @@ import { EmployeePhoto } from './entities/employee-photo.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from '../roles';
 import { Store } from '../stores';
-import { RoleRepository } from '../roles/repositories/role.repository';
-import { StoreRepository } from '../stores/repositories/store.repository';
 import { EmployeePhotosRepository } from './repositories/employee-photos.repository';
 import { EmployeeRepository } from './repositories/employee.repository';
 import { EMPLOYEE_TYPES } from './interfaces/type';
+import { StoreRepositoryProvider } from '../stores/stores.module';
+import { RoleRepositoryProvider } from '../roles/roles.module';
 
 export const EmployeesServiceProvider: Provider = {
   provide: EMPLOYEE_TYPES.service,
@@ -32,8 +32,8 @@ export const EmployeePhotosRepositoryProvider: Provider = {
     EmployeePhotosRepositoryProvider,
     EmployeeRepositoryProvider,
     EmployeesServiceProvider,
-    RoleRepository,
-    StoreRepository,
+    RoleRepositoryProvider,
+    StoreRepositoryProvider,
   ],
   exports: [
     EmployeePhotosRepositoryProvider,

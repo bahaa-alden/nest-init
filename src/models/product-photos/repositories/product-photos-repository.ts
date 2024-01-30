@@ -27,7 +27,6 @@ export class ProductPhotosRepository implements IPhotoRepository<ProductPhoto> {
     const uploaded = await this.cloudinaryService.uploadMultiplePhotos(
       blurHashs,
     );
-
     const photos = uploaded.map((p) => this.productPhotosRepo.create({ ...p }));
     return photos;
   }
@@ -35,6 +34,5 @@ export class ProductPhotosRepository implements IPhotoRepository<ProductPhoto> {
   async remove(photo: ProductPhoto) {
     await this.cloudinaryService.removePhoto(photo.publicId);
     await photo.remove();
-    return;
   }
 }

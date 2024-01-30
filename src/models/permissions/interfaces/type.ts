@@ -1,4 +1,4 @@
-export const CITY_TYPES = {
-  service: 'ICitiesService',
-  repository: 'ICityRepository',
+export const PERMISSION_TYPES = {
+  service: 'IPermissionsService',
+  repository: 'IPermissionRepository',
 };

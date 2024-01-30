@@ -1,6 +1,6 @@
+import { COUPON_TYPES } from './../interfaces/type';
 import {
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -13,30 +13,33 @@ import { CaslAbilityFactory } from '../../../shared/casl';
 import { ForbiddenError } from '@casl/ability';
 import { Action, Entities } from '../../../common/enums';
 import { Coupon } from '../entities/coupon.entity';
-import { ICrud } from '../../../common/interfaces';
-import {
-  denied_error,
-  item_already_exist,
-  item_not_found,
-} from '../../../common/constants';
-import { ProductRepository } from '../../products/repositories/product.repository';
-import { CouponRepository } from '../repositories/coupon.repository';
+import { item_already_exist, item_not_found } from '../../../common/constants';
 import { USER_TYPES } from '../../users/interfaces/type';
 import { IUserRepository } from '../../users/interfaces/repositories/user.repository.interface';
+import { PRODUCT_TYPES } from '../../products/interfaces/type';
+import { ICouponsService } from '../interfaces/services/coupons.service.interface';
+import { IProductsService } from '../../products/interfaces/services/products.service.interface';
+import { ICouponRepository } from '../interfaces/repositories/coupon.repository.interface';
 
 @Injectable()
-export class CouponsService implements ICrud<Coupon> {
+export class CouponsService implements ICouponsService {
   constructor(
     @Inject(USER_TYPES.repository.user)
     private readonly userRepository: IUserRepository,
-    private readonly productRepository: ProductRepository,
-    private readonly couponRepository: CouponRepository,
+    @Inject(PRODUCT_TYPES.service)
+    private productsService: IProductsService,
+    @Inject(COUPON_TYPES.repository)
+    private couponRepository: ICouponRepository,
     private readonly caslAbilityFactory: CaslAbilityFactory,
   ) {}
-  async create(dto: CreateCouponDto, proOwner: User, productId?: string) {
+  async create(
+    dto: CreateCouponDto,
+    proOwner: User,
+    productId?: string,
+  ): Promise<Coupon> {
     const prodId = dto.productId || productId;
-    const product = await this.isProductOwner(prodId, proOwner);
-    const user = await this.userRepository.findByIdForThings(dto.userId);
+    const product = await this.productsService.isProductOwner(prodId, proOwner);
+    const user = await this.userRepository.findOneByIdForThings(dto.userId);
     if (!user) throw new NotFoundException(item_not_found(Entities.User));
     const exist = await this.couponRepository.existedCoupon(prodId, dto.userId);
     if (exist) throw new ConflictException(item_already_exist(Entities.Coupon));
@@ -49,31 +52,31 @@ export class CouponsService implements ICrud<Coupon> {
     return coupon;
   }
 
-  async find(productId: string, user: User) {
-    await this.isProductOwner(productId, user);
+  async find(productId: string, user: User): Promise<Coupon[]> {
+    await this.productsService.isProductOwner(productId, user);
     const coupons = await this.couponRepository.find({ productId });
     return coupons;
   }
 
-  async findOne(id: string, user?: User) {
+  async findOne(id: string, user?: User): Promise<Coupon> {
     const coupon = await this.couponRepository.findOne(id);
     if (!coupon) throw new NotFoundException(item_not_found(Entities.Coupon));
     if (user) await this.couponCasl(coupon, user, Action.Read);
     return coupon;
   }
 
-  async findMyCoupons(userId: string) {
+  async findMyCoupons(userId: string): Promise<Coupon[]> {
     const coupons = await this.couponRepository.find({ userId });
     return coupons;
   }
 
-  async update(id: string, dto: UpdateCouponDto, user: User) {
+  async update(id: string, dto: UpdateCouponDto, user: User): Promise<Coupon> {
     const coupon = await this.findOne(id, user);
     await this.couponCasl(coupon, user, Action.Update);
     return this.couponRepository.update(coupon, dto);
   }
 
-  async remove(id: string, user: User) {
+  async remove(id: string, user: User): Promise<void> {
     const coupon = await this.findOne(id, user);
     await this.couponCasl(coupon, user, Action.Delete);
     await coupon.remove();
@@ -84,13 +87,5 @@ export class CouponsService implements ICrud<Coupon> {
     const ability = this.caslAbilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(action, coupon);
     return coupon;
-  }
-
-  async isProductOwner(productId: string, proOwner: User) {
-    const product = await this.productRepository.findByIdForThings(productId);
-    if (!product) throw new NotFoundException(item_not_found(Entities.Product));
-    if (product.user.id !== proOwner.id)
-      throw new ForbiddenException(denied_error);
-    return product;
   }
 }

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDate,
+  IsDateString,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -28,6 +29,6 @@ export class CreateCouponDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   expire: Date;
 }

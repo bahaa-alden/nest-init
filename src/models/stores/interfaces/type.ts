@@ -1,4 +1,4 @@
-export const CITY_TYPES = {
-  service: 'ICitiesService',
-  repository: 'ICityRepository',
+export const STORE_TYPES = {
+  service: 'IStoresService',
+  repository: 'IStoreRepository',
 };

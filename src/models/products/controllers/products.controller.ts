@@ -12,12 +12,13 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  Req,
+  Inject,
 } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
-import { CheckAbilities, GetUser } from '../../../common/decorators';
+import { CheckAbilities, GetUser, Roles } from '../../../common/decorators';
 import { User } from '../../users';
-import { ProductsService } from '../services/products.service';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -31,7 +32,7 @@ import {
 } from '@nestjs/swagger';
 import { CaslAbilitiesGuard } from '../../../common/guards';
 import { Product } from '../entities/product.entity';
-import { Action, Entities, GROUPS } from '../../../common/enums';
+import { Action, Entities, GROUPS, ROLE } from '../../../common/enums';
 import { PaginatedResponse } from '../../../common/types';
 import { ICrud } from '../../../common/interfaces';
 import {
@@ -39,6 +40,9 @@ import {
   data_not_found,
   denied_error,
 } from '../../../common/constants';
+import { Request } from 'express';
+import { IProductsService } from '../interfaces/services/products.service.interface';
+import { PRODUCT_TYPES } from '../interfaces/type';
 
 @ApiTags('Products')
 @ApiBearerAuth('token')
@@ -48,9 +52,13 @@ import {
 @UseGuards(CaslAbilitiesGuard)
 @Controller({ path: 'products', version: '1' })
 export class ProductsController implements ICrud<Product> {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    @Inject(PRODUCT_TYPES.service)
+    private readonly productsService: IProductsService,
+  ) {}
 
   @ApiCreatedResponse({ type: Product })
+  @Roles(ROLE.USER)
   @CheckAbilities({ action: Action.Create, subject: Entities.Product })
   @Post()
   create(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
@@ -76,19 +84,31 @@ export class ProductsController implements ICrud<Product> {
     type: 'boolean',
     example: false,
   })
+  @ApiQuery({
+    name: 'q',
+    allowEmptyValue: false,
+    type: 'string',
+    required: false,
+  })
   @CheckAbilities({ action: Action.Read, subject: Entities.Product })
   @SerializeOptions({ groups: [GROUPS.ALL_PRODUCTS] })
   @Get()
   find(
     @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('is_paid') is_paid: boolean,
+    @Query('limit')
+    limit: number,
+    @Query('is_paid')
+    is_paid: boolean,
+    @Query('q')
+    q: string,
+    @GetUser() user: User,
   ) {
-    return this.productsService.find(page, limit, is_paid);
+    return this.productsService.find(page, limit, is_paid, q, user);
   }
 
   @ApiOkResponse({ description: 'ok' })
   @CheckAbilities({ action: Action.Update, subject: Entities.Product })
+  @Roles(ROLE.USER)
   @HttpCode(HttpStatus.OK)
   @Post(':id/likes')
   async like(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
@@ -97,6 +117,7 @@ export class ProductsController implements ICrud<Product> {
 
   @ApiOkResponse({ description: 'ok' })
   @CheckAbilities({ action: Action.Update, subject: Entities.Product })
+  @Roles(ROLE.USER)
   @HttpCode(HttpStatus.OK)
   @Delete(':id/likes')
   async dislike(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
@@ -107,12 +128,18 @@ export class ProductsController implements ICrud<Product> {
   @CheckAbilities({ action: Action.Read, subject: Entities.Product })
   @SerializeOptions({ groups: [GROUPS.PRODUCT] })
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.productsService.findOne(id);
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser() user: User,
+    @Req() req: Request & { query: { isOwner: string } },
+  ) {
+    const isOwner = JSON.parse(req.query.isOwner);
+    return this.productsService.findOne(id, user, isOwner);
   }
 
   @ApiOkResponse({ type: Product })
   @CheckAbilities({ action: Action.Update, subject: Entities.Product })
+  @Roles(ROLE.USER)
   @SerializeOptions({ groups: [GROUPS.PRODUCT] })
   @Patch(':id')
   update(

@@ -14,7 +14,7 @@ export interface ICommentRepository {
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<Comment>>;
-  findOne(id: string): Promise<Comment>;
+  findOneById(id: string): Promise<Comment>;
   update(id: string, dto: UpdateCommentDto): Promise<Comment>;
   remove(id: string): Promise<void>;
 }

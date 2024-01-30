@@ -14,7 +14,9 @@ import { Coupon } from '../../models/coupons';
 @Injectable()
 export class CaslAbilityFactory {
   defineAbility(currentUser: User) {
-    const { can, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
+    const { can, build, cannot } = new AbilityBuilder<AppAbility>(
+      createMongoAbility,
+    );
     currentUser.role.permissions.forEach((p) => {
       can(p.action, p.subject);
     });
@@ -26,6 +28,9 @@ export class CaslAbilityFactory {
     can(Action.Create, Coupon, { proOwnerId: { $eq: currentUser.id } });
     can(Action.Update, Coupon, { proOwnerId: { $eq: currentUser.id } });
     can(Action.Delete, Coupon, { proOwnerId: { $eq: currentUser.id } });
+    cannot(Action.Delete, Product, { is_paid: { $eq: true } }).because(
+      'Sold product cannot be removed',
+    );
     return build({
       detectSubjectType: (item) =>
         item.constructor as ExtractSubjectType<Subjects>,

@@ -14,11 +14,11 @@ export interface IUserRepository {
     withDeleted: boolean,
   ): Promise<PaginatedResponse<User> | User[]>;
 
-  findById(id: string, withDeleted: boolean): Promise<User>;
+  findOneById(id: string, withDeleted: boolean): Promise<User>;
 
-  findByEmail(email: string, withDeleted?: boolean): Promise<User>;
+  findOneByEmail(email: string, withDeleted?: boolean): Promise<User>;
 
-  findByIdForThings(id: string): Promise<User>;
+  findOneByIdForThings(id: string): Promise<User>;
 
   findOneByResetToken(hashToken: string): Promise<User>;
 

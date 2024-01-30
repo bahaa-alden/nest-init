@@ -13,22 +13,24 @@ import {
   incorrect_credentials,
   item_not_found,
 } from '../../../common/constants';
-import { RoleRepository } from '../../roles/repositories/role.repository';
 import { IAdminsService } from '../interfaces/services/admins.service.interface';
 import { ADMIN_TYPES } from '../interfaces/type';
 import { IAdminRepository } from '../interfaces/repositories/admin.repository.interface';
+import { ROLE_TYPES } from '../../roles/interfaces/type';
+import { IRoleRepository } from '../../roles/interfaces/repositories/role.repository.interface';
 
 @Injectable()
 export class AdminsService implements IAdminsService {
   constructor(
     private jwtTokenService: JwtTokenService,
-    private roleRepository: RoleRepository,
+    @Inject(ROLE_TYPES.repository)
+    private roleRepository: IRoleRepository,
     @Inject(ADMIN_TYPES.repository.admin)
     private adminRepository: IAdminRepository,
   ) {}
 
   async login(dto: LoginAdminDto): Promise<AuthAdminResponse> {
-    const admin = await this.adminRepository.findByEmail(dto.email);
+    const admin = await this.adminRepository.findOneByEmail(dto.email);
     if (!admin || !(await admin.verifyHash(admin.password, dto.password))) {
       throw new UnauthorizedException(incorrect_credentials);
     }
@@ -43,7 +45,7 @@ export class AdminsService implements IAdminsService {
 
   async findOne(id: string, role?: string): Promise<Admin> {
     const withDeleted = role === ROLE.SUPER_ADMIN ? true : false;
-    const admin = await this.adminRepository.findById(id, withDeleted);
+    const admin = await this.adminRepository.findOneById(id, withDeleted);
     if (!admin) {
       throw new NotFoundException(item_not_found(Entities.Admin));
     }
