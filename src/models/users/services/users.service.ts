@@ -85,4 +85,17 @@ export class UsersService implements IUsersService {
     await this.userRepository.remove(user);
     return;
   }
+
+  async setTwoFactorAuthenticationSecret(
+    twoFactorAuthenticationSecret: string,
+    user: User,
+  ) {
+    return this.userRepository.update(user, { twoFactorAuthenticationSecret });
+  }
+
+  async turnOnTwoFactorAuthentication(user: User) {
+    return this.userRepository.update(user, {
+      isTwoFactorAuthenticationEnabled: true,
+    });
+  }
 }

@@ -4,7 +4,7 @@ import {
   NotFoundException,
   Inject,
 } from '@nestjs/common';
-import { Entities, ROLE } from '../../common/enums';
+import { ROLE } from '../../common/enums';
 import { User } from '../../models/users';
 import { JwtTokenService } from '../../shared/jwt';
 import {
@@ -17,10 +17,8 @@ import {
 import { AuthUserResponse, jwtPayload } from '../interfaces';
 import { Admin } from './../../models/admins';
 
-import { IAuthController } from '../../common/interfaces';
 import * as crypto from 'crypto';
 import {
-  item_not_found,
   incorrect_current_password,
   incorrect_credentials,
   reset_token_message,
@@ -37,9 +35,10 @@ import { USER_TYPES } from '../../models/users/interfaces/type';
 import { IUserRepository } from '../../models/users/interfaces/repositories/user.repository.interface';
 import { ROLE_TYPES } from '../../models/roles/interfaces/type';
 import { IRoleRepository } from '../../models/roles/interfaces/repositories/role.repository.interface';
+import { IAuthService } from '../interfaces/services/auth.service.interface';
 
 @Injectable()
-export class AuthService implements IAuthController<AuthUserResponse> {
+export class AuthService implements IAuthService {
   constructor(
     private readonly jwtTokenService: JwtTokenService,
     @Inject(USER_TYPES.repository.user)
@@ -62,27 +61,27 @@ export class AuthService implements IAuthController<AuthUserResponse> {
     return this.sendAuthResponse(user);
   }
 
-  async login(dto: LoginDto): Promise<AuthUserResponse> {
+  async login(dto: LoginDto): Promise<AuthUserResponse | { token: string }> {
     const user = await this.userRepository.findOneByEmail(dto.email);
     if (!user || !(await user.verifyHash(user.password, dto.password))) {
       throw new UnauthorizedException(incorrect_credentials);
     }
-    return this.sendAuthResponse(user);
+
+    const res = await this.sendAuthResponse(user);
+    if (user.isTwoFactorAuthenticationEnabled) return { token: res.token };
+    return res;
   }
 
-  async updateMyPassword(dto: PasswordChangeDto, email: string) {
-    const user = await this.userRepository.findOneByEmail(email);
-
-    if (!user) throw new NotFoundException(item_not_found(Entities.User));
-
+  async updateMyPassword(
+    dto: PasswordChangeDto,
+    user: User,
+  ): Promise<AuthUserResponse> {
     // 2)check if the passwordConfirm is correct
     if (!(await user.verifyHash(user.password, dto.passwordCurrent))) {
       throw new UnauthorizedException(incorrect_current_password);
     }
-    await this.userRepository.resetPassword(user, dto);
-    const token = await this.jwtTokenService.signToken(user.id, User.name);
-
-    return { token, user };
+    user = await this.userRepository.resetPassword(user, dto);
+    return this.sendAuthResponse(user);
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
@@ -110,12 +109,23 @@ export class AuthService implements IAuthController<AuthUserResponse> {
     return this.sendAuthResponse(user);
   }
 
-  async sendAuthResponse(user: User): Promise<AuthUserResponse> {
-    const token = await this.jwtTokenService.signToken(user.id, User.name);
+  async sendAuthResponse(
+    user: User,
+    isTwoFactorAuth = false,
+  ): Promise<AuthUserResponse> {
+    let token: string;
+    if (!isTwoFactorAuth)
+      token = await this.jwtTokenService.signToken(user.id, User.name);
+    else
+      token = await this.jwtTokenService.getCookieWithJwtAccessToken(
+        user.id,
+        isTwoFactorAuth,
+      );
+
     return { token, user };
   }
 
-  async validate(payload: jwtPayload) {
+  async validate(payload: jwtPayload): Promise<User | Admin | Employee> {
     let user: User | Admin | Employee;
 
     if (payload.entity === Admin.name) {

@@ -22,4 +22,16 @@ export class JwtTokenService {
     await this.redisStoreService.storeUserId(id);
     return token;
   }
+
+  async getCookieWithJwtAccessToken(
+    userId: string,
+    isSecondFactorAuthenticated = false,
+  ) {
+    const payload = { sub: userId, isSecondFactorAuthenticated };
+    const token = await this.jwt.signAsync(payload, {
+      secret: this.jwtConfig.jwt_secret,
+      expiresIn: this.jwtConfig.jwt_expires_in + 'd',
+    });
+    return token;
+  }
 }

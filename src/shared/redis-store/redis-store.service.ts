@@ -12,9 +12,7 @@ export class RedisStoreService {
   ) {}
   async storeUserId(id: string) {
     const redisExpire =
-      parseInt(this.configService.get('JWT_EXPIRES_IN').substring(0, 2)) *
-      24 *
-      3600;
+      parseInt(this.configService.get('JWT_EXPIRES_IN')) * 24 * 3600;
     this.redis.set(user_key, id, 'EX', redisExpire);
   }
 
@@ -24,9 +22,7 @@ export class RedisStoreService {
 
   async storeToken(token: string) {
     const redisExpire =
-      parseInt(this.configService.get('JWT_EXPIRES_IN').substring(0, 2)) *
-      24 *
-      3600;
+      parseInt(this.configService.get('JWT_EXPIRES_IN')) * 24 * 3600;
     this.redis.set(token_key, token, 'EX', redisExpire);
   }
 

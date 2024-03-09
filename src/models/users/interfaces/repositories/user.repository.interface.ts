@@ -3,7 +3,7 @@ import { PaginatedResponse } from '../../../../common/types';
 import { Category } from '../../../categories';
 import { City } from '../../../cities';
 import { Role } from '../../../roles';
-import { CreateUserDto, UpdateUserDto } from '../../dtos';
+import { CreateUserDto } from '../../dtos';
 import { UserPhoto } from '../../entities/user-photo.entity';
 import { User } from '../../entities/user.entity';
 
@@ -24,7 +24,7 @@ export interface IUserRepository {
 
   create(dto: CreateUserDto, role: Role): Promise<User>;
 
-  update(user: User, dto: UpdateUserDto): Promise<User>;
+  update(user: User, dto: any): Promise<User>;
 
   updateFavorites(
     user: User,

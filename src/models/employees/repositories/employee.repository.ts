@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ROLE } from '../../../common/enums';
 import { Role } from '../../roles';
-import { Repository, Equal, FindOneOptions } from 'typeorm';
+import { Repository, Equal } from 'typeorm';
 import { defaultPhoto } from '../../../common/constants';
 import { Store } from '../../stores';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -44,42 +44,6 @@ export class EmployeeRepository
       withDeleted,
       relations: { photos: true, role: true },
     });
-  }
-
-  async findOneById(id: string, withDeleted = false) {
-    const options: FindOneOptions<Employee> = {
-      where: { id },
-      withDeleted,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      relations: { photos: true, role: true, store: true },
-    };
-
-    return await this.employeeRepo.findOne(options);
-  }
-
-  async findOneByEmail(email: string, withDeleted = false) {
-    const options: FindOneOptions<Employee> = {
-      where: { email },
-      withDeleted,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      relations: { photos: true, role: true, store: true },
-    };
-
-    return await this.employeeRepo.findOne(options);
   }
 
   async update(

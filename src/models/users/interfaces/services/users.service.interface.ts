@@ -25,4 +25,11 @@ export interface IUsersService {
   remove(id: string): Promise<void>;
 
   recover(id: string): Promise<User>;
+
+  setTwoFactorAuthenticationSecret(
+    twoFactorAuthenticationSecret: string,
+    user: User,
+  ): Promise<User>;
+
+  turnOnTwoFactorAuthentication(user: User): Promise<User>;
 }

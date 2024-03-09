@@ -24,6 +24,14 @@ import { Wallet } from './wallet.entity';
 
 @Entity({ name: 'users' })
 export class User extends BasePerson {
+  @Exclude()
+  @Column({ nullable: true })
+  twoFactorAuthenticationSecret?: string;
+
+  @Exclude()
+  @Column({ default: false })
+  isTwoFactorAuthenticationEnabled: boolean;
+
   @Expose({ groups: [GROUPS.USER] })
   @Transform(({ value }) => value.name)
   @ManyToOne(() => Role, (role) => role.users)

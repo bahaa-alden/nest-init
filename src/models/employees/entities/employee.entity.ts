@@ -1,14 +1,7 @@
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BasePerson, BasePhoto } from '../../../common/entities';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { GROUPS, ROLE } from '../../../common/enums';
+import { GROUPS } from '../../../common/enums';
 import { Role } from '../../roles';
 import { EmployeePhoto } from './employee-photo.entity';
 import { Store } from '../../stores';

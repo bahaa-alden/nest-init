@@ -32,6 +32,8 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { RedisStoreModule } from './shared/redis-store/redis-store.module';
 import { LoggerMiddleware } from './common/middlewares';
 import { LoggerModule } from './shared/logger/logger.module';
+import { PaymentsModule } from './models/payments/payments.module';
+import { Auth2faModule } from './auth-2fa/auth-2fa.module';
 
 @Module({
   imports: [
@@ -53,6 +55,7 @@ import { LoggerModule } from './shared/logger/logger.module';
 
     DevtoolsModule.register({ http: process.env.ENV !== 'production' }),
     AuthModule,
+    Auth2faModule,
     AdminsModule,
     UsersModule,
     EmployeesModule,
@@ -73,6 +76,7 @@ import { LoggerModule } from './shared/logger/logger.module';
     CloudinaryModule,
     RedisStoreModule,
     LoggerModule,
+    PaymentsModule,
   ],
   providers: [
     IsUniqueConstraint,

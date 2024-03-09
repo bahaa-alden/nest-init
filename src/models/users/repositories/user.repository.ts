@@ -1,7 +1,7 @@
 import { Role } from '../../roles';
 import { Inject, Injectable } from '@nestjs/common';
 import { MoreThan, Repository } from 'typeorm';
-import { CreateUserDto, UpdateUserDto, User, UserPhoto } from '..';
+import { CreateUserDto, User, UserPhoto } from '..';
 import { defaultPhoto } from '../../../common/constants';
 import { pagination } from '../../../common/helpers';
 import { PasswordChangeDto, ResetPasswordDto } from '../../../auth';
@@ -55,31 +55,6 @@ export class UserRepository
     return pagination(page, limit, totalDataCount, data);
   }
 
-  async findOneById(id: string, withDeleted = false): Promise<User> {
-    return await this.userRepo.findOne({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-        favoriteCategories: { id: true, name: true },
-        favoriteCities: { id: true, name: true },
-        wallet: { id: true, total: true, pending: true },
-      },
-      relations: {
-        role: { permissions: true },
-        photos: true,
-        favoriteCategories: true,
-        favoriteCities: true,
-        wallet: true,
-      },
-      withDeleted,
-    });
-  }
-
   async findOneByResetToken(hashToken: string) {
     return this.userRepo.findOne({
       where: {
@@ -96,30 +71,7 @@ export class UserRepository
       },
     });
   }
-  async findOneByEmail(email: string, withDeleted = false): Promise<User> {
-    return await this.userRepo.findOne({
-      where: { email },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-        favoriteCategories: { id: true, name: true },
-        favoriteCities: { id: true, name: true },
-        wallet: { id: true, total: true, pending: true },
-      },
-      relations: {
-        role: { permissions: true },
-        photos: true,
-        favoriteCategories: true,
-        favoriteCities: true,
-        wallet: true,
-      },
-      withDeleted,
-    });
-  }
+
   async findOneByIdForThings(id: string): Promise<User> {
     return await this.userRepo.findOne({
       where: { id },
@@ -131,10 +83,10 @@ export class UserRepository
     });
   }
 
-  async update(user: User, dto: UpdateUserDto): Promise<User> {
-    user.photos.push(await this.userPhotosRepository.uploadPhoto(dto.photo));
-    Object.assign(user, { email: dto.email, name: dto.name });
-    await this.userRepo.save(user);
+  async update(user: User, dto: any): Promise<User> {
+    if (dto.photo)
+      user.photos.push(await this.userPhotosRepository.uploadPhoto(dto.photo));
+    await this.userRepo.update(user.id, dto);
     return this.findOneById(user.id);
   }
 
@@ -143,7 +95,6 @@ export class UserRepository
     favoriteCities: City[],
     favoriteCategories: Category[],
   ): Promise<User> {
-    console.log(user);
     user.favoriteCategories.push(...favoriteCategories);
     user.favoriteCities.push(...favoriteCities);
     await this.userRepo.save(user);

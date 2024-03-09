@@ -8,6 +8,7 @@ import {
   Patch,
   UseGuards,
   Req,
+  Inject,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,7 +19,6 @@ import {
 } from '@nestjs/swagger';
 import { Public, GetUser, Roles } from '../../common/decorators';
 import { GROUPS, ROLE } from '../../common/enums';
-import { AuthService } from '../services/auth.service';
 import {
   SignUpDto,
   PasswordChangeDto,
@@ -27,9 +27,11 @@ import {
   ResetPasswordDto,
 } from '../dtos';
 import { RolesGuard } from '../../common/guards';
-import { IAuthController } from '../../common/interfaces';
 import { AuthUserResponse } from '../interfaces';
 import { Request } from 'express';
+import { IAuthService } from '../interfaces/services/auth.service.interface';
+import { AUTH_TYPES } from '../interfaces/type';
+import { User } from '../../models/users';
 
 /**
  * @ngdoc controller
@@ -41,14 +43,15 @@ import { Request } from 'express';
 @ApiTags('auth')
 @ApiBearerAuth('token')
 @Controller({ path: 'auth', version: '1' })
-export class AuthController implements IAuthController<AuthUserResponse> {
-  constructor(private authService: AuthService) {}
+export class AuthController {
+  constructor(@Inject(AUTH_TYPES.service) private authService: IAuthService) {}
 
   @Public()
   @SerializeOptions({ groups: [GROUPS.USER] })
   @ApiCreatedResponse({ type: AuthUserResponse })
   @Post('signup')
   signup(@Body() dto: SignUpDto, @Req() request: Request) {
+    console.log(request);
     const dynamicOrigin = `${request.protocol}://${request.get('host')}`;
     return this.authService.signup(dto, dynamicOrigin);
   }
@@ -102,10 +105,7 @@ export class AuthController implements IAuthController<AuthUserResponse> {
   @UseGuards(RolesGuard)
   @Roles(ROLE.USER)
   @Patch('updateMyPassword')
-  updateMyPassword(
-    @Body() dto: PasswordChangeDto,
-    @GetUser('email') email: string,
-  ) {
-    return this.authService.updateMyPassword(dto, email);
+  updateMyPassword(@Body() dto: PasswordChangeDto, @GetUser() user: User) {
+    return this.authService.updateMyPassword(dto, user);
   }
 }
